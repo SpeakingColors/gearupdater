@@ -1,0 +1,104 @@
+[
+ {
+  "tag_name": "v0.2.4",
+  "name": "Meowbass v0.2.4 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T05:59:29Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.2.4",
+  "assets": [
+   {
+    "name": "Meowbass-v0.2.4.zip",
+    "size": 73424364,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.2.4/Meowbass-v0.2.4.zip",
+    "digest": "sha256:85b232490e615a9d38e1693357842394a51208596b60b5d37fe00952bc09f6f6"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.3",
+  "name": "Meowbass v0.2.3 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T19:52:41Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.2.3",
+  "assets": [
+   {
+    "name": "Meowbass-v0.2.3.zip",
+    "size": 73494703,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.2.3/Meowbass-v0.2.3.zip",
+    "digest": "sha256:5606f30d866211ea72d60f71d3895e948839c7c5644ca9d42542608e4fabe315"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.2",
+  "name": "Meowbass v0.2.2 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T18:17:19Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.2.2",
+  "assets": [
+   {
+    "name": "Meowbass-v0.2.2.zip",
+    "size": 73448252,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.2.2/Meowbass-v0.2.2.zip",
+    "digest": "sha256:451f8f76e5e602e0c1ce0108053770a85633e8b7947f73efaf21e34989e3b0c3"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.1",
+  "name": "Meowbass v0.2.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T05:45:12Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.2.1",
+  "assets": [
+   {
+    "name": "Meowbass-v0.2.1.zip",
+    "size": 73442197,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.2.1/Meowbass-v0.2.1.zip",
+    "digest": "sha256:5b2ea68666413f7219645888b5d841ddc7c449649474a3a5a7e3acceeb9b7358"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Meowbass v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T04:20:20Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "Meowbass-v0.2.0.zip",
+    "size": 73259282,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.2.0/Meowbass-v0.2.0.zip",
+    "digest": "sha256:0afd7a2c6fc3ef132df5c2da931e937952a3d1a257c448b31206368dd32b03f6"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.1",
+  "name": "Meowbass v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowbass). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-18T23:44:06Z",
+  "html_url": "https://github.com/SpeakingColors/meowbass/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "Meowbass-v0.1.1.zip",
+    "size": 71815427,
+    "browser_download_url": "https://github.com/SpeakingColors/meowbass/releases/download/v0.1.1/Meowbass-v0.1.1.zip",
+    "digest": "sha256:3d9d791bbf04bb51b51d3769839fef92026c1895840ea206e8e8a42623e46a37"
+   }
+  ]
+ }
+]

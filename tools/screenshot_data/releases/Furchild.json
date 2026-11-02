@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "Furchild v0.1.0 (test build)",
+  "body": "Furchild test build (pre-release). A free, open source, cat-themed stereo tube-style limiting compressor (VST3) by Studio 87.\n\nOne zip with: Windows installer (.exe, with uninstaller), macOS installer (.pkg, with an \"Uninstall Furchild\" app), Linux Flatpak extension and a plain .vst3 tarball, the PDF manual (with an interface tour), INSTALL.txt, LICENSE and SHA256SUMS. Everything works offline; the plugin collects nothing and never uses the network.\n\nWhy the installers are \"unsigned\": code signing certificates cost money every year and this project is free. Windows may show a blue \"unknown publisher\" screen (More info, Run anyway); macOS may ask you to allow the package in System Settings, Privacy and Security. The SHA256SUMS file lets you check your download.\n\nThis is a test build. Measured in CI: the DSP core tests and pluginval (strictness 5) on Linux, and that all installers build. Not yet checked: real Windows and macOS hosts, a real Flatpak DAW, and listening tests against the hardware it is inspired by. See ROADMAP.md.\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T20:09:17Z",
+  "html_url": "https://github.com/SpeakingColors/Furchild/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "Furchild-v0.1.0.zip",
+    "size": 53770390,
+    "browser_download_url": "https://github.com/SpeakingColors/Furchild/releases/download/v0.1.0/Furchild-v0.1.0.zip",
+    "digest": "sha256:238c327a24a974abd124079c5f22692db773034079c366626c3baa937f80931e"
+   }
+  ]
+ }
+]

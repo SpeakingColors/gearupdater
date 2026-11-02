@@ -1,0 +1,104 @@
+[
+ {
+  "tag_name": "v0.2.4",
+  "name": "Cat Crusher v0.2.4 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T05:57:27Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.2.4",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.2.4.zip",
+    "size": 73348119,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.2.4/CatCrusher-v0.2.4.zip",
+    "digest": "sha256:cc6b58470edb1b490056d80bd254b990129bcffea132dc48b6699307ddac82dd"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.3",
+  "name": "Cat Crusher v0.2.3 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T19:49:52Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.2.3",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.2.3.zip",
+    "size": 73720518,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.2.3/CatCrusher-v0.2.3.zip",
+    "digest": "sha256:76ee6c0cc9718361d2c8bf253eecc205125138daf382110b4c74bcbcbe0ab683"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.2",
+  "name": "Cat Crusher v0.2.2 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T18:14:31Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.2.2",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.2.2.zip",
+    "size": 73670147,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.2.2/CatCrusher-v0.2.2.zip",
+    "digest": "sha256:ec9ff7a977565a2456afa36cb3e2729b8dcda5c434af63b8c91b3d79bbc3b62e"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.1",
+  "name": "Cat Crusher v0.2.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T05:47:20Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.2.1",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.2.1.zip",
+    "size": 73665546,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.2.1/CatCrusher-v0.2.1.zip",
+    "digest": "sha256:9278bfe724e0762508af226f823b111bad8a1e4e4f2fdda827af4dcb11de484a"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Cat Crusher v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T04:19:34Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.2.0.zip",
+    "size": 73473792,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.2.0/CatCrusher-v0.2.0.zip",
+    "digest": "sha256:0ceed4771fef16b307741fbb29f069f526796e33b98271c6c20ad1e02f87daa8"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.1",
+  "name": "Cat Crusher v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Crusher). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-18T23:42:04Z",
+  "html_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "CatCrusher-v0.1.1.zip",
+    "size": 71979490,
+    "browser_download_url": "https://github.com/SpeakingColors/catcrusher-vst/releases/download/v0.1.1/CatCrusher-v0.1.1.zip",
+    "digest": "sha256:f3567da698d04f1e08f7f5d24ed2bbf8a4a1083eedf5efbf0016c69d3f904bba"
+   }
+  ]
+ }
+]

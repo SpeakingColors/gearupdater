@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "LapCat2A v0.1.0 (test build)",
+  "body": "Test build of LapCat2A, a free open source optical leveling amplifier (VST3). Not tuned by ear and not tried on real machines yet.\n\nIn the zip: installers for Windows (.exe), macOS (.pkg) and Linux (Flatpak extension and a plain .vst3), the PDF manual, INSTALL.txt, LICENSE and SHA256SUMS. Everything works offline. No telemetry.\n\nThe installers are not signed or notarized, so your system may warn you. Windows: More info, then Run anyway. macOS: System Settings, Privacy and Security, Open Anyway. Details are in INSTALL.txt and the manual.\n\nWhat is measured and what is not is listed in ROADMAP.md.\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T20:00:18Z",
+  "html_url": "https://github.com/SpeakingColors/LapCat2A/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "LapCat2A-v0.1.0.zip",
+    "size": 55983983,
+    "browser_download_url": "https://github.com/SpeakingColors/LapCat2A/releases/download/v0.1.0/LapCat2A-v0.1.0.zip",
+    "digest": "sha256:f8151e6696c06accc527a850b045394715b1209c98df64e9c0ff92d5559f0e31"
+   }
+  ]
+ }
+]

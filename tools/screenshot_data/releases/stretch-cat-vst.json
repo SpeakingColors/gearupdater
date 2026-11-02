@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "Stretch Cat v0.1.0 (test build)",
+  "body": "Test build, not tuned by ear yet. The plugin window is the host's plain parameter view plus a Load button for now (the designed window is only in the mockup). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T21:13:27Z",
+  "html_url": "https://github.com/SpeakingColors/stretch-cat-vst/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "StretchCat-v0.1.0.zip",
+    "size": 69962909,
+    "browser_download_url": "https://github.com/SpeakingColors/stretch-cat-vst/releases/download/v0.1.0/StretchCat-v0.1.0.zip",
+    "digest": "sha256:51c4e11949108b60816cd2bbae789c65239e69d5a7e68ae15dde5d4371b36112"
+   }
+  ]
+ }
+]

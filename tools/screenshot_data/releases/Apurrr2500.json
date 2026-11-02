@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "Apurrr2500 v0.1.0 (test build)",
+  "body": "Apurrr2500 test build (pre-release). A free, open source stereo bus compressor in the style of a classic hardware unit. By Studio 87.\n\nOne zip, everything works offline:\n- Windows installer (.exe) with uninstaller\n- macOS installer (.pkg) with an \"Uninstall Apurrr2500\" app\n- Linux: Flatpak extension for Flatpak DAWs, and a plain .vst3 tarball\n- PDF manual with an interface tour, INSTALL.txt, LICENSE and SHA256SUMS\n\nAbout the \"unknown publisher\" warnings: the installers are not signed (signing needs a paid certificate; this is a free project). Windows may show \"Windows protected your PC\": click More info, then Run anyway. macOS may block the package: open System Settings, Privacy & Security, and choose Open Anyway. The checksums are in SHA256SUMS and the source is in this repository.\n\nWhat is verified: the compressor core is tested in plain C++ (ranges, level calibration, response time, stability on silence, DC, full scale and NaN, aliasing, CPU, sample rates) and matches the approved mockup's engine. The plugin loads in pluginval on Linux.\n\nWhat is not verified: the installers have not been run on real Windows or macOS machines yet, the plugin has not been tried in real hosts on every system, and the calibration (0 dBu = -22 dBFS, 0 VU = -18 dBFS) comes from the design mockup and has not been checked against a real hardware unit. See ROADMAP.md.\n\nFree to use. Collects nothing. Optional support: https://ko-fi.com/studio87\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T19:53:59Z",
+  "html_url": "https://github.com/SpeakingColors/Apurrr2500/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "Apurrr2500-v0.1.0.zip",
+    "size": 54242093,
+    "browser_download_url": "https://github.com/SpeakingColors/Apurrr2500/releases/download/v0.1.0/Apurrr2500-v0.1.0.zip",
+    "digest": "sha256:02c00e6f594bff1514f6cbc705ab15024d7f0d21590db71cd08ad88a0e762968"
+   }
+  ]
+ }
+]

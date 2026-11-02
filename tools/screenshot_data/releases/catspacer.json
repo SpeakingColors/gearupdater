@@ -1,0 +1,104 @@
+[
+ {
+  "tag_name": "v0.2.4",
+  "name": "Cat Spacer v0.2.4 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T05:59:31Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.2.4",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.2.4.zip",
+    "size": 73155700,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.2.4/CatSpacer-v0.2.4.zip",
+    "digest": "sha256:b3189b6d29125731fa54e667c0ad5a760492541a9bebaea519c48075b0fc9a2d"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.3",
+  "name": "Cat Spacer v0.2.3 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T19:51:49Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.2.3",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.2.3.zip",
+    "size": 73908205,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.2.3/CatSpacer-v0.2.3.zip",
+    "digest": "sha256:61598f2cae690f2be7f42605f3a8077c49fd902a1faf841f41a54c6797790a56"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.2",
+  "name": "Cat Spacer v0.2.2 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T18:19:29Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.2.2",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.2.2.zip",
+    "size": 73852980,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.2.2/CatSpacer-v0.2.2.zip",
+    "digest": "sha256:dd74915f324195b7dd140b381f73595d20666e2b87212a375dab23888be70c11"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.1",
+  "name": "Cat Spacer v0.2.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T05:46:46Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.2.1",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.2.1.zip",
+    "size": 73852265,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.2.1/CatSpacer-v0.2.1.zip",
+    "digest": "sha256:9b048cd945a09a2f253fbcf542ab5f87d8ab035c074fbde484dbab3892966392"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Cat Spacer v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T04:19:39Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.2.0.zip",
+    "size": 73667530,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.2.0/CatSpacer-v0.2.0.zip",
+    "digest": "sha256:b03c99c76794f8c75c349d6540dff4574ddb9a056f739212fbfeb2e962805f15"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.1",
+  "name": "Cat Spacer v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Cat Spacer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-18T23:42:08Z",
+  "html_url": "https://github.com/SpeakingColors/catspacer/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "CatSpacer-v0.1.1.zip",
+    "size": 71908453,
+    "browser_download_url": "https://github.com/SpeakingColors/catspacer/releases/download/v0.1.1/CatSpacer-v0.1.1.zip",
+    "digest": "sha256:35875de8dfda43a7c5f34f165c317bca797c480c375fb9117bf2a122b06e2f86"
+   }
+  ]
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "FetlinePounce 0.1.0 (test build)",
+  "body": "FetlinePounce test build: a free, open source FET style limiting amplifier (VST3) by Studio 87.\n\nThis is a pre-release. The DSP core is tested; the installers and the plugin are NOT yet tried on real machines or in real DAWs.\n\nInside the zip: Windows installer, macOS package, Linux Flatpak extension and plain VST3 tarball, PDF manual, INSTALL.txt, LICENSE, SHA256SUMS.\n\nThe installers are not code signed. Windows may show an \"unknown publisher\" screen: More info, then Run anyway. macOS may block the package: System Settings, Privacy and Security, Open Anyway. Signing needs paid certificates, which this free project does not have.\n\nCollects nothing; no network access.\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T20:06:35Z",
+  "html_url": "https://github.com/SpeakingColors/FetlinePounce/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "FetlinePounce_v0.1.0.zip",
+    "size": 53995758,
+    "browser_download_url": "https://github.com/SpeakingColors/FetlinePounce/releases/download/v0.1.0/FetlinePounce_v0.1.0.zip",
+    "digest": "sha256:8f09c49e6340d75d68862f78bd776bb446c54153e68c36acd95d0e06fd309c3e"
+   }
+  ]
+ }
+]

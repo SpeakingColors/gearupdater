@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "Pawltec v0.1.0 (test build)",
+  "body": "**Test build (pre-release).** Pawltec is a free, open source tube-style program equalizer (VST3) by Studio 87: low boost and atten on a shared frequency, high boost with width, high atten, a tube stage and an Output level. It collects nothing and never uses the network.\n\nThis zip holds the installers for Windows (.exe) and macOS (.pkg), Linux Flatpak extension and plain .vst3 tarball, the PDF manual, INSTALL.txt, LICENSE and SHA256SUMS. Everything works offline.\n\n**What is checked:** the DSP core has automatic tests (flat response, exact gains, constant latency, aliasing, level match, NaN safety), the plugin builds on Windows, macOS and Linux and passes the pluginval validator on Linux, and the window is rendered by the real compiled editor for the manual.\n\n**What is not checked yet:** the installers on real Windows and macOS machines, the Flatpak extension in a real Flatpak DAW, the plugin in real DAWs, and the sound by ear on real material. The filter shapes are our own model, not measured from hardware.\n\n**Why Windows or macOS may warn you:** the installers are not signed with a paid publisher certificate (it costs money every year and this project is free), so Windows SmartScreen and macOS Gatekeeper warn about any unsigned installer. On Windows choose \"More info\", then \"Run anyway\". On macOS open System Settings, Privacy and Security, and choose \"Open Anyway\". You can compare the files with SHA256SUMS in the zip, and the source is on GitHub.\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T19:53:10Z",
+  "html_url": "https://github.com/SpeakingColors/Pawltec/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "Pawltec-v0.1.0.zip",
+    "size": 53751210,
+    "browser_download_url": "https://github.com/SpeakingColors/Pawltec/releases/download/v0.1.0/Pawltec-v0.1.0.zip",
+    "digest": "sha256:a6835984fd8dec10b10aed3893f23f9aec30a27942dacc8e0e11f37684dd3aef"
+   }
+  ]
+ }
+]

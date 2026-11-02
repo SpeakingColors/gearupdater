@@ -1,0 +1,104 @@
+[
+ {
+  "tag_name": "v0.2.4",
+  "name": "Fat Cat v0.2.4 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T05:59:19Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.2.4",
+  "assets": [
+   {
+    "name": "FatCat-v0.2.4.zip",
+    "size": 73290556,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.2.4/FatCat-v0.2.4.zip",
+    "digest": "sha256:88166085885df91d20a58ae1a31c867c539b480f9a3c4408e501998fde46b47f"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.3",
+  "name": "Fat Cat v0.2.3 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T19:49:24Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.2.3",
+  "assets": [
+   {
+    "name": "FatCat-v0.2.3.zip",
+    "size": 73305441,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.2.3/FatCat-v0.2.3.zip",
+    "digest": "sha256:669bed124d37671c65a7707d6b42d810e61cb7d63e4ca87362ea25c7cc9aca3b"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.2",
+  "name": "Fat Cat v0.2.2 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T18:14:52Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.2.2",
+  "assets": [
+   {
+    "name": "FatCat-v0.2.2.zip",
+    "size": 73266394,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.2.2/FatCat-v0.2.2.zip",
+    "digest": "sha256:22964f440ffd7e8cff247df00d3a196a009e4eedfbd3bf5797983638388dc0f6"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.1",
+  "name": "Fat Cat v0.2.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T05:44:32Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.2.1",
+  "assets": [
+   {
+    "name": "FatCat-v0.2.1.zip",
+    "size": 73266924,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.2.1/FatCat-v0.2.1.zip",
+    "digest": "sha256:4a1ac2586131f57d1e7d369e9f2c11cbd18d658deeab7545f23515aacb58a52e"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Fat Cat v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T04:20:02Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "FatCat-v0.2.0.zip",
+    "size": 73063175,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.2.0/FatCat-v0.2.0.zip",
+    "digest": "sha256:98d5d4ed26a18f1a0359b7897e5d69844fba978b50bc8297c26ca4a90a0f0d3d"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.1",
+  "name": "Fat Cat v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Fat Cat). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-18T23:43:26Z",
+  "html_url": "https://github.com/SpeakingColors/FatCat/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "FatCat-v0.1.1.zip",
+    "size": 71842870,
+    "browser_download_url": "https://github.com/SpeakingColors/FatCat/releases/download/v0.1.1/FatCat-v0.1.1.zip",
+    "digest": "sha256:29a0771e8490faea5f32b3a28d12cc93aa83101f54e47e4cff0f1dd9e144d07f"
+   }
+  ]
+ }
+]

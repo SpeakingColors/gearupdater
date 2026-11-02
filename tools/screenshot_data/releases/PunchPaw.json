@@ -1,0 +1,19 @@
+[
+ {
+  "tag_name": "v0.1.0",
+  "name": "PunchPaw v0.1.0 (test build)",
+  "body": "PunchPaw 0.1.0 (test build). A free, open source punch compressor for drums and bass (VST3).\n\nOne zip: installers for Windows (.exe) and Linux (Flatpak extension plus a plain .vst3), the PDF manual with an interface tour, INSTALL.txt and SHA256SUMS. Everything works offline; the plugin collects nothing.\n\nThe macOS .pkg is not in this zip: GitHub's macOS build machines were unavailable (capacity). It will be added by a re-run as soon as one is free; see the open macOS issue.\n\nThe installers are not code-signed or notarised. Windows may say \"unknown publisher\" (More info, Run anyway); macOS may need Privacy and Security, Open Anyway. This is not a sign of harm: the code is open and the zip has SHA256SUMS to check it.\n\nThis is a test build: automated tests and pluginval pass in CI, but it has not been checked by ear in real hosts or installed on real Windows and macOS machines yet. See ROADMAP.md.\n",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-02T20:17:34Z",
+  "html_url": "https://github.com/SpeakingColors/PunchPaw/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "PunchPaw-v0.1.0.zip",
+    "size": 54801524,
+    "browser_download_url": "https://github.com/SpeakingColors/PunchPaw/releases/download/v0.1.0/PunchPaw-v0.1.0.zip",
+    "digest": "sha256:4e4642fcdb1c93dc9538af88e3243cd9bbb09a4201de342971fbdf1fd5091ad3"
+   }
+  ]
+ }
+]

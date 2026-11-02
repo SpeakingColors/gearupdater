@@ -1,0 +1,104 @@
+[
+ {
+  "tag_name": "v0.2.4",
+  "name": "Meowximizer v0.2.4 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T05:57:50Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.2.4",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.2.4.zip",
+    "size": 66922166,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.2.4/Meowximizer-v0.2.4.zip",
+    "digest": "sha256:a1ecae02ec4469958685c656d31ad54055a5ba7700c0e0d670eb0723ed505215"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.3",
+  "name": "Meowximizer v0.2.3 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T19:52:42Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.2.3",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.2.3.zip",
+    "size": 67451440,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.2.3/Meowximizer-v0.2.3.zip",
+    "digest": "sha256:c4fb93d26f27e695b618b9614af09e3c2fa618be27e3a2826a9191470a7631b0"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.2",
+  "name": "Meowximizer v0.2.2 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T18:17:38Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.2.2",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.2.2.zip",
+    "size": 67402521,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.2.2/Meowximizer-v0.2.2.zip",
+    "digest": "sha256:36be5c81ecffadaff2cc57b49d92d74e8c0214f96f5c788852afa22f368bff0b"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.1",
+  "name": "Meowximizer v0.2.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T05:46:44Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.2.1",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.2.1.zip",
+    "size": 67408052,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.2.1/Meowximizer-v0.2.1.zip",
+    "digest": "sha256:a0b82376da05125e82fa5573187b862602b21661494d6603be234febe2ab28ce"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Meowximizer v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T04:20:45Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.2.0.zip",
+    "size": 67227381,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.2.0/Meowximizer-v0.2.0.zip",
+    "digest": "sha256:631af1f6c8dae0e1c70170e0f6b9e9a5590148d65e1f0daf789e07dd734b880f"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.1",
+  "name": "Meowximizer v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Meowximizer). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-18T23:42:47Z",
+  "html_url": "https://github.com/SpeakingColors/Meowximizer/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "Meowximizer-v0.1.1.zip",
+    "size": 72085221,
+    "browser_download_url": "https://github.com/SpeakingColors/Meowximizer/releases/download/v0.1.1/Meowximizer-v0.1.1.zip",
+    "digest": "sha256:8307e08bcac48bf32d638528fb66704944f926830058daf451fbc4795af9c001"
+   }
+  ]
+ }
+]

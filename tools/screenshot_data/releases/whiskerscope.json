@@ -1,0 +1,70 @@
+[
+ {
+  "tag_name": "v0.3.1",
+  "name": "Whisker Scope v0.3.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Whisker Scope). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-21T04:36:55Z",
+  "html_url": "https://github.com/SpeakingColors/whiskerscope/releases/tag/v0.3.1",
+  "assets": [
+   {
+    "name": "WhiskerScope-v0.3.1.zip",
+    "size": 79734609,
+    "browser_download_url": "https://github.com/SpeakingColors/whiskerscope/releases/download/v0.3.1/WhiskerScope-v0.3.1.zip",
+    "digest": "sha256:aad53317682de2c8b7e376d1e723211815de2004db64bfedd51f2d86211bc690"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.3.0",
+  "name": "Whisker Scope v0.3.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Whisker Scope). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-21T03:52:41Z",
+  "html_url": "https://github.com/SpeakingColors/whiskerscope/releases/tag/v0.3.0",
+  "assets": [
+   {
+    "name": "WhiskerScope-v0.3.0.zip",
+    "size": 79725380,
+    "browser_download_url": "https://github.com/SpeakingColors/whiskerscope/releases/download/v0.3.0/WhiskerScope-v0.3.0.zip",
+    "digest": "sha256:10d958d47508f54d5bea272da8bfb1e2396e3f5bf780c2070af0b4c79cfcde87"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.2.0",
+  "name": "Whisker Scope v0.2.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Whisker Scope). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-20T01:11:30Z",
+  "html_url": "https://github.com/SpeakingColors/whiskerscope/releases/tag/v0.2.0",
+  "assets": [
+   {
+    "name": "WhiskerScope-v0.2.0.zip",
+    "size": 73828978,
+    "browser_download_url": "https://github.com/SpeakingColors/whiskerscope/releases/download/v0.2.0/WhiskerScope-v0.2.0.zip",
+    "digest": "sha256:b157c9e66905b0ecb21e04ff4671442b759ce2db9e920fac5089ff6ba04e3b27"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.0",
+  "name": "Whisker Scope v0.1.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Whisker Scope). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-19T21:02:56Z",
+  "html_url": "https://github.com/SpeakingColors/whiskerscope/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "WhiskerScope-v0.1.0.zip",
+    "size": 66004563,
+    "browser_download_url": "https://github.com/SpeakingColors/whiskerscope/releases/download/v0.1.0/WhiskerScope-v0.1.0.zip",
+    "digest": "sha256:d418a38c94b0e1becd2fd5ec61adf14734fbd28520c8f0155f9327b18ca67246"
+   }
+  ]
+ }
+]

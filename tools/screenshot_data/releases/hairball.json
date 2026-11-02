@@ -1,0 +1,36 @@
+[
+ {
+  "tag_name": "v0.1.1",
+  "name": "Hairball v0.1.1 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Hairball). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-11-01T06:12:10Z",
+  "html_url": "https://github.com/SpeakingColors/hairball/releases/tag/v0.1.1",
+  "assets": [
+   {
+    "name": "Hairball-v0.1.1.zip",
+    "size": 128316741,
+    "browser_download_url": "https://github.com/SpeakingColors/hairball/releases/download/v0.1.1/Hairball-v0.1.1.zip",
+    "digest": "sha256:5f439f274d6716a306df03b8fa3ceb41cd0d1b478e6e8dfa7117678f0af19f90"
+   }
+  ]
+ },
+ {
+  "tag_name": "v0.1.0",
+  "name": "Hairball v0.1.0 (test build)",
+  "body": "Test build, not tuned by ear yet. Free and open source (Hairball). One zip: installers for Windows (.exe), macOS (.pkg), Linux (Flatpak extensions and a plain .vst3), the PDF manual and INSTALL.txt. Everything works offline. SHA-256 sums are inside the zip.",
+  "prerelease": true,
+  "draft": false,
+  "published_at": "2026-10-20T00:13:29Z",
+  "html_url": "https://github.com/SpeakingColors/hairball/releases/tag/v0.1.0",
+  "assets": [
+   {
+    "name": "Hairball-v0.1.0.zip",
+    "size": 129348027,
+    "browser_download_url": "https://github.com/SpeakingColors/hairball/releases/download/v0.1.0/Hairball-v0.1.0.zip",
+    "digest": "sha256:90b50783a8c8ba049e458d92aa179c64cfa5d9821f54e7f5673ab0abcac6c7ee"
+   }
+  ]
+ }
+]
