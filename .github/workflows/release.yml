@@ -1,0 +1,205 @@
+# Release build: Linux Flatpak, Windows installer (.exe), macOS installer (.pkg), PDF manual, INSTALL.txt, LICENSE and
+# SHA256SUMS in one zip, plus a separate SHA256SUMS asset (so the updater can check the zip itself).
+# Run by hand with a tag, for example: gh api -X POST repos/SpeakingColors/gearupdater/actions/workflows/release.yml/dispatches -f ref=main -f 'inputs[tag]=v0.1.0'
+name: release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Publish a pre-release with this tag (for example v0.1.0). Leave empty to only build.'
+        required: false
+        default: ''
+      skip_macos:
+        description: 'Skip the macOS job (use if the macOS queue is stuck). The release then has no .pkg.'
+        type: boolean
+        required: false
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: updater-release-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: false
+env:
+  TAGIN: ${{ inputs.tag }}
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1 libglib2.0-0
+          pip install PySide6-Essentials Pillow
+      - env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python3 -m unittest discover tests -v
+          python3 tools/mutation_check.py
+
+  manual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install reportlab Pillow
+      - run: |
+          ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
+          sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
+          python3 tools/make_manual.py Studio87-Updater-manual.pdf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manual
+          path: "*.pdf"
+
+  windows:
+    needs: [tests, manual]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: manual
+          path: manual
+      - name: Version from the tag
+        run: |
+          ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
+          sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
+          echo "VER=$ver" >> "$GITHUB_ENV"
+      - name: Build the app (PyInstaller)
+        run: |
+          pip install pyinstaller PySide6-Essentials
+          pyinstaller --noconfirm --windowed --name Studio87Updater --icon studio87_updater/assets/icon.ico \
+            --add-data "studio87_updater/assets;studio87_updater/assets" --add-data "studio87_updater/products.json;studio87_updater" \
+            packaging/launcher.py
+          test -f dist/Studio87Updater/Studio87Updater.exe
+      - name: Installer (Inno Setup)
+        run: |
+          mkdir -p stage; cp manual/*.pdf stage/Studio87-Updater-manual.pdf
+          iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+          [ -f "$iscc" ] || { choco install innosetup -y --no-progress; }
+          "$iscc" "//DVersion=$VER" packaging/windows.iss
+          test -s "Output/Studio87-Updater-Setup.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: "Output/*.exe"
+
+  macos:
+    if: ${{ inputs.skip_macos != true }}
+    needs: [tests, manual]
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: manual
+          path: manual
+      - name: Build the app and the .pkg
+        run: |
+          ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
+          sed -i.bak -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py; rm -f studio87_updater/__init__.py.bak
+          pip install pyinstaller PySide6-Essentials
+          pyinstaller --noconfirm --windowed --name "Studio 87 Updater" --icon studio87_updater/assets/icon.icns \
+            --osx-bundle-identifier io.github.speakingcolors.studio87updater \
+            --add-data "studio87_updater/assets:studio87_updater/assets" --add-data "studio87_updater/products.json:studio87_updater" \
+            packaging/launcher.py
+          test -d "dist/Studio 87 Updater.app"
+          id="io.github.speakingcolors.studio87updater"
+          mkdir -p root/app root/doc
+          cp -R "dist/Studio 87 Updater.app" root/app/
+          osacompile -o "root/app/Uninstall Studio 87 Updater.app" packaging/macos-uninstall.applescript
+          cp studio87_updater/assets/icon.icns "root/app/Uninstall Studio 87 Updater.app/Contents/Resources/applet.icns"
+          cp manual/*.pdf root/doc/Studio87-Updater-manual.pdf
+          codesign --force --deep -s - "root/app/Studio 87 Updater.app"; codesign --force --deep -s - "root/app/Uninstall Studio 87 Updater.app"
+          pkgbuild --root root/app --identifier "$id.app" --version "$ver" --install-location "/Applications" app.pkg
+          pkgbuild --root root/doc --identifier "$id.doc" --version "$ver" --install-location "/Library/Application Support/Studio 87/Updater" doc.pkg
+          productbuild --package app.pkg --package doc.pkg Studio87-Updater-macOS.pkg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: "*.pkg"
+
+  linux-flatpak:
+    needs: tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Flatpak
+        shell: bash
+        run: |
+          set -o pipefail
+          (
+          set -ex
+          ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
+          sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
+          sed -i -E "s/<release version=\"[0-9.]+\"/<release version=\"$ver\"/" packaging/flatpak/io.github.speakingcolors.Studio87Updater.metainfo.xml
+          sudo apt-get update && sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          sed -e "s/@QT@/6.9/g" packaging/flatpak/io.github.speakingcolors.Studio87Updater.yml > app.yml
+          cp app.yml packaging/flatpak/_build.yml
+          flatpak-builder --user --force-clean --install-deps-from=flathub --repo=repo build-dir packaging/flatpak/_build.yml
+          test -f build-dir/files/bin/studio87-updater
+          mkdir -p out
+          flatpak build-bundle repo out/Studio87-Updater.flatpak io.github.speakingcolors.Studio87Updater
+          ) 2>&1 | tee flatpak.log
+      - name: Show errors
+        if: failure()
+        shell: bash
+        run: (grep -iE "error|fail|cannot|no such" flatpak.log | grep -v "end-of-life" | tail -n 8; tail -n 5 flatpak.log) | while IFS= read -r l; do echo "::error::${l:0:300}"; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: "out/*"
+
+  package:
+    permissions:
+      contents: write
+    needs: [manual, windows, macos, linux-flatpak]
+    if: ${{ !cancelled() && needs.manual.result == 'success' && needs.windows.result == 'success' && needs.linux-flatpak.result == 'success' && (needs.macos.result == 'success' || needs.macos.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: parts }
+      - name: Assemble the zip
+        run: |
+          tag="$GITHUB_REF_NAME"; if [ "$GITHUB_REF_TYPE" != "tag" ]; then tag="${TAGIN:-dev}"; fi
+          d="Studio87-Updater-$tag"; mkdir -p "$d/windows" "$d/macos" "$d/linux" outer
+          cp parts/windows/*.exe "$d/windows/"
+          if ls parts/macos/*.pkg >/dev/null 2>&1; then cp parts/macos/*.pkg "$d/macos/"; else rmdir "$d/macos"; echo "macOS was skipped in this run" > "$d/NO-MACOS.txt"; fi
+          cp parts/flatpak/* "$d/linux/"
+          cp parts/manual/*.pdf "$d/Studio87-Updater-manual.pdf"; cp LICENSE "$d/"
+          cp INSTALL.txt "$d/INSTALL.txt"
+          (cd "$d" && find . -type f ! -name SHA256SUMS | sort | xargs sha256sum > SHA256SUMS)
+          zip -r "$d.zip" "$d"
+          ls -l "$d.zip"
+          sha256sum "$d.zip" > outer/SHA256SUMS
+          cat outer/SHA256SUMS
+          echo "TAG=$tag" >> "$GITHUB_ENV"; echo "ZIP=$d.zip" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-zip
+          path: |
+            *.zip
+            outer/SHA256SUMS
+      - name: Publish release
+        if: github.ref_type == 'tag' || inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release upload "$TAG" "$ZIP" outer/SHA256SUMS --clobber
+          else gh release create "$TAG" "$ZIP" outer/SHA256SUMS --target "$GITHUB_SHA" --prerelease --title "Studio 87 Updater $TAG (test build)" --notes "Test build."; fi
+          if [ -f release/NOTES.md ]; then gh release edit "$TAG" --notes-file release/NOTES.md; fi

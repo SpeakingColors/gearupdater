@@ -1,0 +1,40 @@
+Studio 87 Updater: install, remove and use (works offline to install; it only needs the internet to check for updates)
+=====================================================================================================================
+
+About the "unknown publisher" warnings
+  These installers are not code-signed or notarised: certificates cost money and this is a free project.
+  The warning only says "not signed by a known company". It does not mean the file is harmful.
+  The code is open on GitHub and SHA256SUMS in this zip lets you check your download.
+
+Linux (Bazzite, Fedora, Ubuntu and others with Flatpak)
+  1. Double click linux/Studio87-Updater.flatpak (it opens in your software centre, for example Discover), then Install.
+     Terminal alternative:  flatpak install --user linux/Studio87-Updater.flatpak
+     It needs the KDE runtime and PySide base app from Flathub; Flatpak fetches them for you the first time if they are missing
+     (that is Flatpak talking to Flathub, not this app).
+  2. Start "Studio 87 Updater" from your application menu.
+  Remove: flatpak uninstall --user io.github.speakingcolors.Studio87Updater
+  What the Flatpak is allowed to do: use the network, show a window, write ~/.vst3 (plugins for native DAWs) and run
+  "flatpak install" on your computer (plugin extensions for Flatpak DAWs). It cannot see the rest of your home folder.
+
+Windows
+  Run windows\Studio87-Updater-Setup.exe. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
+  Remove: Settings > Apps > Studio 87 Updater > Uninstall. It asks if you also want its settings deleted (default No).
+
+macOS
+  Open macos\Studio87-Updater-macOS.pkg. If macOS blocks it, open System Settings > Privacy & Security and choose "Open Anyway".
+  Remove: open "Uninstall Studio 87 Updater" in the Applications folder.
+
+Using it
+  The window opens with the list saved last time and checks GitHub once. After that it only checks when you click "Check for updates".
+  Tick products and click "Update selected", or click "Update all", or press Update on a single row. Nothing is installed without a click.
+  Every download is checked against SHA256SUMS before it is installed; on a mismatch it is refused and nothing is changed.
+  Your saved presets and data folders are never touched.
+
+Where it keeps its own files
+  Linux   : ~/.var/app/io.github.speakingcolors.Studio87Updater/data/Studio 87/Updater (settings, installed-versions.json)
+            and .../cache (saved GitHub answers and screenshots). Outside Flatpak: ~/.local/share/Studio 87/Updater.
+  Windows : %APPDATA%\Studio 87\Updater and %LOCALAPPDATA%\Studio 87\Updater\cache
+  macOS   : ~/Library/Application Support/Studio 87/Updater and ~/Library/Caches/Studio 87/Updater
+
+Manual: Studio87-Updater-manual.pdf. Checksums: SHA256SUMS. Licence: AGPL-3.0-or-later (see LICENSE).
+This is a test build until it has been checked on real machines.

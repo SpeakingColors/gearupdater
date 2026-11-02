@@ -1,11 +1,44 @@
+# Runs on every push: the pure-core tests, the GUI smoke tests (offscreen Qt with a stub GitHub),
+# the deliberate-bug check, and renders the real window to docs/screenshot-ci.png as an artifact.
 name: updater-tests
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: updater-tests-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m unittest discover tests -v
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Qt offscreen libraries and PySide6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1 libglib2.0-0
+          pip install PySide6-Essentials Pillow
+      - name: Tests (pure core, firmware checker, GUI offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python3 -m unittest discover tests -v
+      - name: The tests must catch deliberately broken code
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python3 tools/mutation_check.py
+      - name: Render the real window offscreen
+        env:
+          QT_QPA_PLATFORM: offscreen
+          SHOT_W: '1500'
+          SHOT_H: '960'
+        run: python3 tools/make_screenshot.py docs/screenshot-ci.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: window-screenshot
+          path: docs/screenshot-ci.png

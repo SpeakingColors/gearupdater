@@ -1,0 +1,318 @@
+{
+ "controls": [
+  {
+   "name": "Check for updates",
+   "box": [
+    596,
+    12,
+    176,
+    34
+   ],
+   "tip": "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.",
+   "n": 1
+  },
+  {
+   "name": "Settings",
+   "box": [
+    778,
+    12,
+    80,
+    34
+   ],
+   "tip": "Look, hover bubbles and where Linux plugins go.",
+   "n": 2
+  },
+  {
+   "name": "About",
+   "box": [
+    876,
+    12,
+    80,
+    34
+   ],
+   "tip": "What this is, what it collects (nothing), and how to remove it.",
+   "n": 3
+  },
+  {
+   "name": "Updates tab",
+   "box": [
+    44,
+    64,
+    110,
+    30
+   ],
+   "tip": "Products that have a newer version than the one installed.",
+   "n": 4
+  },
+  {
+   "name": "Installed tab",
+   "box": [
+    160,
+    64,
+    100,
+    30
+   ],
+   "tip": "Everything found on this computer.",
+   "n": 5
+  },
+  {
+   "name": "Not installed tab",
+   "box": [
+    266,
+    64,
+    118,
+    30
+   ],
+   "tip": "Products that are not installed here yet.",
+   "n": 6
+  },
+  {
+   "name": "All tab",
+   "box": [
+    390,
+    64,
+    70,
+    30
+   ],
+   "tip": "Every Studio 87 product, including ones that only link to GitHub.",
+   "n": 7
+  },
+  {
+   "name": "Update selected",
+   "box": [
+    686,
+    64,
+    144,
+    30
+   ],
+   "tip": "Update the products you ticked, one after another.",
+   "n": 8
+  },
+  {
+   "name": "Update all",
+   "box": [
+    838,
+    64,
+    118,
+    30
+   ],
+   "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
+   "n": 9
+  },
+  {
+   "name": "Row tick box",
+   "box": [
+    52,
+    136,
+    20,
+    20
+   ],
+   "tip": "Tick to include this product in 'Update selected'.",
+   "n": 10
+  },
+  {
+   "name": "Update / Install button",
+   "box": [
+    838,
+    109,
+    110,
+    22
+   ],
+   "tip": "Download, verify the SHA256 checksums, then install 0.2.4. Installers are not code-signed: Windows or macOS may show a warning. Nothing is installed until you click.",
+   "n": 11
+  },
+  {
+   "name": "Changelog button",
+   "box": [
+    838,
+    135,
+    110,
+    22
+   ],
+   "tip": "Read the release notes for every version newer than the one you have.",
+   "n": 12
+  },
+  {
+   "name": "GitHub button",
+   "box": [
+    838,
+    161,
+    110,
+    22
+   ],
+   "tip": "Open the project page in your browser.",
+   "n": 13
+  },
+  {
+   "name": "Previous page",
+   "box": [
+    410,
+    554,
+    40,
+    28
+   ],
+   "tip": "Previous page.",
+   "n": 14
+  },
+  {
+   "name": "Next page",
+   "box": [
+    550,
+    554,
+    40,
+    28
+   ],
+   "tip": "Next page.",
+   "n": 15
+  },
+  {
+   "name": "Smaller window",
+   "box": [
+    758,
+    606,
+    40,
+    24
+   ],
+   "tip": "Make the window smaller. You can also drag any edge or corner; the shape stays the same.",
+   "n": 16
+  },
+  {
+   "name": "Back to 100 percent",
+   "box": [
+    802,
+    606,
+    56,
+    24
+   ],
+   "tip": "Back to the normal size. Double click on either wood side does the same.",
+   "n": 17
+  },
+  {
+   "name": "Larger window",
+   "box": [
+    864,
+    606,
+    40,
+    24
+   ],
+   "tip": "Make the window larger.",
+   "n": 18
+  }
+ ],
+ "displays": [
+  {
+   "name": "Screenshot and cat icon",
+   "box": [
+    78,
+    108,
+    156,
+    76
+   ],
+   "text": "The product's own docs/screenshot.png, small, with the cat icon on it, so you recognise it at a glance. Fetched during the check and saved on disk.",
+   "letter": "A"
+  },
+  {
+   "name": "Name, kind and build type",
+   "box": [
+    248,
+    106,
+    300,
+    22
+   ],
+   "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as one.",
+   "letter": "B"
+  },
+  {
+   "name": "Installed and latest version",
+   "box": [
+    248,
+    128,
+    300,
+    15
+   ],
+   "text": "What is really installed (read from the plugin's own metadata or from what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly.",
+   "letter": "C"
+  },
+  {
+   "name": "Status",
+   "box": [
+    248,
+    143,
+    300,
+    16
+   ],
+   "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While updating it turns into Downloading, Verifying SHA256, Installing.",
+   "letter": "D"
+  },
+  {
+   "name": "Changelog line",
+   "box": [
+    248,
+    159,
+    576,
+    15
+   ],
+   "text": "The first line of the release notes. The Changelog button shows the notes of every version newer than yours.",
+   "letter": "E"
+  },
+  {
+   "name": "Date, size and install route",
+   "box": [
+    248,
+    173,
+    576,
+    13
+   ],
+   "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited).",
+   "letter": "F"
+  },
+  {
+   "name": "Status line",
+   "box": [
+    44,
+    550,
+    380,
+    36
+   ],
+   "text": "When the last check happened and how many updates were found. Offline and rate-limit messages appear here and in red on the right.",
+   "letter": "G"
+  },
+  {
+   "name": "Page counter",
+   "box": [
+    450,
+    554,
+    100,
+    28
+   ],
+   "text": "Five products per page, so the window never needs a scrollbar.",
+   "letter": "H"
+  },
+  {
+   "name": "Size read-out",
+   "box": [
+    444,
+    598,
+    200,
+    42
+   ],
+   "text": "Window size in pixels and, on the 100% button, the zoom relative to the default size.",
+   "letter": "I"
+  },
+  {
+   "name": "Wood sides",
+   "box": [
+    0,
+    0,
+    34,
+    640
+   ],
+   "text": "Double click on either wood side to go back to the default size (100%).",
+   "letter": "J"
+  }
+ ],
+ "design": [
+  1000,
+  640
+ ]
+}
