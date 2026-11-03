@@ -76,9 +76,11 @@ jobs:
           sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
           echo "VER=$ver" >> "$GITHUB_ENV"
       - name: Build the app (PyInstaller)
+        env:
+          MSYS_NO_PATHCONV: '1'
         run: |
           pip install pyinstaller PySide6-Essentials
-          pyinstaller --noconfirm --windowed --name Studio87Updater --icon studio87_updater/assets/icon.ico \
+          pyinstaller --noconfirm --windowed --paths . --name Studio87Updater --icon studio87_updater/assets/icon.ico \
             --add-data "studio87_updater/assets;studio87_updater/assets" --add-data "studio87_updater/products.json;studio87_updater" \
             packaging/launcher.py
           test -f dist/Studio87Updater/Studio87Updater.exe
@@ -112,7 +114,7 @@ jobs:
           ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
           sed -i.bak -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py; rm -f studio87_updater/__init__.py.bak
           pip install pyinstaller PySide6-Essentials
-          pyinstaller --noconfirm --windowed --name "Studio 87 Updater" --icon studio87_updater/assets/icon.icns \
+          pyinstaller --noconfirm --windowed --paths . --name "Studio 87 Updater" --icon studio87_updater/assets/icon.icns \
             --osx-bundle-identifier io.github.speakingcolors.studio87updater \
             --add-data "studio87_updater/assets:studio87_updater/assets" --add-data "studio87_updater/products.json:studio87_updater" \
             packaging/launcher.py
