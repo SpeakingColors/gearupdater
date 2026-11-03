@@ -1,4 +1,4 @@
-Studio 87 Updater 0.1.0 (test build). A free, open source window that lists every Studio 87 plugin and app, shows which have a newer version on GitHub, and updates them one by one, several at once or all together.
+Studio 87 Gear Updater 0.1.0 (test build). A free, open source window that lists every Studio 87 plugin and app, shows which have a newer version on GitHub, and updates them one by one, several at once or all together.
 
 One zip: the Linux Flatpak, the Windows installer (.exe), the macOS installer (.pkg) if the macOS build was available, the PDF manual with an interface tour, INSTALL.txt and SHA256SUMS. A separate SHA256SUMS asset lists the zip itself. The updater checks GitHub only when you open it or click Check for updates, collects nothing, verifies SHA256 before installing, and never touches your presets.
 

@@ -1,4 +1,4 @@
-"""The Qt window. Everything is drawn in a 1000 x 640 design space and scaled uniformly, aspect locked."""
+"""The Qt window. Everything is drawn in a 1000 x 676 design space and scaled uniformly, aspect locked."""
 import os
 import sys
 import time
@@ -8,7 +8,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QRect, QRectF, QRunnable, QSize, Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QImage, QPainter, QPen, QPixmap
 from PySide6.QtCore import QUrl
-from PySide6.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView, QMainWindow, QTextBrowser, QWidget)
+from PySide6.QtWidgets import (QApplication, QLineEdit, QScrollArea, QGraphicsScene, QGraphicsView, QMainWindow, QTextBrowser, QWidget)
 
 from .. import APP_NAME, __version__
 from .. import model as MD
@@ -16,11 +16,11 @@ from ..service import THEMES, Service
 from .theme import LOOKS, THEME
 from .widgets import MONO, BubbleManager, Btn, Check, font, paint_cat, wood_pixmap
 
-DW, DH = 1000, 640
+DW, DH = 1000, 676
 CHEEK = 34
 PAGE = 5
 ROW_H = 88
-LIST_Y = 104
+LIST_Y = 140
 KOFI = "https://ko-fi.com/studio87"
 ASSETS = Path(__file__).resolve().parents[1] / "assets"
 
@@ -211,14 +211,14 @@ class RowWidget(QWidget):
 
 
 class StudioRoot(QWidget):
-    """The whole window content, 1000 x 640 design pixels."""
+    """The whole window content, 1000 x 676 design pixels."""
 
     def __init__(self, svc, window=None):
         super().__init__()
         self.svc, self.win = svc, window
         THEME.set(svc.settings["theme"])
         self.resize(DW, DH)
-        self.rows, self.view_rows, self.page, self.tab = [], [], 0, "updates"
+        self.rows, self.view_rows, self.page, self.tab = [], [], 0, svc.settings["tab"]
         self.selected, self.installing, self.checking = set(), False, False
         self.thumbs, self.status, self.notice = {}, "", ""
         self.pool = QThreadPool()
@@ -250,40 +250,57 @@ class StudioRoot(QWidget):
         self.b_about.setGeometry(DW - CHEEK - 10 - 80, 12, 80, 34)
         self.tabs = {}
         x = cx
-        for key, label, wd in (("updates", "Updates", 110), ("installed", "Installed", 100), ("missing", "Not installed", 118), ("all", "All", 70)):
-            b = Btn(label, self, "tab", 15)
+        for (key, label), wd in zip(MD.TABS, (96, 62, 118, 90, 112, 134, 96, 122)):
+            b = Btn(label, self, "tab", 14)
             b.setGeometry(x, 64, wd, 30)
             b.clicked.connect(lambda _, k=key: self.set_tab(k))
             self.tabs[key] = b
             x += wd + 6
+        self.search = QLineEdit(self)
+        self.search.setGeometry(cx, 100, 300, 30)
+        self.search.setPlaceholderText("Search name, kind or status")
+        self.search.setClearButtonEnabled(True)
+        self.search.textChanged.connect(self.on_search)
+        self.b_view = Btn("Use pages", self, "normal", 14)
+        self.b_view.setGeometry(cx + 310, 100, 110, 30)
         self.b_all = Btn("Update all", self, "primary", 15)
-        self.b_all.setGeometry(DW - cx - 118, 64, 118, 30)
+        self.b_all.setGeometry(DW - cx - 118, 100, 118, 30)
         self.b_sel = Btn("Update selected", self, "normal", 15)
-        self.b_sel.setGeometry(DW - cx - 118 - 144 - 8, 64, 144, 30)
+        self.b_sel.setGeometry(DW - cx - 118 - 144 - 8, 100, 144, 30)
         self.b_stop = Btn("Stop after this one", self, "normal", 14)
-        self.b_stop.setGeometry(DW - cx - 118 - 144 - 8 - 150, 64, 142, 30)
+        self.b_stop.setGeometry(DW - cx - 118 - 144 - 8 - 150, 100, 142, 30)
         self.b_stop.hide()
+        self.scroll = QScrollArea(self)
+        self.scroll.setGeometry(cx, LIST_Y, RowWidget.W + 14, PAGE * ROW_H)
+        self.scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(False)
+        self.inner = QWidget()
+        self.scroll.setWidget(self.inner)
+        self.scroll.hide()
+        self.allrows = []
         self.rowws = []
         for i in range(PAGE):
             rw = RowWidget(self, self)
             rw.move(cx, LIST_Y + i * ROW_H)
             self.rowws.append(rw)
         self.b_prev = Btn("<", self, "normal", 16)
-        self.b_prev.setGeometry(DW // 2 - 90, 554, 40, 28)
+        self.b_prev.setGeometry(DW // 2 - 90, 590, 40, 28)
         self.b_next = Btn(">", self, "normal", 16)
-        self.b_next.setGeometry(DW // 2 + 50, 554, 40, 28)
+        self.b_next.setGeometry(DW // 2 + 50, 590, 40, 28)
         self.b_zoom_out = Btn("-", self, "normal", 16)
         self.b_zoom_100 = Btn("100%", self, "normal", 13)
         self.b_zoom_in = Btn("+", self, "normal", 16)
         zx = DW - cx - 3 * 40 - 8
         for b, dx in ((self.b_zoom_out, 0), (self.b_zoom_100, 44), (self.b_zoom_in, 88)):
-            b.setGeometry(zx + dx - 70, 606, 40 if b is not self.b_zoom_100 else 56, 24)
-        self.b_zoom_100.setGeometry(zx + 44 - 70, 606, 56, 24)
-        self.b_zoom_in.setGeometry(zx + 106 - 70, 606, 40, 24)
+            b.setGeometry(zx + dx - 70, 642, 40 if b is not self.b_zoom_100 else 56, 24)
+        self.b_zoom_100.setGeometry(zx + 44 - 70, 642, 56, 24)
+        self.b_zoom_in.setGeometry(zx + 106 - 70, 642, 40, 24)
+        self.b_view.clicked.connect(self.toggle_view)
         self.b_check.clicked.connect(self.start_check)
         self.b_set.clicked.connect(self.show_settings)
         self.b_about.clicked.connect(self.show_about)
-        self.b_all.clicked.connect(lambda: self.update_rows([r for r in self.rows if r.status == MD.UPDATE]))
+        self.b_all.clicked.connect(lambda: self.update_rows(MD.all_targets(self.view_rows)))
         self.b_sel.clicked.connect(lambda: self.update_rows([r for r in self.rows if r.product.repo in self.selected and r.can_install]))
         self.b_stop.clicked.connect(self.stop_queue)
         self.b_prev.clicked.connect(lambda: self.goto(self.page - 1))
@@ -295,6 +312,8 @@ class StudioRoot(QWidget):
         B(self.b_check, "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.")
         B(self.b_set, "Look, hover bubbles and where Linux plugins go.")
         B(self.b_about, "What this is, what it collects (nothing), and how to remove it.")
+        B(self.search, "Type to filter the list by name, kind (for example controller) or status (for example update).")
+        B(self.b_view, "Switch between one scrolling list (the default) and pages of five products. Pages never need a scrollbar.")
         B(self.b_all, "Update every product that has a newer version. Products with an unknown installed version are left alone.")
         B(self.b_sel, "Update the products you ticked, one after another.")
         B(self.b_stop, "Finish the current product, then stop the rest.")
@@ -304,13 +323,21 @@ class StudioRoot(QWidget):
         B(self.b_zoom_in, "Make the window larger.")
         B(self.b_zoom_100, "Back to the normal size. Double click on either wood side does the same.")
         for k, b in self.tabs.items():
-            B(b, {"updates": "Products that have a newer version than the one installed.",
-                  "installed": "Everything found on this computer.",
-                  "missing": "Products that are not installed here yet.",
-                  "all": "Every Studio 87 product, including ones that only link to GitHub."}[k])
+            B(b, {"all": "Every public Studio 87 product.", "fx": "VST3 effects, analysers, editors and tools.", "synth": "Synths and instruments.",
+                  "controller": "Plugins that control a hardware synth or effect unit.", "apps": "Standalone apps and logue units (minilogue xd, drumlogue).",
+                  "installed": "Products found on this computer.", "notinstalled": "Products not installed yet. Pick Install on a row.",
+                  "updates": "Products that have a newer version than the one installed."}[k])
 
     def apply_look(self):
         THEME.set(self.svc.settings["theme"])
+        T = THEME
+        self.search.setFont(font("Barlow Condensed", 16, QFont.Weight.Medium))
+        self.search.setStyleSheet("QLineEdit{background:%s;color:%s;border:1px solid %s;border-radius:4px;padding:2px 8px;}QLineEdit:focus{border:1px solid %s;}" % (
+            T.s("display"), T.s("text"), T.s("line"), T.s("info")))
+        self.scroll.setStyleSheet("QScrollArea{background:transparent;}QScrollBar:vertical{background:%s;width:8px;margin:0;border-radius:4px;}"
+                                  "QScrollBar::handle:vertical{background:%s;border-radius:4px;min-height:30px;}QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;}"
+                                  "QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical{background:transparent;}" % (T.s("display"), T.s("info")))
+        self.inner.setStyleSheet("background:transparent;")
         self.update()
         for w in self.findChildren(QWidget):
             w.update()
@@ -328,34 +355,37 @@ class StudioRoot(QWidget):
         paint_cat(p, QRect(CHEEK + 12, 8, 42, 42))
         p.setPen(T.c("text"))
         p.setFont(font(px=30, weight=QFont.Weight.Bold, italic=True))
-        p.drawText(CHEEK + 64, 6, 260, 36, Qt.AlignmentFlag.AlignVCenter, "Updater")
+        p.drawText(CHEEK + 64, 6, 260, 36, Qt.AlignmentFlag.AlignVCenter, "Gear Updater")
         p.setPen(T.c("dim"))
         p.setFont(font(px=14, weight=QFont.Weight.Medium, spacing=3))
-        p.drawText(CHEEK + 64 + 118, 6, 200, 36, Qt.AlignmentFlag.AlignVCenter, "STUDIO 87")
+        p.drawText(CHEEK + 64 + 200, 6, 200, 36, Qt.AlignmentFlag.AlignVCenter, "STUDIO 87")
         # footer bar + strip
         p.setPen(T.c("dim"))
         p.setFont(font(px=14, weight=QFont.Weight.Medium))
         msg = self.status
-        p.drawText(CHEEK + 10, 550, DW // 2 - 110 - CHEEK, 36, Qt.AlignmentFlag.AlignVCenter,
+        p.drawText(CHEEK + 10, 586, DW // 2 - 110 - CHEEK, 36, Qt.AlignmentFlag.AlignVCenter,
                    QFontMetrics(p.font()).elidedText(msg, Qt.TextElideMode.ElideRight, DW // 2 - 120 - CHEEK))
         pages = max(1, -(-len(self.view_rows) // PAGE))
         p.setPen(T.c("text"))
         p.setFont(font(MONO, 13, QFont.Weight.Normal))
-        p.drawText(DW // 2 - 50, 554, 100, 28, Qt.AlignmentFlag.AlignCenter, "%d / %d" % (self.page + 1, pages))
+        if not self.show_all:
+            p.drawText(DW // 2 - 50, 590, 100, 28, Qt.AlignmentFlag.AlignCenter, "%d / %d" % (self.page + 1, pages))
+        else:
+            p.drawText(DW // 2 - 90, 590, 180, 28, Qt.AlignmentFlag.AlignCenter, "%d shown" % len(self.view_rows))
         if self.notice:
             p.setPen(T.c("bad"))
             p.setFont(font(px=14, weight=QFont.Weight.DemiBold))
-            p.drawText(DW // 2 + 100, 550, DW // 2 - 100 - CHEEK - 10, 36, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight,
+            p.drawText(DW // 2 + 100, 586, DW // 2 - 100 - CHEEK - 10, 36, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight,
                        QFontMetrics(p.font()).elidedText(self.notice, Qt.TextElideMode.ElideLeft, DW // 2 - 110 - CHEEK - 10))
-        p.fillRect(CHEEK, 598, DW - 2 * CHEEK, DH - 598, T.c("panel"))
+        p.fillRect(CHEEK, 634, DW - 2 * CHEEK, DH - 634, T.c("panel"))
         p.setPen(QPen(T.c("line"), 1))
-        p.drawLine(CHEEK, 598, DW - CHEEK, 598)
+        p.drawLine(CHEEK, 634, DW - CHEEK, 634)
         p.setPen(T.c("dim"))
         p.setFont(font(px=14, weight=QFont.Weight.Medium))
-        p.drawText(CHEEK + 10, 598, 400, DH - 598, Qt.AlignmentFlag.AlignVCenter, "Studio 87  ·  Updater v%s" % __version__)
+        p.drawText(CHEEK + 10, 634, 400, DH - 634, Qt.AlignmentFlag.AlignVCenter, "Studio 87  \u00b7  Gear Updater v%s" % __version__)
         sz = self.win.logical_size() if self.win else (DW, DH)
         p.setFont(font(MONO, 12, QFont.Weight.Normal))
-        p.drawText(CHEEK + 10 + 400, 598, 200, DH - 598, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter, "%d x %d px" % sz)
+        p.drawText(CHEEK + 10 + 400, 634, 200, DH - 634, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter, "%d x %d px" % sz)
         if not self.view_rows:
             p.setPen(T.c("dim"))
             p.setFont(font(px=20, weight=QFont.Weight.Medium))
@@ -370,10 +400,12 @@ class StudioRoot(QWidget):
     def empty_text(self):
         if self.checking and not self.rows:
             return "Checking GitHub..."
-        if self.tab == "updates" and self.rows:
-            return "Everything you have is up to date."
         if not self.rows:
             return "Nothing to show yet. Click 'Check for updates'."
+        if self.search.text().strip():
+            return "Nothing matches your search."
+        if self.tab == "updates":
+            return "Everything you have is up to date."
         return "Nothing here."
 
     def mouseDoubleClickEvent(self, e):
@@ -385,52 +417,90 @@ class StudioRoot(QWidget):
 
     # ---- list -----------------------------------------------------------
     def filtered(self):
-        t = self.tab
-        if t == "updates":
-            return [r for r in self.rows if r.status == MD.UPDATE]
-        if t == "installed":
-            return [r for r in self.rows if r.installed and r.installed.state == "installed"]
-        if t == "missing":
-            return [r for r in self.rows if r.status == MD.NOT_INSTALLED]
-        return list(self.rows)
+        return MD.filter_rows(self.rows, self.tab, self.search.text())
 
     def set_tab(self, key):
         self.tab, self.page = key, 0
+        self.svc.settings.set("tab", key)
         self.refresh_list()
+
+    def on_search(self, _text):
+        self.page = 0
+        self.refresh_list()
+
+    def toggle_view(self):
+        self.svc.settings.set("view", "pages" if self.svc.settings["view"] == "scroll" else "scroll")
+        self.page = 0
+        self.refresh_list()
+
+    @property
+    def show_all(self):
+        return self.svc.settings["view"] == "scroll"
 
     def goto(self, page):
         pages = max(1, -(-len(self.view_rows) // PAGE))
         self.page = max(0, min(pages - 1, page))
         self.refresh_list()
 
+    def all_row_widgets(self):
+        return self.rowws + self.allrows
+
     def refresh_list(self):
         self.view_rows = self.filtered()
         pages = max(1, -(-len(self.view_rows) // PAGE))
         self.page = min(self.page, pages - 1)
-        chunk = self.view_rows[self.page * PAGE:(self.page + 1) * PAGE]
-        for i, rw in enumerate(self.rowws):
-            if i < len(chunk):
-                rw.bind(chunk[i])
-                if chunk[i].product.repo in self.busy_text:
-                    rw.set_busy(*self.busy_text[chunk[i].product.repo])
-                rw.show()
-            else:
+        if self.show_all:
+            chunk, pool = self.view_rows, self.allrows
+            while len(pool) < len(chunk):
+                rw = RowWidget(self, self.inner)
+                pool.append(rw)
+            for i, rw in enumerate(pool):
+                if i < len(chunk):
+                    rw.move(0, i * ROW_H)
+                    rw.bind(chunk[i])
+                    if chunk[i].product.repo in self.busy_text:
+                        rw.set_busy(*self.busy_text[chunk[i].product.repo])
+                    rw.show()
+                else:
+                    rw.row = None
+                    rw.hide()
+            self.inner.resize(RowWidget.W, max(1, len(chunk)) * ROW_H)
+            self.scroll.show()
+            for rw in self.rowws:
                 rw.row = None
                 rw.hide()
+        else:
+            self.scroll.hide()
+            chunk = self.view_rows[self.page * PAGE:(self.page + 1) * PAGE]
+            for rw in self.allrows:
+                rw.row = None
+                rw.hide()
+            for i, rw in enumerate(self.rowws):
+                if i < len(chunk):
+                    rw.bind(chunk[i])
+                    if chunk[i].product.repo in self.busy_text:
+                        rw.set_busy(*self.busy_text[chunk[i].product.repo])
+                    rw.show()
+                else:
+                    rw.row = None
+                    rw.hide()
         n_upd = sum(1 for r in self.rows if r.status == MD.UPDATE)
-        n_inst = sum(1 for r in self.rows if r.installed and r.installed.state == "installed")
-        n_miss = sum(1 for r in self.rows if r.status == MD.NOT_INSTALLED)
-        for k, label, n in (("updates", "Updates", n_upd), ("installed", "Installed", n_inst), ("missing", "Not installed", n_miss), ("all", "All", len(self.rows))):
+        for k, label in MD.TABS:
+            n = len(MD.filter_rows(self.rows, k, ""))
             b = self.tabs[k]
             b.setText("%s (%d)" % (label, n) if self.rows else label)
             b.setChecked(k == self.tab)
-        self.b_all.setText("Update all (%d)" % n_upd if n_upd else "Update all")
-        self.b_all.setEnabled(n_upd > 0 and not self.installing)
-        ns = len([r for r in self.rows if r.product.repo in self.selected and r.can_install])
-        self.b_sel.setText("Update selected (%d)" % ns if ns else "Update selected")
-        self.b_sel.setEnabled(ns > 0 and not self.installing)
-        self.b_prev.setEnabled(self.page > 0)
-        self.b_next.setEnabled(self.page < pages - 1)
+        self.b_view.setText("Use pages" if self.show_all else "Use scrolling")
+        n_all = len(MD.all_targets(self.view_rows))
+        self.b_all.setText(MD.all_label(self.view_rows))
+        self.b_all.setEnabled(n_all > 0 and not self.installing)
+        sel = [r for r in self.rows if r.product.repo in self.selected and r.can_install]
+        self.b_sel.setText(MD.selected_label(sel))
+        self.b_sel.setEnabled(bool(sel) and not self.installing)
+        self.b_prev.setEnabled(not self.show_all and self.page > 0)
+        self.b_next.setEnabled(not self.show_all and self.page < pages - 1)
+        self.b_prev.setVisible(not self.show_all)
+        self.b_next.setVisible(not self.show_all)
         self.b_check.setEnabled(not self.checking and not self.installing)
         self.b_stop.setVisible(self.installing)
         self.update()
@@ -457,7 +527,7 @@ class StudioRoot(QWidget):
 
     def load_visible_thumbs(self):
         start = self.page * PAGE
-        for r in self.view_rows[start:start + PAGE]:
+        for r in (self.view_rows if self.show_all else self.view_rows[start:start + PAGE]):
             repo = r.product.repo
             if repo not in self.thumbs and r.product.checks_releases:
                 pm = self._make_thumb(self.svc.screenshot(r.product, use_network=False))
@@ -468,7 +538,7 @@ class StudioRoot(QWidget):
         pm = self._make_thumb(data)
         if pm is not None:
             self.thumbs[repo] = pm
-            for rw in self.rowws:
+            for rw in self.all_row_widgets():
                 if rw.row is not None and rw.row.product.repo == repo:
                     rw.update()
 
@@ -573,18 +643,20 @@ class StudioRoot(QWidget):
         self.b_stop.setEnabled(False)
 
     def _row_widget(self, repo):
-        for rw in self.rowws:
+        for rw in self.all_row_widgets():
             if rw.row is not None and rw.row.product.repo == repo:
                 return rw
         return None
 
     def on_inst_progress(self, repo, stage, d, t):
+        # stage text follows the wording of the action: Installing for new products, Updating for updates
         if stage == "download":
             text, frac = "Downloading", (d / t if t else None)
         elif stage == "verify":
             text, frac = "Verifying SHA256", None
         else:
-            text, frac = "Installing", None
+            row = next((r for r in self.rows if r.product.repo == repo), None)
+            text, frac = (MD.progress_word(row) if row is not None else "Installing"), None
         self.busy_text[repo] = (text, frac)
         rw = self._row_widget(repo)
         if rw:
@@ -611,9 +683,9 @@ class StudioRoot(QWidget):
         self.installing = False
         self.b_stop.setEnabled(True)
         self.rows.sort(key=MD.sort_key)
-        keep = {rw.row.product.repo: rw.message for rw in self.rowws if rw.row is not None}
+        keep = {rw.row.product.repo: rw.message for rw in self.all_row_widgets() if rw.row is not None}
         self.refresh_list()
-        for rw in self.rowws:
+        for rw in self.all_row_widgets():
             if rw.row is not None and keep.get(rw.row.product.repo):
                 rw.message = keep[rw.row.product.repo]
                 rw.update()
@@ -664,17 +736,17 @@ class StudioRoot(QWidget):
         ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
 
     def show_confirm(self, rows):
-        ov = self._overlay("Update %d products?" % len(rows), 640, 420)
-        ov.sub = "Each one is downloaded, its SHA256 checked, then installed. A mismatch stops that product."
+        ov = self._overlay(MD.confirm_title(rows), 640, 420)
+        ov.sub = "Each one is downloaded, its SHA256 checked, then %s. A mismatch stops that product." % ("installed" if not MD.split_actions(rows)[0] else "installed or updated")
         shown = ["%s %s" % (r.product.name, r.latest.version or r.latest.tag) for r in rows[:12]]
         names = ", ".join(shown) + (" and %d more" % (len(rows) - 12) if len(rows) > 12 else "")
         ov.lines = [names, "", "These installers are not code-signed (no paid certificate). Windows or macOS may show an 'unknown publisher' warning; "
                     "the code is open on GitHub and the checksum is verified here. Your presets are never touched."]
         ov.add_button("Cancel", ov.w - 24 - 100 - 8 - 100, ov.h - 46, 100, self.close_overlay)
-        ov.add_button("Update %d" % len(rows), ov.w - 24 - 100, ov.h - 46, 100, lambda: self.run_queue(rows), "primary")
+        ov.add_button(MD.confirm_button(rows), ov.w - 24 - 100, ov.h - 46, 100, lambda: self.run_queue(rows), "primary")
 
     def show_settings(self):
-        ov = self._overlay("Settings", 640, 420)
+        ov = self._overlay("Settings", 640, 460)
         s = self.svc.settings
         ov.sub = "Saved on this computer only."
         y = 100
@@ -695,6 +767,17 @@ class StudioRoot(QWidget):
             bb.setChecked(bool(s["bubbles"]))
         bb.clicked.disconnect()
         bb.clicked.connect(tog)
+        y += 56
+        ov.label("List view", 28, y + 4)
+        vb = ov.add_button("Pages instead of scrolling: %s" % ("Off" if self.show_all else "On"), 160, y, 280, lambda: None, "tab")
+        vb.setChecked(not self.show_all)
+
+        def tog_view():
+            self.toggle_view()
+            vb.setText("Pages instead of scrolling: %s" % ("Off" if self.show_all else "On"))
+            vb.setChecked(not self.show_all)
+        vb.clicked.disconnect()
+        vb.clicked.connect(tog_view)
         if self.svc.system == "linux":
             y += 56
             ov.label("Linux plugins go to", 28, y + 4)
@@ -722,16 +805,16 @@ class StudioRoot(QWidget):
                 b.setChecked(kk == k)
 
     def show_about(self):
-        ov = self._overlay("About Studio 87 Updater", 720, 470)
+        ov = self._overlay("About Studio 87 Gear Updater", 720, 470)
         ov.sub = "Version %s  ·  free and open source (AGPL-3.0-or-later)" % __version__
         d = str(self.svc.data_dir)
         ov.lines = [
-            "Studio 87 Updater lists every Studio 87 plugin and app and tells you which have a newer version on GitHub.",
+            "Studio 87 Gear Updater lists every Studio 87 plugin and app and tells you which have a newer version on GitHub.",
             "It collects nothing: no telemetry, no account, no background checks, no timers. It only reads public GitHub release data when you open it or click Check for updates, "
             "and downloads a release zip only when you click Update. Everything is verified against SHA256SUMS first; a mismatch is refused.",
             "The installers are not code-signed: Windows may say 'unknown publisher', macOS may need Privacy and Security, Open Anyway.",
             "Your presets and data folders are never touched. This app keeps its settings and a small list of installed versions in: " + d,
-            "Remove it like any app: Linux: flatpak uninstall --user io.github.speakingcolors.Studio87Updater; Windows: Settings, Apps; macOS: the Uninstall app in Applications.",
+            "Remove it like any app: Linux: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater; Windows: Settings, Apps; macOS: the Uninstall app in Applications.",
         ]
         ov.add_button("Ko-fi (optional tip)", 24, ov.h - 46, 170, lambda: self.open_url(KOFI))
         ov.add_button("GitHub", 202, ov.h - 46, 100, lambda: self.open_url("https://github.com/SpeakingColors/gearupdater"))
@@ -797,7 +880,7 @@ class Overlay(QWidget):
             p.drawText(c.x() + x, c.y() + yy, 200, 24, Qt.AlignmentFlag.AlignVCenter, text)
         if self.note:
             p.setPen(T.c("dim"))
-            r = QRect(c.x() + 28, c.y() + 250, c.width() - 56, 80)
+            r = QRect(c.x() + 28, c.y() + 330, c.width() - 56, 80)
             p.drawText(r, Qt.TextFlag.TextWordWrap, self.note)
         p.end()
 
@@ -825,7 +908,7 @@ class MainWindow(QMainWindow):
         self.view.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.RenderHint.SmoothPixmapTransform | QPainter.RenderHint.TextAntialiasing)
         self.view.setBackgroundBrush(THEME.c("bg"))
         self.setCentralWidget(self.view)
-        self.setMinimumSize(500, 320)
+        self.setMinimumSize(500, 338)
         self.resize(DW, DH)
         self._last = QSize(DW, DH)
         self._fixing = False

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.speakingcolors.Studio87Updater</id>
-  <name>Studio 87 Updater</name>
+  <id>io.github.speakingcolors.Studio87GearUpdater</id>
+  <name>Studio 87 Gear Updater</name>
   <summary>Update your Studio 87 plugins and apps</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>AGPL-3.0-or-later</project_license>
   <description>
     <p>Lists every Studio 87 plugin and app, shows which have a newer version on GitHub, and updates them one by one, several at once or all together. Checksums are verified before anything is installed. It collects nothing and only checks when you open it or click the button.</p>
   </description>
-  <launchable type="desktop-id">io.github.speakingcolors.Studio87Updater.desktop</launchable>
+  <launchable type="desktop-id">io.github.speakingcolors.Studio87GearUpdater.desktop</launchable>
   <url type="homepage">https://github.com/SpeakingColors/gearupdater</url>
-  <provides><binary>studio87-updater</binary></provides>
-  <releases><release version="0.1.0" date="2026-11-03"/></releases>
+  <provides><binary>studio87-gearupdater</binary></provides>
+  <releases><release version="0.1.1" date="2026-11-03"/></releases>
   <content_rating type="oars-1.1"/>
 </component>

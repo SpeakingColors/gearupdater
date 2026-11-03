@@ -36,7 +36,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
           SHOT_W: '1500'
-          SHOT_H: '960'
+          SHOT_H: "1014"
         run: python3 tools/make_screenshot.py docs/screenshot-ci.png
       - uses: actions/upload-artifact@v4
         with:

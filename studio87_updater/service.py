@@ -11,7 +11,7 @@ from . import paths as P
 from .github import GitHubClient, Offline, RateLimited, UrlLibTransport
 from .install import Installer
 
-DEFAULT_SETTINGS = {"theme": "purr", "bubbles": True, "linux_target": "auto", "zoom_note_seen": False}
+DEFAULT_SETTINGS = {"theme": "purr", "bubbles": True, "linux_target": "auto", "zoom_note_seen": False, "view": "scroll", "tab": "all"}
 THEMES = ("navy", "soda", "purr")
 
 
@@ -28,6 +28,10 @@ class Settings:
                         self.data[k] = d[k]
         except (OSError, ValueError):
             pass
+        if self.data["view"] not in ("pages", "scroll"):
+            self.data["view"] = "scroll"
+        if self.data["tab"] not in ("all", "fx", "synth", "controller", "apps", "updates"):
+            self.data["tab"] = "all"
         if self.data["theme"] not in THEMES:
             self.data["theme"] = "purr"
         if self.data["linux_target"] not in ("auto", "native", "flatpak"):
@@ -48,6 +52,7 @@ class Service:
                  flatpak_probe=None, runner=None):
         self.system = system or P.system_name()
         self._env, self._home = env, home
+        P.migrate_old_data(self.system, env, home)
         self.data_dir = P.data_dir(self.system, env, home)
         self.cache_dir = P.cache_dir(self.system, env, home)
         self.manifest = manifest or M.load_manifest()

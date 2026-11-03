@@ -38,165 +38,209 @@
    "box": [
     44,
     64,
-    110,
+    96,
     30
    ],
    "tip": "Products that have a newer version than the one installed.",
    "n": 4
   },
   {
-   "name": "Installed tab",
+   "name": "All tab",
    "box": [
-    160,
+    146,
     64,
-    100,
+    62,
     30
    ],
-   "tip": "Everything found on this computer.",
+   "tip": "Every public Studio 87 product.",
    "n": 5
+  },
+  {
+   "name": "VST and FX tab",
+   "box": [
+    214,
+    64,
+    118,
+    30
+   ],
+   "tip": "VST3 effects, analysers, editors and tools.",
+   "n": 6
+  },
+  {
+   "name": "Synths tab",
+   "box": [
+    338,
+    64,
+    90,
+    30
+   ],
+   "tip": "Synths and instruments.",
+   "n": 7
+  },
+  {
+   "name": "Controllers tab",
+   "box": [
+    434,
+    64,
+    112,
+    30
+   ],
+   "tip": "Plugins that control a hardware synth or effect unit.",
+   "n": 8
+  },
+  {
+   "name": "Apps and logue tab",
+   "box": [
+    552,
+    64,
+    134,
+    30
+   ],
+   "tip": "Standalone apps and logue units (minilogue xd, drumlogue).",
+   "n": 9
+  },
+  {
+   "name": "Installed tab",
+   "box": [
+    692,
+    64,
+    96,
+    30
+   ],
+   "tip": "Products found on this computer.",
+   "n": 10
   },
   {
    "name": "Not installed tab",
    "box": [
-    266,
+    794,
     64,
-    118,
+    122,
     30
    ],
-   "tip": "Products that are not installed here yet.",
-   "n": 6
+   "tip": "Products not installed yet. Pick Install on a row.",
+   "n": 11
   },
   {
-   "name": "All tab",
+   "name": "Search box",
    "box": [
-    390,
-    64,
-    70,
+    44,
+    100,
+    300,
     30
    ],
-   "tip": "Every Studio 87 product, including ones that only link to GitHub.",
-   "n": 7
+   "tip": "Type to filter the list by name, kind (for example controller) or status (for example update).",
+   "n": 12
   },
   {
-   "name": "Update selected",
+   "name": "Scrolling / pages switch",
+   "box": [
+    354,
+    100,
+    110,
+    30
+   ],
+   "tip": "Switch between one scrolling list (the default) and pages of five products. Pages never need a scrollbar.",
+   "n": 13
+  },
+  {
+   "name": "Update / Install selected",
    "box": [
     686,
-    64,
+    100,
     144,
     30
    ],
    "tip": "Update the products you ticked, one after another.",
-   "n": 8
+   "n": 14
   },
   {
-   "name": "Update all",
+   "name": "Update all / Install all",
    "box": [
     838,
-    64,
+    100,
     118,
     30
    ],
    "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
-   "n": 9
+   "n": 15
   },
   {
    "name": "Row tick box",
    "box": [
     52,
-    136,
+    172,
     20,
     20
    ],
    "tip": "Tick to include this product in 'Update selected'.",
-   "n": 10
+   "n": 16
   },
   {
    "name": "Update / Install button",
    "box": [
     838,
-    109,
+    145,
     110,
     22
    ],
    "tip": "Download, verify the SHA256 checksums, then install 0.2.4. Installers are not code-signed: Windows or macOS may show a warning. Nothing is installed until you click.",
-   "n": 11
+   "n": 17
   },
   {
    "name": "Changelog button",
    "box": [
     838,
-    135,
+    171,
     110,
     22
    ],
    "tip": "Read the release notes for every version newer than the one you have.",
-   "n": 12
+   "n": 18
   },
   {
    "name": "GitHub button",
    "box": [
     838,
-    161,
+    197,
     110,
     22
    ],
    "tip": "Open the project page in your browser.",
-   "n": 13
-  },
-  {
-   "name": "Previous page",
-   "box": [
-    410,
-    554,
-    40,
-    28
-   ],
-   "tip": "Previous page.",
-   "n": 14
-  },
-  {
-   "name": "Next page",
-   "box": [
-    550,
-    554,
-    40,
-    28
-   ],
-   "tip": "Next page.",
-   "n": 15
+   "n": 19
   },
   {
    "name": "Smaller window",
    "box": [
     758,
-    606,
+    642,
     40,
     24
    ],
    "tip": "Make the window smaller. You can also drag any edge or corner; the shape stays the same.",
-   "n": 16
+   "n": 20
   },
   {
    "name": "Back to 100 percent",
    "box": [
     802,
-    606,
+    642,
     56,
     24
    ],
    "tip": "Back to the normal size. Double click on either wood side does the same.",
-   "n": 17
+   "n": 21
   },
   {
    "name": "Larger window",
    "box": [
     864,
-    606,
+    642,
     40,
     24
    ],
    "tip": "Make the window larger.",
-   "n": 18
+   "n": 22
   }
  ],
  "displays": [
@@ -204,7 +248,7 @@
    "name": "Screenshot and cat icon",
    "box": [
     78,
-    108,
+    144,
     156,
     76
    ],
@@ -215,7 +259,7 @@
    "name": "Name, kind and build type",
    "box": [
     248,
-    106,
+    142,
     300,
     22
    ],
@@ -226,7 +270,7 @@
    "name": "Installed and latest version",
    "box": [
     248,
-    128,
+    164,
     300,
     15
    ],
@@ -237,7 +281,7 @@
    "name": "Status",
    "box": [
     248,
-    143,
+    179,
     300,
     16
    ],
@@ -248,7 +292,7 @@
    "name": "Changelog line",
    "box": [
     248,
-    159,
+    195,
     576,
     15
    ],
@@ -259,7 +303,7 @@
    "name": "Date, size and install route",
    "box": [
     248,
-    173,
+    209,
     576,
     13
    ],
@@ -278,14 +322,14 @@
    "letter": "G"
   },
   {
-   "name": "Page counter",
+   "name": "Scrolling list",
    "box": [
-    450,
-    554,
-    100,
-    28
+    952,
+    140,
+    18,
+    60
    ],
-   "text": "Five products per page, so the window never needs a scrollbar.",
+   "text": "One long list of the tab you are on. Use the mouse wheel or the thin scrollbar. The switch button next to the search box shows pages of five instead (off by default).",
    "letter": "H"
   },
   {
@@ -305,7 +349,7 @@
     0,
     0,
     34,
-    640
+    676
    ],
    "text": "Double click on either wood side to go back to the default size (100%).",
    "letter": "J"
@@ -313,6 +357,6 @@
  ],
  "design": [
   1000,
-  640
+  676
  ]
 }

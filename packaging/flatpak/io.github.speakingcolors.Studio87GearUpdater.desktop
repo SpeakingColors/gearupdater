@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Studio 87 Gear Updater
+Comment=Update your Studio 87 plugins and apps
+Exec=studio87-gearupdater
+Icon=io.github.speakingcolors.Studio87GearUpdater
+Keywords=gear updater;updater;studio 87;firmware;plugins;vst;update;
+Categories=AudioVideo;Audio;Utility;
+Terminal=false
+StartupWMClass=studio87-gearupdater

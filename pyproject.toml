@@ -3,9 +3,9 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "studio87-updater"
+name = "studio87-gearupdater"
 dynamic = ["version"]
-description = "Studio 87 Updater: lists every Studio 87 plugin and app with an update available"
+description = "Studio 87 Gear Updater: lists every Studio 87 plugin and app with an update available"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "AGPL-3.0-or-later" }
@@ -15,7 +15,7 @@ dependencies = []          # PySide6 comes from the Flatpak base app, or from pi
 gui = ["PySide6>=6.5"]
 
 [project.gui-scripts]
-studio87-updater = "studio87_updater.__main__:main"
+studio87-gearupdater = "studio87_updater.__main__:main"
 
 [tool.setuptools]
 packages = ["studio87_updater", "studio87_updater.gui"]

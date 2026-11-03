@@ -91,7 +91,7 @@ class GuiSmoke(unittest.TestCase):
         for size in ((1400, 700), (700, 900), (640, 300), (1200, 1200)):
             win.resize(*size)
             self.app.processEvents()
-            self.assertLessEqual(abs(win.width() / win.height() - 1000 / 640), 0.01, size)
+            self.assertLessEqual(abs(win.width() / win.height() - 1000 / 676), 0.01, size)
         win.resize(1500, 960)
         self.app.processEvents()
         root = win.root
@@ -99,7 +99,7 @@ class GuiSmoke(unittest.TestCase):
                          Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
         root.mouseDoubleClickEvent(ev)
         self.app.processEvents()
-        self.assertEqual((win.width(), win.height()), (1000, 640))
+        self.assertEqual((win.width(), win.height()), (1000, 676))
         win.zoom(0.5)
         self.assertEqual(win.width(), 1500)
         root.b_zoom_100.click()
@@ -111,19 +111,44 @@ class GuiSmoke(unittest.TestCase):
         self.assertEqual(win.view.horizontalScrollBarPolicy(), Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.assertEqual(win.view.verticalScrollBarPolicy(), Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def test_paging_and_tabs(self):
+    def test_scroll_list_is_default_and_pages_are_optional(self):
         self.make(staged={})
         root = self.open_and_check()
+        self.assertEqual(self.svc.settings["view"], "scroll")
+        self.assertTrue(root.show_all and root.scroll.isVisible())
         root.set_tab("all")
-        self.assertEqual(len(root.view_rows), 51)
-        shown = [rw for rw in root.rowws if rw.row is not None and rw.isVisible()]
-        self.assertEqual(len(shown), 5)
+        n = len([p for p in self.svc.products if True])
+        self.assertEqual(len(root.view_rows), len(root.rows))
+        shown = [rw for rw in root.allrows if rw.row is not None]
+        self.assertEqual(len(shown), len(root.rows), "every product is in the one scrolling list")
+        self.assertGreater(root.inner.height(), root.scroll.height())
+        self.assertFalse([rw for rw in root.rowws if rw.row is not None], "paged rows are unused in scroll mode")
+        self.assertFalse(root.b_next.isVisible())
+        root.toggle_view()
+        self.assertEqual(self.svc.settings["view"], "pages")
+        self.assertFalse(root.scroll.isVisible())
+        self.assertEqual(len([rw for rw in root.rowws if rw.row is not None]), 5)
         root.goto(99)
-        self.assertEqual(root.page, 10)
-        self.assertEqual(len([rw for rw in root.rowws if rw.row is not None]), 1)
+        self.assertEqual(len([rw for rw in root.rowws if rw.row is not None]), len(root.rows) % 5 or 5)
         root.set_tab("updates")
         self.assertEqual(root.view_rows, [])
         self.assertIn("up to date", root.empty_text())
+
+    def test_search_box_filters_as_you_type_and_tab_and_view_persist(self):
+        self.make(staged={"Hairball": "0.1.0"})
+        root = self.open_and_check()
+        root.search.setText("hair")
+        self.assertEqual([r.product.name for r in root.view_rows], ["Hairball"])
+        root.search.setText("controller")
+        self.assertTrue(root.view_rows and all(r.product.cat == "controller" for r in root.view_rows))
+        root.search.setText("zzzz")
+        self.assertIn("matches", root.empty_text())
+        root.search.setText("")
+        root.set_tab("synth")
+        root.toggle_view()
+        from studio87_updater.service import Settings
+        saved = Settings(self.svc.settings.path)
+        self.assertEqual((saved["tab"], saved["view"]), ("synth", "pages"))
 
     def test_hover_bubble_after_delay_and_setting_off(self):
         self.make()
@@ -174,16 +199,18 @@ class GuiSmoke(unittest.TestCase):
         # GitHub's own digest in the recorded data belongs to the real zip, so the stub zip must be refused first
         win = self.make(files={url: z}, staged={"Hairball": "0.1.0"})
         root = self.open_and_check()
-        rw = next(rw for rw in root.rowws if rw.row is not None and rw.row.product.name == "Hairball")
+        hb = lambda: next(rw for rw in root.allrows if rw.row is not None and rw.row.product.name == "Hairball")
+        rw = hb()
         rw.b_main.click()
-        self.assertTrue(self.pump(lambda: not root.installing and "Refused" in rw.message))
+        self.assertTrue(self.pump(lambda: not root.installing and "Refused" in hb().message))
+        rw = hb()
         self.assertIn("SHA256", rw.message)
         self.assertEqual(json.loads((self.home / ".vst3" / "Hairball.vst3" / "Contents" / "Resources" / "moduleinfo.json").read_text())["Version"], "0.1.0")
         # now serve a zip whose digest matches what the release data claims
         row = rw.row
         row.releases[0].zip_asset().sha256 = hashlib.sha256(z).hexdigest()
         rw.b_main.click()
-        self.assertTrue(self.pump(lambda: not root.installing and "Installed" in rw.message))
+        self.assertTrue(self.pump(lambda: not root.installing and "Installed" in hb().message))
         info = json.loads((self.home / ".vst3" / "Hairball.vst3" / "Contents" / "Resources" / "moduleinfo.json").read_text())
         self.assertEqual(info["Version"], "0.1.1", "the bundle from the verified zip is now in place")
         self.assertEqual(row.status, "current")

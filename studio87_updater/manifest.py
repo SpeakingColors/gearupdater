@@ -31,6 +31,13 @@ class Product:
     branch: str = "main"
     discovered: bool = False                         # found on GitHub, not in products.json
     owner: str = "SpeakingColors"
+    category: str = ""                               # fx | synth | controller | apps ; empty = from kind
+
+    @property
+    def cat(self):
+        if self.category:
+            return self.category
+        return {"controller": "controller", "logue": "apps", "app": "apps", "vst3": "fx"}.get(self.kind, "")
 
     @property
     def kind_label(self):
@@ -89,7 +96,8 @@ def parse_manifest(data):
             install = {}
         _validate_install(repo, install)
         products.append(Product(repo=repo, name=name, kind=kind, install=install,
-                                detect=dict(raw.get("detect", {})), branch=raw.get("branch", "main"), owner=owner))
+                                detect=dict(raw.get("detect", {})), branch=raw.get("branch", "main"), owner=owner,
+                                category=raw.get("category", "")))
     return Manifest(owner=owner, products=products, ignore=[r.lower() for r in data.get("ignore", [])])
 
 

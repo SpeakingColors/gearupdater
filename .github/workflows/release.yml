@@ -49,7 +49,7 @@ jobs:
       - run: |
           ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
           sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
-          python3 tools/make_manual.py Studio87-Updater-manual.pdf
+          python3 tools/make_manual.py Studio87-GearUpdater-manual.pdf
       - uses: actions/upload-artifact@v4
         with:
           name: manual
@@ -80,17 +80,17 @@ jobs:
           MSYS_NO_PATHCONV: '1'
         run: |
           pip install pyinstaller PySide6-Essentials
-          pyinstaller --noconfirm --windowed --paths . --name Studio87Updater --icon studio87_updater/assets/icon.ico \
+          pyinstaller --noconfirm --windowed --paths . --name Studio87GearUpdater --icon studio87_updater/assets/icon.ico \
             --add-data "studio87_updater/assets;studio87_updater/assets" --add-data "studio87_updater/products.json;studio87_updater" \
             packaging/launcher.py
-          test -f dist/Studio87Updater/Studio87Updater.exe
+          test -f dist/Studio87GearUpdater/Studio87GearUpdater.exe
       - name: Installer (Inno Setup)
         run: |
-          mkdir -p stage; cp manual/*.pdf stage/Studio87-Updater-manual.pdf
+          mkdir -p stage; cp manual/*.pdf stage/Studio87-GearUpdater-manual.pdf
           iscc="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
           [ -f "$iscc" ] || { choco install innosetup -y --no-progress; }
           "$iscc" "//DVersion=$VER" packaging/windows.iss
-          test -s "Output/Studio87-Updater-Setup.exe"
+          test -s "Output/Studio87-GearUpdater-Setup.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: windows
@@ -114,21 +114,21 @@ jobs:
           ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
           sed -i.bak -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py; rm -f studio87_updater/__init__.py.bak
           pip install pyinstaller PySide6-Essentials
-          pyinstaller --noconfirm --windowed --paths . --name "Studio 87 Updater" --icon studio87_updater/assets/icon.icns \
-            --osx-bundle-identifier io.github.speakingcolors.studio87updater \
+          pyinstaller --noconfirm --windowed --paths . --name "Studio 87 Gear Updater" --icon studio87_updater/assets/icon.icns \
+            --osx-bundle-identifier io.github.speakingcolors.studio87gearupdater \
             --add-data "studio87_updater/assets:studio87_updater/assets" --add-data "studio87_updater/products.json:studio87_updater" \
             packaging/launcher.py
-          test -d "dist/Studio 87 Updater.app"
-          id="io.github.speakingcolors.studio87updater"
+          test -d "dist/Studio 87 Gear Updater.app"
+          id="io.github.speakingcolors.studio87gearupdater"
           mkdir -p root/app root/doc
-          cp -R "dist/Studio 87 Updater.app" root/app/
-          osacompile -o "root/app/Uninstall Studio 87 Updater.app" packaging/macos-uninstall.applescript
-          cp studio87_updater/assets/icon.icns "root/app/Uninstall Studio 87 Updater.app/Contents/Resources/applet.icns"
-          cp manual/*.pdf root/doc/Studio87-Updater-manual.pdf
-          codesign --force --deep -s - "root/app/Studio 87 Updater.app"; codesign --force --deep -s - "root/app/Uninstall Studio 87 Updater.app"
+          cp -R "dist/Studio 87 Gear Updater.app" root/app/
+          osacompile -o "root/app/Uninstall Studio 87 Gear Updater.app" packaging/macos-uninstall.applescript
+          cp studio87_updater/assets/icon.icns "root/app/Uninstall Studio 87 Gear Updater.app/Contents/Resources/applet.icns"
+          cp manual/*.pdf root/doc/Studio87-GearUpdater-manual.pdf
+          codesign --force --deep -s - "root/app/Studio 87 Gear Updater.app"; codesign --force --deep -s - "root/app/Uninstall Studio 87 Gear Updater.app"
           pkgbuild --root root/app --identifier "$id.app" --version "$ver" --install-location "/Applications" app.pkg
-          pkgbuild --root root/doc --identifier "$id.doc" --version "$ver" --install-location "/Library/Application Support/Studio 87/Updater" doc.pkg
-          productbuild --package app.pkg --package doc.pkg Studio87-Updater-macOS.pkg
+          pkgbuild --root root/doc --identifier "$id.doc" --version "$ver" --install-location "/Library/Application Support/Studio 87/Gear Updater" doc.pkg
+          productbuild --package app.pkg --package doc.pkg Studio87-GearUpdater-macOS.pkg
       - uses: actions/upload-artifact@v4
         with:
           name: macos
@@ -147,15 +147,15 @@ jobs:
           set -ex
           ver="${TAGIN:-$GITHUB_REF_NAME}"; ver="${ver#v}"; echo "$ver" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || ver=0.0.0
           sed -i -E "s/^__version__ = \".*\"/__version__ = \"$ver\"/" studio87_updater/__init__.py
-          sed -i -E "s/<release version=\"[0-9.]+\"/<release version=\"$ver\"/" packaging/flatpak/io.github.speakingcolors.Studio87Updater.metainfo.xml
+          sed -i -E "s/<release version=\"[0-9.]+\"/<release version=\"$ver\"/" packaging/flatpak/io.github.speakingcolors.Studio87GearUpdater.metainfo.xml
           sudo apt-get update && sudo apt-get install -y flatpak flatpak-builder
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          sed -e "s/@QT@/6.9/g" packaging/flatpak/io.github.speakingcolors.Studio87Updater.yml > app.yml
+          sed -e "s/@QT@/6.9/g" packaging/flatpak/io.github.speakingcolors.Studio87GearUpdater.yml > app.yml
           cp app.yml packaging/flatpak/_build.yml
           flatpak-builder --user --force-clean --install-deps-from=flathub --repo=repo build-dir packaging/flatpak/_build.yml
-          test -f build-dir/files/bin/studio87-updater
+          test -f build-dir/files/bin/studio87-gearupdater
           mkdir -p out
-          flatpak build-bundle repo out/Studio87-Updater.flatpak io.github.speakingcolors.Studio87Updater
+          flatpak build-bundle repo out/Studio87-GearUpdater.flatpak io.github.speakingcolors.Studio87GearUpdater
           ) 2>&1 | tee flatpak.log
       - name: Show errors
         if: failure()
@@ -179,11 +179,11 @@ jobs:
       - name: Assemble the zip
         run: |
           tag="$GITHUB_REF_NAME"; if [ "$GITHUB_REF_TYPE" != "tag" ]; then tag="${TAGIN:-dev}"; fi
-          d="Studio87-Updater-$tag"; mkdir -p "$d/windows" "$d/macos" "$d/linux" outer
+          d="Studio87-GearUpdater-$tag"; mkdir -p "$d/windows" "$d/macos" "$d/linux" outer
           cp parts/windows/*.exe "$d/windows/"
           if ls parts/macos/*.pkg >/dev/null 2>&1; then cp parts/macos/*.pkg "$d/macos/"; else rmdir "$d/macos"; echo "macOS was skipped in this run" > "$d/NO-MACOS.txt"; fi
           cp parts/flatpak/* "$d/linux/"
-          cp parts/manual/*.pdf "$d/Studio87-Updater-manual.pdf"; cp LICENSE "$d/"
+          cp parts/manual/*.pdf "$d/Studio87-GearUpdater-manual.pdf"; cp LICENSE "$d/"
           cp INSTALL.txt "$d/INSTALL.txt"
           (cd "$d" && find . -type f ! -name SHA256SUMS | sort | xargs sha256sum > SHA256SUMS)
           zip -r "$d.zip" "$d"
@@ -203,5 +203,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then gh release upload "$TAG" "$ZIP" outer/SHA256SUMS --clobber
-          else gh release create "$TAG" "$ZIP" outer/SHA256SUMS --target "$GITHUB_SHA" --prerelease --title "Studio 87 Updater $TAG (test build)" --notes "Test build."; fi
+          else gh release create "$TAG" "$ZIP" outer/SHA256SUMS --target "$GITHUB_SHA" --prerelease --title "Studio 87 Gear Updater $TAG (test build)" --notes "Test build."; fi
           if [ -f release/NOTES.md ]; then gh release edit "$TAG" --notes-file release/NOTES.md; fi

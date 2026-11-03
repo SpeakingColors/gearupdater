@@ -1,20 +1,21 @@
 ## Intro
-Studio 87 Updater is one window that lists every Studio 87 plugin, VST, FX and app and shows which of them have a newer version on GitHub. You can update one product, several at once, or all of them, and read the changelog of each before you do.
+Studio 87 Gear Updater is one window that lists every Studio 87 plugin, VST, FX and app and shows which of them have a newer version on GitHub. You can update one product, several at once, or all of them, and read the changelog of each before you do.
 It is free and open source and made mainly for its author, so it is built to be quick: a saved list appears at once, one check of GitHub follows, and every action is one click.
 It collects nothing. It checks GitHub only when you open it or click Check for updates. There are no timers, no background checks and no auto-start. The only network use is reading public GitHub data and downloading a release zip you chose to install.
 
 ## Quick start
-- Open Studio 87 Updater. The list saved last time appears at once and it checks GitHub one time.
+- Open Studio 87 Gear Updater. The list saved last time appears at once and it checks GitHub one time.
+- Type in the search box to filter by name, kind or status. Tabs: All, VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed, Updates. The list scrolls; The switch button next to the search box shows pages of five instead (off by default).
 - The Updates tab shows what has a newer version. Click Changelog on a row to read what changed.
-- Click Update on a row to update just that product. Or tick several rows and click Update selected, or click Update all.
+- Click Update on a row to update just that product. Or tick several rows and click Update selected (only real updates count), Install selected (not-installed products) or Apply selected (a mix, for example "2 updates, 1 install"). Update all / Install all act on the products in the tab you are viewing.
 - Each download is checked against its SHA256 checksums before anything is installed. If a check fails, that product is refused and nothing is changed.
 - Close your DAW before updating a plugin, so its file is not in use. Restart the DAW and rescan plugins afterwards.
 - Click Check for updates whenever you want to look again. Nothing else asks GitHub anything.
 
 ## Install and remove
-Windows: run Studio87-Updater-Setup.exe from the zip. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
-macOS: open Studio87-Updater-macOS.pkg. If macOS blocks it, use System Settings, Privacy and Security, Open Anyway. Remove it with Uninstall Studio 87 Updater in the Applications folder.
-Linux: double click Studio87-Updater.flatpak and press Install in your software centre. Terminal alternative: flatpak install --user Studio87-Updater.flatpak. Remove it with: flatpak uninstall --user io.github.speakingcolors.Studio87Updater
+Windows: run Studio87-GearUpdater-Setup.exe from the zip. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
+macOS: open Studio87-GearUpdater-macOS.pkg. If macOS blocks it, use System Settings, Privacy and Security, Open Anyway. Remove it with Uninstall Studio 87 Gear Updater in the Applications folder.
+Linux: double click Studio87-GearUpdater.flatpak and press Install in your software centre. Terminal alternative: flatpak install --user Studio87-GearUpdater.flatpak. Remove it with: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater
 The installers are not code-signed or notarised, because certificates cost money and this is a free project. The warning only says not signed by a known company. The code is open on GitHub and SHA256SUMS in the zip lets you check your download.
 
 ## Settings
@@ -23,12 +24,12 @@ Hover bubbles: switch the one-second info bubbles on or off.
 Linux plugins go to: Automatic uses the Flatpak extension when that product's extension is already installed and otherwise puts the plugin in the VST3 folder (~/.vst3). VST3 folder and Flatpak DAW force one of the two. Your presets are never touched by either.
 
 ## Safety and privacy
-- Nothing is installed without your click on Update, Update selected or Update all.
+- Nothing is installed without your click on Update, Install, Update selected, Install selected, Apply selected, Update all or Install all.
 - Every download is verified: GitHub's own SHA-256 digest of the zip, a SHA256SUMS release asset that lists the zip (when the release has one), and the SHA256SUMS inside the zip for every file. At least one source must exist; all that exist must match. On a mismatch the product is refused.
 - These checks show that the download is intact and is what the release published. They are not a signature and do not prove who made it.
 - Zips and plugin tarballs are unpacked safely: no paths outside the target folder, no symbolic links, and a plugin tarball must contain exactly one .vst3 folder.
 - Presets and user data folders are never touched. A plugin update replaces only the plugin's .vst3 folder, and the old one is kept until the new one is in place.
-- Nothing about you or your computer is sent. The requests carry only the generic User-Agent Studio87-Updater, an Accept header and, for saved answers, the If-None-Match header GitHub itself gave out.
+- Nothing about you or your computer is sent. The requests carry only the generic User-Agent Studio87-GearUpdater, an Accept header and, for saved answers, the If-None-Match header GitHub itself gave out.
 
 ## Troubleshooting
 - Offline: the list shows the last saved answers and the status line says Offline. Click Check for updates again when you are back online.

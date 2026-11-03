@@ -1,12 +1,12 @@
 # Linux package of the updater itself: a Flatpak (double click the .flatpak file in the software centre).
 # Qt comes from the KDE runtime plus the PySide base app, so no Qt is bundled twice.
-app-id: io.github.speakingcolors.Studio87Updater
+app-id: io.github.speakingcolors.Studio87GearUpdater
 runtime: org.kde.Platform
 runtime-version: '@QT@'
 sdk: org.kde.Sdk
 base: io.qt.PySide.BaseApp
 base-version: '@QT@'
-command: studio87-updater
+command: studio87-gearupdater
 finish-args:
   - --share=ipc
   - --share=network                          # read-only GitHub requests and the release zip you choose
@@ -16,13 +16,13 @@ finish-args:
   - --filesystem=~/.vst3:create              # where plugins for native DAWs are installed
   - --talk-name=org.freedesktop.Flatpak      # lets it run `flatpak install` for Flatpak DAW plugin extensions (flatpak-spawn --host)
 modules:
-  - name: studio87-updater
+  - name: studio87-gearupdater
     buildsystem: simple
     build-commands:
       - pip3 install --no-build-isolation --no-deps --prefix=/app .
-      - install -Dm644 studio87_updater/assets/icon.svg /app/share/icons/hicolor/scalable/apps/io.github.speakingcolors.Studio87Updater.svg
-      - install -Dm644 packaging/flatpak/io.github.speakingcolors.Studio87Updater.desktop /app/share/applications/io.github.speakingcolors.Studio87Updater.desktop
-      - install -Dm644 packaging/flatpak/io.github.speakingcolors.Studio87Updater.metainfo.xml /app/share/metainfo/io.github.speakingcolors.Studio87Updater.metainfo.xml
+      - install -Dm644 studio87_updater/assets/icon.svg /app/share/icons/hicolor/scalable/apps/io.github.speakingcolors.Studio87GearUpdater.svg
+      - install -Dm644 packaging/flatpak/io.github.speakingcolors.Studio87GearUpdater.desktop /app/share/applications/io.github.speakingcolors.Studio87GearUpdater.desktop
+      - install -Dm644 packaging/flatpak/io.github.speakingcolors.Studio87GearUpdater.metainfo.xml /app/share/metainfo/io.github.speakingcolors.Studio87GearUpdater.metainfo.xml
     sources:
       - type: dir
         path: ../..

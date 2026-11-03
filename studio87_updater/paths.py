@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 
 BRAND = "Studio 87"
-PRODUCT = "Updater"
+PRODUCT = "Gear Updater"
+OLD_PRODUCT = "Updater"      # v0.1.0 folder name; migrated on first start
 
 
 def system_name(platform=None):
@@ -40,6 +41,25 @@ def cache_dir(system=None, env=None, home=None):
     else:
         base = Path(env.get("XDG_CACHE_HOME") or home / ".cache")
     return base / BRAND / PRODUCT
+
+
+def migrate_old_data(system=None, env=None, home=None):
+    """v0.1.0 kept its files in '.../Studio 87/Updater'. Copy them to the new folder once; the old one is left in place."""
+    import shutil
+    new = data_dir(system, env, home)
+    old = new.parent / OLD_PRODUCT
+    if old.is_dir() and not new.exists():
+        try:
+            shutil.copytree(old, new)
+        except OSError:
+            pass
+    newc = cache_dir(system, env, home)
+    oldc = newc.parent / OLD_PRODUCT
+    if oldc.is_dir() and not newc.exists():
+        try:
+            shutil.copytree(oldc, newc)
+        except OSError:
+            pass
 
 
 def vst3_dirs(system=None, env=None, home=None):

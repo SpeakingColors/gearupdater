@@ -47,7 +47,7 @@ def main():
     app = QApplication.instance() or QApplication([])
     A.load_fonts()
     win = A.MainWindow(svc)
-    win.resize(int(1000 * SCALE), int(640 * SCALE))
+    win.resize(int(1000 * SCALE), int(676 * SCALE))
     win.show()
     root = win.root
     root.start_open_check()
@@ -56,7 +56,7 @@ def main():
         app.processEvents()
         time.sleep(0.03)
     pump(app)
-    root.tab, root.page = "updates", 0
+    root.tab, root.page = "all", 0
     root.refresh_list()
     pump(app)
     shot = OUT / "window.png"
@@ -66,7 +66,7 @@ def main():
         p = w.mapTo(root, QPoint(0, 0))
         return [p.x(), p.y(), w.width(), w.height()]
 
-    row = root.rowws[0]
+    row = next(rw for rw in root.allrows if rw.row is not None and rw.row.status == "update")
     controls = []
 
     def add(name, w, tip=None):
@@ -77,16 +77,17 @@ def main():
     add("Check for updates", root.b_check)
     add("Settings", root.b_set)
     add("About", root.b_about)
-    for k, label in (("updates", "Updates tab"), ("installed", "Installed tab"), ("missing", "Not installed tab"), ("all", "All tab")):
+    for k, label in (("updates", "Updates tab"), ("all", "All tab"), ("fx", "VST and FX tab"), ("synth", "Synths tab"), ("controller", "Controllers tab"), ("apps", "Apps and logue tab"),
+                     ("installed", "Installed tab"), ("notinstalled", "Not installed tab")):
         add(label, root.tabs[k])
-    add("Update selected", root.b_sel)
-    add("Update all", root.b_all)
+    add("Search box", root.search)
+    add("Scrolling / pages switch", root.b_view)
+    add("Update / Install selected", root.b_sel)
+    add("Update all / Install all", root.b_all)
     add("Row tick box", row.check)
     add("Update / Install button", row.b_main)
     add("Changelog button", row.b_log)
     add("GitHub button", row.b_git)
-    add("Previous page", root.b_prev)
-    add("Next page", root.b_next)
     add("Smaller window", root.b_zoom_out)
     add("Back to 100 percent", root.b_zoom_100)
     add("Larger window", root.b_zoom_in)
@@ -106,10 +107,10 @@ def main():
          "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited)."},
         {"name": "Status line", "box": [44, 550, 380, 36],
          "text": "When the last check happened and how many updates were found. Offline and rate-limit messages appear here and in red on the right."},
-        {"name": "Page counter", "box": [DWc(root) // 2 - 50, 554, 100, 28],
-         "text": "Five products per page, so the window never needs a scrollbar."},
+        {"name": "Scrolling list", "box": [root.scroll.x() + root.scroll.width() - 18, root.scroll.y(), 18, 60],
+         "text": "One long list of the tab you are on. Use the mouse wheel or the thin scrollbar. The switch button next to the search box shows pages of five instead (off by default)."},
         {"name": "Size read-out", "box": [444, 598, 200, 42], "text": "Window size in pixels and, on the 100% button, the zoom relative to the default size."},
-        {"name": "Wood sides", "box": [0, 0, 34, 640], "text": "Double click on either wood side to go back to the default size (100%)."},
+        {"name": "Wood sides", "box": [0, 0, 34, 676], "text": "Double click on either wood side to go back to the default size (100%)."},
     ]
     img = Image.open(shot).convert("RGBA")
     s = img.width / 1000.0
@@ -127,7 +128,7 @@ def main():
         badge(int(bx * s), int(by * s), str(i), (255, 123, 177, 255))
         c["n"] = i
     anchors = [(rb[0] + 182, rb[1] + 10), (rb[0] + 700, rb[1] + 13), (rb[0] + 700, rb[1] + 31), (rb[0] + 700, rb[1] + 47),
-               (rb[0] + 760, rb[1] + 62), (rb[0] + 760, rb[1] + 76), (392, 556), (500, 546), (610, 620), (17, 330)]
+               (rb[0] + 760, rb[1] + 62), (rb[0] + 760, rb[1] + 76), (392, 556), (root.scroll.x() + root.scroll.width() - 9, root.scroll.y() + 12), (610, 620), (17, 330)]
     for i, (dsp, (ax, ay)) in enumerate(zip(displays, anchors)):
         L = chr(ord("A") + i)
         badge(int(ax * s), int(ay * s), L, (2, 235, 186, 255))
@@ -145,7 +146,7 @@ def main():
         win.grab().save(str(OUT / ("%s.png" % key)))
         root.close_overlay()
         pump(app, 5)
-    (OUT / "tour.json").write_text(json.dumps({"controls": controls, "displays": displays, "design": [1000, 640]}, indent=1))
+    (OUT / "tour.json").write_text(json.dumps({"controls": controls, "displays": displays, "design": [1000, 676]}, indent=1))
     print("tour written:", len(controls), "controls,", len(displays), "displays")
     win.close()
 

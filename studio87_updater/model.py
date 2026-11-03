@@ -79,6 +79,9 @@ def sort_key(row):
     return (order.get(row.status, 9), row.product.name.lower())
 
 
+MISSING = "missing-repo"     # GitHub answered 404: private or gone, so it is never shown
+
+
 def check_product(client, product, use_network=True):
     """(releases or None when never checked, error text, from_cache). Raises Offline / RateLimited."""
     url = client.releases_url(product.owner, product.repo)
@@ -87,6 +90,8 @@ def check_product(client, product, use_network=True):
     except HttpError as e:
         return None, "GitHub answered %s" % e.status, False
     if data is None:
+        if src == "missing":
+            return MISSING, "", False
         return (None if src == "cache" else []), "", src == "cache"
     return R.parse_releases(data), "", src == "cache"
 
@@ -109,6 +114,10 @@ def build_rows(client, products, installed_for, use_network=True, on_progress=No
                 rels, err, cached = check_product(client, p, use_network=False)
             if client.went_offline:
                 net, notice = False, notice or "offline"
+            if rels == MISSING:
+                if on_progress:
+                    on_progress(i + 1, len(products), row)
+                continue
             row.releases, row.error, row.from_cache = rels or [], err, cached
             row.status = UNCHECKED if (rels is None and not err) else compute_status(p, rels, row.installed, err or None)
         else:
@@ -150,3 +159,97 @@ METHOD_TEXT = {"vst3": "VST3 (native or Flatpak)", "exe": "Windows installer", "
 
 def method_text(row, system):
     return METHOD_TEXT.get(row.product.method(system), "no installer")
+
+
+# ---- tabs, search, view -----------------------------------------------------
+TABS = [("updates", "Updates"), ("all", "All"), ("fx", "VST and FX"), ("synth", "Synths"), ("controller", "Controllers"),
+        ("apps", "Apps and logue"), ("installed", "Installed"), ("notinstalled", "Not installed")]
+TAB_KEYS = [k for k, _ in TABS]
+CAT_LABEL = {"fx": "VST plugins and FX", "synth": "Synths", "controller": "Hardware controllers", "apps": "Apps and logue units"}
+
+
+def in_tab(row, tab):
+    if tab == "all":
+        return True
+    if tab == "updates":
+        return row.status == UPDATE
+    if tab == "installed":
+        return row.status in (UPDATE, CURRENT)
+    if tab == "notinstalled":
+        return row.status == NOT_INSTALLED
+    return row.product.cat == tab
+
+
+def matches(row, query):
+    """Every word of the query must appear in the name, kind, category or status text (case-insensitive)."""
+    words = (query or "").lower().split()
+    if not words:
+        return True
+    hay = " ".join([row.product.name, row.product.kind_label, CAT_LABEL.get(row.product.cat, ""),
+                    STATUS_TEXT[row.status], status_line(row), installed_text(row)]).lower()
+    return all(w in hay for w in words)
+
+
+def filter_rows(rows, tab="all", query=""):
+    return [r for r in rows if in_tab(r, tab) and matches(r, query)]
+
+
+
+# ---- contextual bulk buttons: only updates count as updates, fresh installs are installs ----
+
+def split_actions(rows):
+    """(updates, installs) among the rows that can actually be installed."""
+    ok = [r for r in rows if r.can_install]
+    return ([r for r in ok if r.status == UPDATE],
+            [r for r in ok if r.status in (NOT_INSTALLED, UNKNOWN_INSTALL)])
+
+
+def _n(n, word):
+    return "%d %s%s" % (n, word, "" if n == 1 else "s")
+
+
+def all_targets(view_rows):
+    """What 'all' acts on: the updates in view; if the view holds none, the installs in view."""
+    upd, ins = split_actions(view_rows)
+    return upd if upd else ins
+
+
+def all_label(view_rows):
+    upd, ins = split_actions(view_rows)
+    if upd:
+        return "Update all (%d)" % len(upd)
+    if ins:
+        return "Install all (%d)" % len(ins)
+    return "Update all (0)"
+
+
+def selected_label(rows):
+    upd, ins = split_actions(rows)
+    if upd and ins:
+        return "Apply selected (%s, %s)" % (_n(len(upd), "update"), _n(len(ins), "install"))
+    if upd:
+        return "Update selected (%d)" % len(upd)
+    if ins:
+        return "Install selected (%d)" % len(ins)
+    return "Update selected"
+
+
+def confirm_title(rows):
+    upd, ins = split_actions(rows)
+    if upd and ins:
+        return "Apply %s and %s?" % (_n(len(upd), "update"), _n(len(ins), "install"))
+    if ins:
+        return "Install %s?" % _n(len(ins), "product")
+    return "Update %s?" % _n(len(upd), "product")
+
+
+def confirm_button(rows):
+    upd, ins = split_actions(rows)
+    if upd and ins:
+        return "Apply %d" % (len(upd) + len(ins))
+    return ("Install %d" if ins else "Update %d") % (len(ins) or len(upd))
+
+
+def progress_word(row):
+    """Verb for one row while a queue runs."""
+    return "Installing" if row.status in (NOT_INSTALLED, UNKNOWN_INSTALL) else "Updating"

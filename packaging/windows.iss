@@ -1,17 +1,17 @@
 ; Windows installer + uninstaller (Inno Setup) for the updater. Called as: ISCC /DVersion=0.1.0 packaging/windows.iss
-; Expects the PyInstaller folder in ..\dist\Studio87Updater and the manual in ..\stage. Works offline.
+; Expects the PyInstaller folder in ..\dist\Studio87GearUpdater and the manual in ..\stage. Works offline.
 ; The uninstaller removes everything it installed. The updater's own settings and installed-versions list
-; (%APPDATA%\Studio 87\Updater) are kept unless you answer Yes; a silent uninstall always keeps them.
+; (%APPDATA%\Studio 87\Gear Updater) are kept unless you answer Yes; a silent uninstall always keeps them.
 [Setup]
 AppId={{6F1D3C52-8B7A-4E0D-A2C9-5B14E7D0A9F3}
-AppName=Studio 87 Updater
+AppName=Studio 87 Gear Updater
 AppVersion={#Version}
 AppPublisher=Studio 87
 AppPublisherURL=https://github.com/SpeakingColors/gearupdater
-DefaultDirName={autopf}\Studio 87\Updater
+DefaultDirName={autopf}\Studio 87\Gear Updater
 DefaultGroupName=Studio 87
 OutputDir=..\Output
-OutputBaseFilename=Studio87-Updater-Setup
+OutputBaseFilename=Studio87-GearUpdater-Setup
 LicenseFile=..\LICENSE
 SetupIconFile=..\studio87_updater\assets\icon.ico
 PrivilegesRequired=admin
@@ -19,25 +19,25 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 Compression=lzma2
 SolidCompression=yes
-UninstallDisplayName=Studio 87 Updater
+UninstallDisplayName=Studio 87 Gear Updater
 UninstallDisplayIcon={app}\icon.ico
 CloseApplications=yes
 DisableProgramGroupPage=yes
 
 [Messages]
-SelectDirDesc=Where should the Studio 87 Updater be installed?
+SelectDirDesc=Where should the Studio 87 Gear Updater be installed?
 SelectDirLabel3=The app, its manual and the uninstaller go into this folder. The plugins it updates go to their own places (for example C:\Program Files\Common Files\VST3).
 SelectDirBrowseLabel=To continue, click Next. Choose another folder only if you want the app somewhere else.
 
 [Files]
-Source: "..\dist\Studio87Updater\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
-Source: "..\stage\Studio87-Updater-manual.pdf"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\Studio87GearUpdater\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "..\stage\Studio87-GearUpdater-manual.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\studio87_updater\assets\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Studio 87 Updater"; Filename: "{app}\Studio87Updater.exe"; IconFilename: "{app}\icon.ico"
-Name: "{group}\Studio 87 Updater manual"; Filename: "{app}\Studio87-Updater-manual.pdf"; IconFilename: "{app}\icon.ico"
-Name: "{group}\Uninstall Studio 87 Updater"; Filename: "{uninstallexe}"; IconFilename: "{app}\icon.ico"
+Name: "{group}\Studio 87 Gear Updater"; Filename: "{app}\Studio87GearUpdater.exe"; IconFilename: "{app}\icon.ico"
+Name: "{group}\Studio 87 Gear Updater manual"; Filename: "{app}\Studio87-GearUpdater-manual.pdf"; IconFilename: "{app}\icon.ico"
+Name: "{group}\Uninstall Studio 87 Gear Updater"; Filename: "{uninstallexe}"; IconFilename: "{app}\icon.ico"
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
@@ -48,7 +48,7 @@ var
   data, vendor: String;
 begin
   if CurUninstallStep <> usPostUninstall then exit;
-  data := ExpandConstant('{userappdata}\Studio 87\Updater');
+  data := ExpandConstant('{userappdata}\Studio 87\Gear Updater');
   vendor := ExpandConstant('{userappdata}\Studio 87');
   if DirExists(data) and (not UninstallSilent) then
     if MsgBox('Also delete the updater''s settings and its list of installed versions?' + #13#10 + #13#10 + data + #13#10 + #13#10 +

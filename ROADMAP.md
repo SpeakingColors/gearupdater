@@ -2,7 +2,7 @@
 
 ## Done in v0.1.0
 - Core with tests (version compare, manifest, release parsing, SHA256 verify, installed-version detection, GitHub client with ETag and rate-limit handling, installer logic).
-- Qt window with the list, tabs, paging, changelog, settings, about, hover bubbles, three looks, aspect-locked resize, wood sides.
+- Qt window with the scrolling list, search, category tabs, optional pages, changelog, settings, about, hover bubbles, three looks, aspect-locked resize, wood sides.
 - Linux Flatpak, Windows installer and macOS package built by `release.yml`.
 
 ## Not verified yet (needs a real machine)

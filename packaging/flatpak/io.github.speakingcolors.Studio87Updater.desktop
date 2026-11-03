@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Studio 87 Updater
-Comment=Update your Studio 87 plugins and apps
-Exec=studio87-updater
-Icon=io.github.speakingcolors.Studio87Updater
-Categories=AudioVideo;Audio;Utility;
-Terminal=false
-StartupWMClass=studio87-updater

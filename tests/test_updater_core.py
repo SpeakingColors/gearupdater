@@ -210,7 +210,7 @@ class GitHubTests(T):
 
     def test_user_agent_is_generic(self):
         req = UrlLibTransport()._req("https://api.github.com/x", {"Accept": "a"})
-        self.assertEqual(req.get_header("User-agent"), "Studio87-Updater")
+        self.assertEqual(req.get_header("User-agent"), "Studio87-GearUpdater")
         self.assertEqual(sorted(k.lower() for k in req.headers), ["accept", "user-agent"])
 
     def test_offline_falls_back_to_cache_else_raises(self):
@@ -551,9 +551,9 @@ class InstallTests(T):
 class PathTests(T):
     def test_brand_folders(self):
         h = Path("/h")
-        self.assertEqual(P.data_dir("linux", {}, h), Path("/h/.local/share/Studio 87/Updater"))
-        self.assertEqual(P.data_dir("windows", {"APPDATA": "C:/A"}, h), Path("C:/A/Studio 87/Updater"))
-        self.assertEqual(P.data_dir("macos", {}, h), Path("/h/Library/Application Support/Studio 87/Updater"))
+        self.assertEqual(P.data_dir("linux", {}, h), Path("/h/.local/share/Studio 87/Gear Updater"))
+        self.assertEqual(P.data_dir("windows", {"APPDATA": "C:/A"}, h), Path("C:/A/Studio 87/Gear Updater"))
+        self.assertEqual(P.data_dir("macos", {}, h), Path("/h/Library/Application Support/Studio 87/Gear Updater"))
         self.assertEqual(P.user_vst3_dir("linux", {}, h), Path("/h/.vst3"))
         self.assertEqual(P.user_vst3_dir("macos", {}, h), Path("/h/Library/Audio/Plug-Ins/VST3"))
 
@@ -573,3 +573,126 @@ class DescribeTests(T):
         row.installed = I.InstalledInfo("not-installed")
         self.assertEqual(MD.installed_text(row), "not installed")
         self.assertEqual(MD.method_text(row, "linux"), "VST3 (native or Flatpak)")
+
+
+class MigrationTests(T):
+    def test_old_updater_folder_is_copied_not_lost(self):
+        h = self.tmp()
+        old = P.data_dir("linux", {}, h).parent / "Updater"
+        old.mkdir(parents=True)
+        (old / "installed-versions.json").write_text('{"schema": 1, "products": {"a": {"version": "1.0.0"}}}')
+        P.migrate_old_data("linux", {}, h)
+        new = P.data_dir("linux", {}, h)
+        self.assertEqual(new.name, "Gear Updater")
+        self.assertEqual(I.Record(new / "installed-versions.json").get("a")["version"], "1.0.0")
+        self.assertTrue((old / "installed-versions.json").exists(), "old copy stays")
+        (new / "installed-versions.json").write_text("{}")
+        P.migrate_old_data("linux", {}, h)
+        self.assertEqual((new / "installed-versions.json").read_text(), "{}", "never overwrites the new folder")
+
+
+class CatalogTests(T):
+    def rows(self):
+        m = M.load_manifest()
+        out = []
+        for p in m.products:
+            out.append(MD.Row(p, status=MD.UPDATE if p.repo == "hairball" else MD.NOT_INSTALLED, installed=I.InstalledInfo("not-installed")))
+        return out
+
+    def test_category_mapping(self):
+        by = {r.product.repo: r.product for r in self.rows()}
+        self.assertEqual(by["SupurrrSaw-VST"].cat, "synth")
+        self.assertEqual(by["PunchPaw"].cat, "fx")
+        self.assertEqual(by["mx400-vst-linux"].cat, "controller")
+        self.assertEqual(by["hypersaw-xd"].cat, "apps")
+        self.assertEqual(by["whiskermix"].cat, "apps")
+        self.assertEqual([k for k, _ in MD.TABS], ["updates", "all", "fx", "synth", "controller", "apps", "installed", "notinstalled"])
+
+    def test_tabs(self):
+        rows = self.rows()
+        self.assertEqual(len(MD.filter_rows(rows, "all")), len(rows))
+        self.assertEqual([r.product.repo for r in MD.filter_rows(rows, "updates")], ["hairball"])
+        for tab in ("fx", "synth", "controller", "apps"):
+            got = MD.filter_rows(rows, tab)
+            self.assertTrue(got and all(r.product.cat == tab for r in got), tab)
+
+    def test_search_by_name_kind_and_status(self):
+        rows = self.rows()
+        names = lambda q: [r.product.name for r in MD.filter_rows(rows, "all", q)]
+        self.assertEqual(names("hairball"), ["Hairball"])
+        self.assertIn("PunchPaw", names("PUNCH"))
+        got = MD.filter_rows(rows, "all", "logue")
+        self.assertTrue(got and all(r.product.kind == "logue" or r.product.cat == "apps" or "logue" in r.product.name.lower() for r in got))
+        self.assertEqual(names("update available"), ["Hairball"])
+        self.assertIn("Furchild", names("not installed"))
+        self.assertEqual(names("hairball furchild"), [])
+        self.assertEqual(len(names("   ")), len(rows))
+        self.assertEqual(names("hair"), ["Hairball"])
+        self.assertEqual([r.product.name for r in MD.filter_rows(rows, "fx", "hair")], ["Hairball"])
+        self.assertEqual(MD.filter_rows(rows, "synth", "hair"), [])
+
+    def test_exclusions_and_no_private_names(self):
+        m = M.load_manifest()
+        repos = {p.repo.lower() for p in m.products}
+        for r in ("cat-ui", "claude-skills", ".github", "speakingcolors"):
+            self.assertNotIn(r, repos)
+            self.assertIn(r, m.ignore)
+        out = M.merge_discovered(m, ["cat-ui", "claude-skills", ".github", "SpeakingColors", "a-new-public-repo"])
+        self.assertEqual([p.repo for p in out][len(m.products):], ["a-new-public-repo"])
+        root = Path(__file__).resolve().parents[1]
+        banned = "place" + "holder" + "game"
+        for f in root.rglob("*"):
+            if f.is_file() and ".git" not in f.parts and f.suffix in (".py", ".json", ".md", ".txt", ".yml", ".html", ".iss", ".xml", ".desktop", ".applescript"):
+                self.assertNotIn(banned, f.read_text(errors="ignore").lower(), str(f))
+
+    def test_repo_returning_404_is_never_shown(self):
+        t = FakeTransport({})
+        c = GitHubClient(t, self.tmp(), now=lambda: 1000.0)
+        p = M.Product(repo="gone-or-private", name="X", kind="vst3", install={"linux": "vst3"})
+        rows, _ = MD.build_rows(c, [p], lambda p: I.InstalledInfo("not-installed"))
+        self.assertEqual(rows, [])
+
+
+class BulkLabelTests(T):
+    def mk(self, repo, status):
+        p = M.Product(repo=repo, name=repo, kind="vst3", install={"linux": "vst3"})
+        r = MD.Row(p, status=status, installed=I.InstalledInfo("not-installed"))
+        r.releases = [type("R", (), {"zip_asset": lambda self: object(), "version": "1", "tag": "v1"})()]
+        return r
+
+    def test_labels(self):
+        u1, u2 = self.mk("a", MD.UPDATE), self.mk("b", MD.UPDATE)
+        n1, n2 = self.mk("c", MD.NOT_INSTALLED), self.mk("d", MD.NOT_INSTALLED)
+        cur = self.mk("e", MD.CURRENT)
+        self.assertEqual(MD.selected_label([u1, u2]), "Update selected (2)")
+        self.assertEqual(MD.selected_label([n1, n2]), "Install selected (2)")
+        self.assertEqual(MD.selected_label([u1, n1, n2]), "Apply selected (1 update, 2 installs)")
+        self.assertEqual(MD.selected_label([u1, u2, n1]), "Apply selected (2 updates, 1 install)")
+        self.assertEqual(MD.selected_label([]), "Update selected")
+        self.assertEqual(MD.selected_label([cur]), "Update selected")
+        self.assertEqual(MD.all_label([u1, n1, n2, cur]), "Update all (1)")
+        self.assertEqual(MD.all_label([n1, n2, cur]), "Install all (2)")
+        self.assertEqual(MD.all_label([cur]), "Update all (0)")
+
+    def test_only_updates_count_as_updates(self):
+        u, n, cur = self.mk("a", MD.UPDATE), self.mk("c", MD.NOT_INSTALLED), self.mk("e", MD.CURRENT)
+        self.assertEqual(MD.all_targets([u, n, cur]), [u])
+        self.assertEqual(MD.all_targets([n, cur]), [n])
+        upd, ins = MD.split_actions([u, n, cur])
+        self.assertEqual((upd, ins), ([u], [n]))
+
+    def test_confirm_and_progress_wording(self):
+        u, n1, n2 = self.mk("a", MD.UPDATE), self.mk("c", MD.NOT_INSTALLED), self.mk("d", MD.NOT_INSTALLED)
+        self.assertEqual(MD.confirm_title([n1, n2]), "Install 2 products?")
+        self.assertEqual(MD.confirm_title([n1]), "Install 1 product?")
+        self.assertEqual(MD.confirm_title([u, n1]), "Apply 1 update and 1 install?")
+        self.assertEqual(MD.confirm_title([u, u]), "Update 2 products?")
+        self.assertEqual(MD.confirm_button([n1, n2]), "Install 2")
+        self.assertEqual(MD.confirm_button([u, n1]), "Apply 2")
+        self.assertEqual(MD.confirm_button([u]), "Update 1")
+        self.assertEqual((MD.progress_word(u), MD.progress_word(n1)), ("Updating", "Installing"))
+
+    def test_installed_and_not_installed_tabs(self):
+        rows = [self.mk("a", MD.UPDATE), self.mk("c", MD.NOT_INSTALLED), self.mk("e", MD.CURRENT)]
+        self.assertEqual([r.product.repo for r in MD.filter_rows(rows, "installed")], ["a", "e"])
+        self.assertEqual([r.product.repo for r in MD.filter_rows(rows, "notinstalled")], ["c"])
