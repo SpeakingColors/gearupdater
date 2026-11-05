@@ -1,5 +1,11 @@
 # Roadmap
 
+## Done in v0.1.1
+- Window ported from the approved v9 mockup: 1047 x 1150 design size fitted to the screen, corner/side resizing, 310 x 162 thumbnails, two-line descriptions, scrolling list without scrollbars, opens on Updates, All tab sorted updates first.
+- Public-only catalog (`catalog.json` built by a scheduled workflow, ETag), optional GitHub sign in (device flow, keychain), install modes (All users, Just for me), wider installed-version detection, per-repo screenshots with a no-screenshot tile.
+- Renamed to Studio 87 Gear Updater (zip `Studio87-Gear-Updater-vX.Y.Z.zip`).
+- Still not verified on real machines: see below, plus the OAuth refresh flow (GitHub may require a client secret for refresh, which a desktop app cannot keep; then the app asks you to sign in again) and the Windows administrator manifest.
+
 ## Done in v0.1.0
 - Core with tests (version compare, manifest, release parsing, SHA256 verify, installed-version detection, GitHub client with ETag and rate-limit handling, installer logic).
 - Qt window with the scrolling list, search, category tabs, optional pages, changelog, settings, about, hover bubbles, three looks, aspect-locked resize, wood sides.

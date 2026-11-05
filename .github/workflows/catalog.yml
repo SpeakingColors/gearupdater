@@ -1,0 +1,42 @@
+name: catalog
+# Builds ONE catalog.json (latest releases of every public product, plus small thumbnails) so the Gear Updater
+# makes one request instead of one per product, and never hits GitHub's 60-requests-per-hour limit.
+# Reads PUBLIC data only. The built-in token is only used to read; contents: write is needed to publish the
+# 'catalog' branch of this repository (a single commit, replaced every run).
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['studio87_updater/products.json', 'tools/build_catalog.py', '.github/workflows/catalog.yml']
+permissions:
+  contents: write
+concurrency:
+  group: catalog
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pillow
+      - name: Previous catalog (kept for products GitHub cannot answer this time)
+        run: curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/catalog/catalog.json" -o prev.json || true
+      - name: Build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/build_catalog.py pub prev.json
+      - name: Publish the catalog branch
+        run: |
+          cd pub
+          git init -q -b catalog
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "catalog $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" catalog

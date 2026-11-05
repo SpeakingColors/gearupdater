@@ -89,6 +89,7 @@ class GitHubClient:
         self.reset = None
         self.requests_made = 0
         self.went_offline = False
+        self.token_provider = None     # optional: returns an OAuth token string or None (never logged)
         os.makedirs(self.cache_dir, exist_ok=True)
 
     # -- cache -------------------------------------------------------------
@@ -170,6 +171,9 @@ class GitHubClient:
             headers["Accept"] = accept
         if meta and meta.get("etag") and cached is not None:
             headers["If-None-Match"] = meta["etag"]
+        tok = self.token_provider() if (self.token_provider and url.startswith(API)) else None
+        if tok:
+            headers["Authorization"] = "Bearer " + tok
         try:
             resp = self.t.request(url, headers)
         except Offline:

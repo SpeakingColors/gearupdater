@@ -1,5 +1,6 @@
 import hashlib
 import json
+import time
 import os
 import shutil
 import tarfile
@@ -310,9 +311,22 @@ class InstalledTests(T):
         info = I.detect(self.product(), "linux", I.Record(d / "r.json"), [d], ("error", set()))
         self.assertEqual(info.state, "unknown")
 
-    def test_product_without_detect_hints_is_unknown_never_not_installed(self):
+    def test_product_without_hints_is_found_by_display_name(self):
         d = self.tmp()
-        p = M.Product(repo="X", name="X", kind="vst3", detect={})
+        p = M.Product(repo="X", name="Stretch Cat", kind="vst3", detect={})
+        self.assertEqual(I.detect(p, "linux", I.Record(d / "r.json"), [d]).state, "not-installed")
+        self.bundle(d, name="StretchCat", ver=None)
+        info = I.detect(p, "linux", I.Record(d / "r.json"), [d])
+        self.assertEqual((info.state, info.version), ("installed", None), "present but no version: never 'not installed'")
+
+    def test_app_without_hints_and_nothing_found_is_unknown_not_missing(self):
+        d = self.tmp()
+        p = M.Product(repo="Z", name="Zed", kind="app", detect={})
+        self.assertEqual(I.detect(p, "linux", I.Record(d / "r.json"), [d]).state, "unknown")
+
+    def test_logue_unit_without_hints_stays_unknown(self):
+        d = self.tmp()
+        p = M.Product(repo="L", name="Sawwiden", kind="logue", detect={})
         self.assertEqual(I.detect(p, "linux", I.Record(d / "r.json"), [d]).state, "unknown")
 
     def test_flatpak_probe_parsing(self):
@@ -569,7 +583,8 @@ class DescribeTests(T):
         self.assertEqual(MD.status_line(row), "Cannot tell if it is installed")
         self.assertEqual(MD.installed_text(row), "unknown")
         row.installed = I.InstalledInfo("installed", None)
-        self.assertEqual(MD.status_line(row), "Installed, version not readable")
+        self.assertTrue(MD.status_line(row).startswith("Installed, version unknown"))
+        self.assertEqual((row.sync, row.action_label), (True, "Update to sync"))
         row.installed = I.InstalledInfo("not-installed")
         self.assertEqual(MD.installed_text(row), "not installed")
         self.assertEqual(MD.method_text(row, "linux"), "VST3 (native or Flatpak)")
@@ -696,3 +711,354 @@ class BulkLabelTests(T):
         rows = [self.mk("a", MD.UPDATE), self.mk("c", MD.NOT_INSTALLED), self.mk("e", MD.CURRENT)]
         self.assertEqual([r.product.repo for r in MD.filter_rows(rows, "installed")], ["a", "e"])
         self.assertEqual([r.product.repo for r in MD.filter_rows(rows, "notinstalled")], ["c"])
+
+
+class DetectionLayoutTests(T):
+    """Synthetic bundles in each OS's standard folders: presence apart from version, name matching, version order."""
+
+    def prod(self, name="Stretch Cat", vst3="Stretch Cat", ext="StretchCat", **kw):
+        return M.Product(repo="stretch-cat-vst", name=name, kind="vst3", detect={"vst3": vst3, "flatpak": ext, **kw})
+
+    def bundle(self, d, stem, ver=None, plist=None):
+        r = d / (stem + ".vst3") / "Contents" / "Resources"
+        r.mkdir(parents=True)
+        if ver:
+            (r / "moduleinfo.json").write_text(json.dumps({"Version": ver}))
+        if plist:
+            import plistlib
+            (d / (stem + ".vst3") / "Contents" / "Info.plist").write_bytes(plistlib.dumps({"CFBundleShortVersionString": plist}))
+        return d / (stem + ".vst3")
+
+    def test_name_matching_display_vs_bundle(self):
+        self.assertEqual(I.norm("Stretch Cat"), I.norm("StretchCat.vst3".replace(".vst3", "")))
+        d = self.tmp()
+        self.bundle(d, "StretchCat", "1.2.3")
+        info = I.detect(self.prod(vst3="Stretch Cat"), "linux", I.Record(d / "r.json"), [d])
+        self.assertEqual((info.state, info.version), ("installed", "1.2.3"))
+        self.bundle(d, "Other Thing", "9.9.9")
+        self.assertIsNone(I.scan_vst3([d], {I.norm("Nothing")}))
+
+    def test_linux_layouts(self):
+        home = self.tmp()
+        sysdir = self.tmp()
+        self.bundle(sysdir, "Stretch Cat", "0.5.0")
+        info = I.detect(self.prod(), "linux", I.Record(home / "r.json"), [home / ".vst3", sysdir])
+        self.assertEqual(info.version, "0.5.0")
+        ids = ("ok", {I.EXT_PREFIX + "StretchCat"})
+        info = I.detect(self.prod(), "linux", I.Record(home / "r.json"), [home / ".vst3"], ids, flatpak_version=lambda i: "0.7.0")
+        self.assertEqual((info.state, info.version, info.source), ("installed", "0.7.0", "flatpak-info"))
+        info = I.detect(self.prod(), "linux", I.Record(home / "r.json"), [home / ".vst3"], ids)
+        self.assertEqual((info.state, info.version), ("installed", None))
+
+    def test_windows_layout_and_registry(self):
+        common = self.tmp()
+        reg = {"Stretch Cat 0.4.0": "0.4.0"}
+        info = I.detect(self.prod(), "windows", I.Record(common / "r.json"), [common / "VST3"], win_uninstall=reg)
+        self.assertEqual((info.state, info.version, info.source), ("installed", "0.4.0", "inno-registry"))
+        self.bundle(common / "VST3", "Stretch Cat", None)
+        info = I.detect(self.prod(), "windows", I.Record(common / "r.json"), [common / "VST3"], win_uninstall={"Stretch Cat": None})
+        self.assertEqual((info.state, info.version), ("installed", None))
+        info = I.detect(self.prod(), "windows", I.Record(common / "r.json"), [common / "VST3"])
+        self.assertEqual(info.state, "installed")
+        self.assertEqual(I.detect(self.prod(), "windows", I.Record(common / "r.json"), [common / "nope"]).state, "not-installed")
+
+    def test_macos_layout_plist_and_pkgutil(self):
+        lib = self.tmp()
+        self.bundle(lib, "Stretch Cat", None, plist="0.6.1")
+        info = I.detect(self.prod(), "macos", I.Record(lib / "r.json"), [lib])
+        self.assertEqual((info.version, info.source), ("0.6.1", "vst3-metadata"))
+        empty = self.tmp()
+        info = I.detect(self.prod(), "macos", I.Record(empty / "r.json"), [empty], mac_pkgs={"io.studio87.StretchCat": "0.6.2"})
+        self.assertEqual((info.state, info.version, info.source), ("installed", "0.6.2", "pkgutil"))
+
+    def test_version_source_order_record_first(self):
+        d = self.tmp()
+        self.bundle(d, "Stretch Cat", "0.1.0")
+        rec = I.Record(d / "r.json")
+        rec.set("stretch-cat-vst", "0.2.0", "v0.2.0", "vst3-tarball")
+        self.assertEqual(I.detect(self.prod(), "linux", rec, [d]).version, "0.2.0")
+        self.assertEqual(I.detect(self.prod(), "linux", rec, [self.tmp()]).state, "not-installed", "a record whose files are gone is stale")
+
+    def test_pkgutil_and_registry_readers(self):
+        class R:
+            def __init__(self, out): self.returncode, self.stdout = 0, out
+        def run(cmd, **k):
+            if cmd[1] == "--pkgs":
+                return R("com.apple.x\nio.studio87.StretchCat\n")
+            return R("package-id: x\nversion: 0.9.0\n")
+        self.assertEqual(I.read_pkgutil(run), {"io.studio87.StretchCat": "0.9.0"})
+        self.assertEqual(I.read_inno_uninstall(winreg=type("W", (), {"HKEY_LOCAL_MACHINE": 1, "HKEY_CURRENT_USER": 2,
+                         "OpenKey": staticmethod(lambda *a: (_ for _ in ()).throw(OSError()))})), {})
+
+
+from studio87_updater import mode as MODE
+
+
+class ModeTests(T):
+    def test_defaults_and_effective_mode(self):
+        self.assertEqual(MODE.default_mode("windows"), "all-users")
+        self.assertEqual(MODE.default_mode("macos"), "all-users")
+        self.assertEqual(MODE.default_mode("linux"), "just-me")
+        self.assertEqual(MODE.effective_mode("linux", "all-users"), "just-me", "Linux never needs admin")
+        self.assertEqual(MODE.effective_mode("windows", ""), "all-users")
+        self.assertEqual(MODE.effective_mode("windows", "just-me"), "just-me")
+        self.assertEqual(MODE.effective_mode("macos", "junk"), "all-users")
+
+    def test_user_vst3_folders_match_steinberg(self):
+        h = Path("/h")
+        self.assertEqual(MODE.user_vst3_dir("windows", {"LOCALAPPDATA": "/h/AppData/Local"}, h), Path("/h/AppData/Local/Programs/Common/VST3"))
+        self.assertEqual(MODE.user_vst3_dir("windows", {}, h), Path("/h/AppData/Local/Programs/Common/VST3"))
+        self.assertEqual(MODE.user_vst3_dir("macos", {}, h), Path("/h/Library/Audio/Plug-Ins/VST3"))
+        self.assertEqual(MODE.user_vst3_dir("linux", {}, h), Path("/h/.vst3"))
+
+    def test_startup_elevation_only_windows_all_users_once(self):
+        self.assertEqual(MODE.startup_elevation("windows", "all-users", False), "relaunch")
+        self.assertEqual(MODE.startup_elevation("windows", "all-users", True), "none")
+        self.assertEqual(MODE.startup_elevation("windows", "all-users", False, already_tried=True), "none", "no relaunch loop if UAC is declined")
+        self.assertEqual(MODE.startup_elevation("windows", "just-me", False), "none", "just-me starts normally")
+        self.assertEqual(MODE.startup_elevation("macos", "all-users", False), "none")
+        self.assertEqual(MODE.startup_elevation("linux", "all-users", False), "none")
+
+    def test_batch_has_at_most_one_prompt(self):
+        b = MODE.batch_plan("macos", "all-users", ["pkg"] * 50)
+        self.assertEqual(b["prompts"], 1)
+        self.assertEqual(len(b["elevated"]), 50)
+        self.assertEqual(MODE.batch_plan("macos", "just-me", ["pkg", "vst3-zip"])["prompts"], 0)
+        self.assertEqual(MODE.batch_plan("windows", "all-users", ["exe"] * 50)["prompts"], 0, "the app itself is already elevated")
+        self.assertEqual(MODE.batch_plan("linux", "just-me", ["vst3-tarball", "flatpak-ext"])["prompts"], 0)
+        self.assertFalse(MODE.method_needs_admin("windows", "just-me", "exe"))
+        self.assertTrue(MODE.method_needs_admin("windows", "all-users", "exe"))
+
+
+class InstallModeTests(T):
+    def prod(self):
+        return M.Product(repo="x", name="X", kind="vst3", install={"windows": "exe", "macos": "pkg", "linux": "vst3"})
+
+    def tree(self, files):
+        d = self.tmp()
+        for f in files:
+            p = d / f
+            p.parent.mkdir(parents=True, exist_ok=True)
+            if f.endswith(".vst3"):
+                (p / "Contents").mkdir(parents=True)
+                (p / "Contents" / "x.bin").write_bytes(b"1")
+            else:
+                p.write_bytes(b"x")
+        return d
+
+    def test_plan_per_mode(self):
+        root = self.tree(["windows/Setup.exe", "macos/X.pkg"])
+        self.assertEqual(INS.choose_plan(self.prod(), "windows", root, mode="all-users").method, "exe")
+        self.assertEqual(INS.choose_plan(self.prod(), "windows", root, mode="just-me").method, "exe-user")
+        self.assertEqual(INS.choose_plan(self.prod(), "macos", root, mode="all-users").method, "pkg")
+        self.assertEqual(INS.choose_plan(self.prod(), "macos", root, mode="just-me").method, "pkg-user")
+        root2 = self.tree(["windows/Setup.exe", "windows/X.vst3"])
+        self.assertEqual(INS.choose_plan(self.prod(), "windows", root2, mode="just-me").method, "vst3-zip")
+        self.assertEqual(INS.choose_plan(self.prod(), "windows", root2, mode="all-users").method, "exe")
+
+    def test_user_commands_need_no_admin(self):
+        calls = []
+
+        class R:
+            returncode, stdout, stderr = 0, "", ""
+        run = lambda cmd, **k: (calls.append(cmd), R())[1]
+        INS.run_plan(INS.Plan("exe-user", Path("S.exe")), "windows", run)
+        INS.run_plan(INS.Plan("pkg-user", Path("X.pkg")), "macos", run)
+        self.assertIn("/CURRENTUSER", calls[0])
+        self.assertEqual(calls[1][-2:], ["-target", "CurrentUserHomeDirectory"])
+
+    def test_vst3_zip_install_records_files_and_uninstall_removes_exactly_them(self):
+        root = self.tree(["windows/X.vst3"])
+        dest = self.tmp() / "VST3"
+        t = INS.install_vst3_zip(root / "windows" / "X.vst3", dest)
+        files = INS.bundle_files(t)
+        self.assertTrue(files and all(Path(f).is_file() for f in files))
+        other = dest / "Other.vst3"
+        other.mkdir()
+        (other / "keep").write_bytes(b"k")
+        rec = I.Record(self.tmp() / "r.json")
+        rec.set("x", "1.0.0", "v1.0.0", "vst3-zip", files)
+        inst = INS.Installer(None, rec, "windows", self.tmp(), dest, self.tmp())
+        n = inst.uninstall_recorded("x")
+        self.assertEqual(n, len(files))
+        self.assertFalse((dest / "X.vst3").exists())
+        self.assertTrue((other / "keep").exists(), "files that were not recorded are never removed")
+        self.assertIsNone(rec.get("x"))
+
+    def test_elevated_pkg_script_runs_every_pkg_in_one_helper(self):
+        sc = INS.elevated_pkg_script([Path("/a/one.pkg"), Path("/a/it's.pkg")])
+        self.assertEqual(sc.count("/usr/sbin/installer"), 2)
+        cmd = INS.elevation_command(Path("/t/s.sh"))
+        self.assertEqual(cmd[0], "osascript")
+        self.assertIn("with administrator privileges", cmd[2])
+
+    def test_staged_pkgs_are_installed_in_one_elevated_call(self):
+        stage = self.tmp()
+        calls = []
+
+        class R:
+            returncode, stdout, stderr = 0, "", ""
+        run = lambda cmd, **k: (calls.append(cmd), R())[1]
+        rec = I.Record(self.tmp() / "r.json")
+        inst = INS.Installer(None, rec, "macos", self.tmp(), self.tmp(), self.tmp(), runner=run, stage_dir=stage)
+        for n in range(5):
+            f = stage / ("p%d.pkg" % n)
+            f.write_bytes(b"x")
+            inst.staged.append(("r%d" % n, "N", f, "1.0", "v1"))
+        out = inst.finish_batch()
+        self.assertEqual(len(calls), 1, "one administrator prompt for the whole batch")
+        self.assertEqual(len(out), 5)
+        self.assertTrue(all(ok for ok, _ in out.values()))
+        self.assertEqual(rec.get("r3")["version"], "1.0")
+
+    def test_failed_elevated_batch_records_nothing(self):
+        stage = self.tmp()
+
+        class R:
+            returncode, stdout, stderr = 1, "", "user cancelled"
+        rec = I.Record(self.tmp() / "r.json")
+        inst = INS.Installer(None, rec, "macos", self.tmp(), self.tmp(), self.tmp(), runner=lambda cmd, **k: R(), stage_dir=stage)
+        f = stage / "p.pkg"
+        f.write_bytes(b"x")
+        inst.staged.append(("r1", "N", f, "1.0", "v1"))
+        out = inst.finish_batch()
+        self.assertFalse(out["r1"][0])
+        self.assertIsNone(rec.get("r1"))
+
+    def test_norm_keeps_digits(self):
+        self.assertEqual(I.norm("JPurrr-8000"), "jpurrr8000")
+        self.assertNotEqual(I.norm("MX400"), I.norm("MX"))
+
+    def test_sync_row_is_not_part_of_update_all_but_counts_when_selected(self):
+        p = M.Product(repo="s", name="S", kind="vst3", install={"linux": "vst3"})
+        row = MD.Row(p, status=MD.UNKNOWN_INSTALL, installed=I.InstalledInfo("installed", None))
+        row.releases = [type("R", (), {"zip_asset": lambda self: object(), "version": "1", "tag": "v1"})()]
+        self.assertEqual(MD.all_targets([row]), [])
+        self.assertEqual(MD.selected_label([row]), "Update selected (1)")
+        self.assertEqual(MD.progress_word(row), "Updating")
+        self.assertEqual(len(MD.filter_rows([row], "installed")), 1)
+        self.assertEqual(MD.filter_rows([row], "notinstalled"), [])
+
+
+from studio87_updater import shots as SH
+
+
+class ShotTests(T):
+    def test_candidates_use_head_and_png_then_jpg(self):
+        u = SH.candidate_urls("SpeakingColors", "Hairball")
+        self.assertEqual(u[0], "https://raw.githubusercontent.com/SpeakingColors/Hairball/HEAD/docs/screenshot.png")
+        self.assertTrue(u[1].endswith("docs/screenshot.jpg"))
+
+    def test_readme_image_skips_icons_svgs_badges_and_foreign_hosts(self):
+        md = ('<img src="assets/icon.svg" width=64>\n![badge](https://img.shields.io/x.png)\n![ext](https://example.com/a.png)\n'
+              '![Kick Kitten](docs/manual-shot.png)\n')
+        self.assertEqual(SH.readme_image(md, "SpeakingColors", "KickKitten"),
+                         "https://raw.githubusercontent.com/SpeakingColors/KickKitten/HEAD/docs/manual-shot.png")
+        self.assertIsNone(SH.readme_image('<img src="assets/icon.svg">', "o", "r"))
+        self.assertIsNone(SH.readme_image("", "o", "r"))
+
+    def test_service_falls_back_to_readme_then_none(self):
+        from studio87_updater.service import Service
+        h = self.tmp()
+        base = "https://raw.githubusercontent.com/SpeakingColors/Kick/HEAD/"
+        t = FakeTransport({base + "README.md": (200, {}, b"![x](docs/shot.png)"), base + "docs/shot.png": (200, {}, b"PNGDATA")})
+        svc = Service(system="linux", env={"XDG_DATA_HOME": str(h / "d"), "XDG_CACHE_HOME": str(h / "c")}, home=h, transport=t,
+                      flatpak_probe=lambda: ("absent", set()))
+        p = M.Product(repo="Kick", name="Kick", kind="vst3")
+        self.assertEqual(svc.screenshot(p), b"PNGDATA")
+        self.assertNotIn("Kick", svc.no_shot)
+        q = M.Product(repo="Nothing", name="N", kind="vst3")
+        self.assertIsNone(svc.screenshot(q))
+        self.assertIn("Nothing", svc.no_shot)
+
+
+from studio87_updater import catalog as CAT
+from studio87_updater.service import Service
+
+
+def _cat(gen=1_700_000_000, **products):
+    return json.dumps({"schema": 1, "generated_epoch": gen, "public_repos": ["PunchPaw", "NewOne"], "products": products})
+
+
+def _entry(tag="v0.2.0"):
+    return {"status": "ok", "thumb": True, "releases": [{"tag_name": tag, "name": tag, "body": "x", "published_at": "2026-11-01T00:00:00Z",
+            "prerelease": True, "html_url": "u", "assets": [{"name": "P-%s.zip" % tag, "size": 5, "browser_download_url": "d", "digest": "sha256:" + "a" * 64}]}]}
+
+
+class CatalogFileTests(T):
+    def test_parse_and_lookup(self):
+        c = CAT.parse_catalog(_cat(PunchPaw=_entry(), Gone={"status": "missing"}))
+        self.assertEqual(c.releases("PunchPaw")[0].tag, "v0.2.0")
+        self.assertEqual(c.releases("PunchPaw")[0].zip_asset().sha256, "a" * 64)
+        self.assertEqual(c.releases("Gone"), CAT.MISSING)
+        self.assertIsNone(c.releases("Unknown"))
+        self.assertTrue(c.has_thumb("PunchPaw"))
+
+    def test_bad_catalogs_are_refused(self):
+        for bad in ("nope", "{}", json.dumps({"schema": 2, "products": {}, "generated_epoch": 1}),
+                    json.dumps({"schema": 1, "products": {}}), json.dumps({"schema": 1, "products": [], "generated_epoch": 1})):
+            with self.assertRaises(ValueError):
+                CAT.parse_catalog(bad)
+
+    def test_staleness_text(self):
+        c = CAT.parse_catalog(_cat(gen=1000))
+        self.assertFalse(c.stale(1000 + 3 * 3600))
+        self.assertTrue(c.stale(1000 + 10 * 3600))
+        txt, stale = CAT.describe(c, 1000 + 3600, local_time=time.gmtime)
+        self.assertEqual((txt, stale), ("catalog updated at 00:16", False))
+        txt, stale = CAT.describe(c, 1000 + 12 * 3600, local_time=time.gmtime)
+        self.assertTrue(stale and "12 hours old" in txt)
+
+    def test_catalog_answers_without_any_api_request(self):
+        c = CAT.parse_catalog(_cat(PunchPaw=_entry("v0.2.0")))
+        t = FakeTransport({})
+        cl = GitHubClient(t, self.tmp(), now=lambda: 1000.0)
+        p = M.Product(repo="PunchPaw", name="PunchPaw", kind="vst3", install={"linux": "vst3"}, detect={"vst3": "PunchPaw"})
+        rows, notice = MD.build_rows(cl, [p], lambda p: I.InstalledInfo("installed", "0.1.0"), True, catalog=c)
+        self.assertEqual(t.log, [], "no request of any kind")
+        self.assertEqual((rows[0].status, rows[0].latest.tag), (MD.UPDATE, "v0.2.0"))
+
+    def test_private_repo_in_catalog_is_never_shown(self):
+        c = CAT.parse_catalog(_cat(Gone={"status": "missing"}))
+        p = M.Product(repo="Gone", name="G", kind="vst3", install={"linux": "vst3"})
+        rows, _ = MD.build_rows(GitHubClient(FakeTransport({}), self.tmp()), [p], lambda p: None, True, catalog=c)
+        self.assertEqual(rows, [])
+
+    def _svc(self, routes):
+        h = self.tmp()
+        t = FakeTransport(routes)
+        return Service(system="linux", env={"XDG_DATA_HOME": str(h / "d"), "XDG_CACHE_HOME": str(h / "c")}, home=h, transport=t,
+                       flatpak_probe=lambda: ("absent", set())), t
+
+    def test_service_uses_catalog_then_falls_back_to_api(self):
+        url = CAT.catalog_url("https://raw.githubusercontent.com", "SpeakingColors")
+        svc, t = self._svc({url: (200, {"etag": "e1"}, _cat(gen=int(time.time()), PunchPaw=_entry()).encode())})
+        rows, _ = svc.check()
+        by = {r.product.repo: r for r in rows}
+        self.assertEqual(by["PunchPaw"].latest.tag, "v0.2.0")
+        api = [u for u, _h in t.log if u.startswith("https://api.github.com/repos/SpeakingColors/PunchPaw")]
+        self.assertEqual(api, [], "PunchPaw came from the catalog")
+        self.assertIn("catalog updated", svc.catalog_text()[0])
+        # unreachable catalog: nothing parsed, the API is used as before
+        svc2, t2 = self._svc({})
+        svc2.check()
+        self.assertIsNone(svc2.catalog)
+        self.assertTrue([u for u, _h in t2.log if u.startswith("https://api.github.com/repos/")])
+        self.assertEqual(svc2.catalog_text(), ("", False))
+
+    def test_refresh_one_uses_the_api_directly(self):
+        url = CAT.catalog_url("https://raw.githubusercontent.com", "SpeakingColors")
+        api = "https://api.github.com/repos/SpeakingColors/PunchPaw/releases?per_page=6"
+        svc, t = self._svc({url: (200, {}, _cat(PunchPaw=_entry("v0.2.0")).encode()),
+                            api: (200, {}, json.dumps([_entry("v0.9.0")["releases"][0]]).encode())})
+        svc.check()
+        p = next(p for p in svc.products if p.repo == "PunchPaw")
+        row = svc.refresh_one(p)
+        self.assertEqual(row.latest.tag, "v0.9.0")
+
+
+class ShotSkipTests(unittest.TestCase):
+    def test_readme_logo_and_badge_images_are_skipped(self):
+        txt = "![logo](docs/logo.png) ![b](https://raw.githubusercontent.com/o/r/HEAD/x/badge.png) ![real](docs/window.png)"
+        self.assertTrue(SH.readme_image(txt, "o", "r").endswith("docs/window.png"))
+        self.assertIsNone(SH.readme_image("![logo](docs/logo.png)", "o", "r"))

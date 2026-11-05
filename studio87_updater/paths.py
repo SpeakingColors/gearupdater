@@ -69,11 +69,16 @@ def vst3_dirs(system=None, env=None, home=None):
     home = Path(home) if home else Path.home()
     if system == "windows":
         common = env.get("COMMONPROGRAMFILES") or r"C:\Program Files\Common Files"
-        return [Path(common) / "VST3"]
+        local = Path(env.get("LOCALAPPDATA") or home / "AppData" / "Local") / "Programs" / "Common" / "VST3"
+        return [Path(common) / "VST3", local]
     if system == "macos":
         return [Path("/Library/Audio/Plug-Ins/VST3"), home / "Library" / "Audio" / "Plug-Ins" / "VST3"]
-    return [home / ".vst3", Path("/usr/lib/vst3"), Path("/usr/local/lib/vst3")]
+    return [home / ".vst3", Path("/usr/lib/vst3"), Path("/usr/lib64/vst3"), Path("/usr/local/lib/vst3"), Path("/usr/local/lib64/vst3")]
 
 
 def user_vst3_dir(system=None, env=None, home=None):
-    return vst3_dirs(system, env, home)[0 if (system or system_name()) != "macos" else 1]
+    """The per-user VST3 folder (Steinberg's 'User' location)."""
+    from . import mode as MODE
+    system = system or system_name()
+    env = os.environ if env is None else env
+    return MODE.user_vst3_dir(system, env, Path(home) if home else Path.home())

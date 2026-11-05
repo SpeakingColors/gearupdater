@@ -7,9 +7,9 @@ One window that lists every Studio 87 plugin, VST, FX and app, shows which ones 
 *The screenshot is the real window rendered offscreen with recorded GitHub data for the products that were recorded; the "installed" versions are staged on purpose so every state shows (see Honest status).*
 
 **TLDR**
-- A list: screenshot and icon on the left, at most five short lines on the right (name and kind, installed and latest version, status, a changelog line, date, size and install route). Buttons: Update, Changelog, GitHub.
-- The full public Studio 87 catalog in one scrolling list (mouse wheel or a thin themed scrollbar). Search box filters as you type by name, kind or status. Tabs: All, VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed, Updates. Any product can be installed from it. Private and unavailable repos are never shown. An optional switch shows pages of five instead.
-- Buttons say what they will do: Update all / Update selected only count real updates; not-installed products say Install, Install selected, Install all; a mixed selection says Apply selected (N updates, M installs).
+- A list: a 310 x 162 screenshot on the left, at most six lines on the right (name and kind, installed and latest version, status, a two-line description, date, size and install route). Buttons: Update or Install, Changelog, GitHub.
+- The full public Studio 87 catalog in one scrolling list (mouse wheel, drag or keys; no scrollbars). It opens on Updates, with an "Everything is up to date" screen when there is nothing to do. Search filters as you type. Tabs: Updates, All (updates first, then by name), VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed. Private and unavailable repos are never shown.
+- Buttons say what they will do: Update all / Update selected only count real updates; on the Not installed tab it says Install all, and a row says Install; a mixed selection says Apply selected (N updates, M installs).
 - It checks GitHub **only when you open it or click "Check for updates"**. No timers, no background polling, no auto-start.
 - It **collects nothing**. The only network use is read-only requests for public GitHub data and the download of a release zip you chose. The User-Agent is the generic `Studio87-GearUpdater`.
 - Nothing is installed without a click. Every download is checked against `SHA256SUMS` first and **refused on a mismatch**.
@@ -17,7 +17,7 @@ One window that lists every Studio 87 plugin, VST, FX and app, shows which ones 
 - The installers are **not code-signed**; the app says so where it matters.
 
 ## Install (double click, no terminal)
-Get `Studio87-GearUpdater-vX.Y.Z.zip` from the Releases page, unzip, and follow `INSTALL.txt`:
+Get `Studio87-Gear-Updater-vX.Y.Z.zip` from the Releases page (v0.1.0 was called `Studio87-Updater-v0.1.0.zip`), unzip, and follow `INSTALL.txt`:
 - **Linux (Bazzite KDE and others):** double click `linux/Studio87-GearUpdater.flatpak`, then Install in the software centre.
 - **Windows:** run `windows/Studio87-GearUpdater-Setup.exe` (unknown-publisher warning: More info, Run anyway).
 - **macOS:** open `macos/Studio87-GearUpdater-macOS.pkg` (Privacy and Security, Open Anyway if blocked).
@@ -35,15 +35,18 @@ Each installer comes with an uninstaller that removes everything it installed; t
 
 ## Decisions (kept simple on purpose)
 - **GUI toolkit: Qt 6 through PySide6 (Python).** Native on KDE, ships as a Flatpak on the KDE runtime and the PySide base app (no Qt bundled twice), as a PyInstaller build for Windows and macOS, and renders offscreen in CI for the screenshot and tests.
-- **Layout:** everything is drawn in a 1000 x 676 design space and scaled uniformly, so the window keeps its shape from any edge or corner. Double click on a wood side, or the 100% button, resets the size. The PurrOne wood sides, Studio 87 branding, hover bubbles after one second, three looks in Settings (Neon Navy, Purple Soda Pop, PurrOne; PurrOne is the default), a thin themed scrollbar in the list (or pages of five if you switch to that).
+- **Layout:** ported from the approved mockup (`docs/mockup/updater-v9.html`, older versions in `docs/mockup/versions`). Default design size 1047 x 1150 (portrait), scaled down to fit your screen, never larger than it. Dragging a corner scales everything; a side changes only the width (960 to 1500) and the layout adapts; top or bottom changes only the height (760 to 1500) and shows more rows, text re-wraps and thumbnails keep their size. Double click on a wood side or Fit resets the size; 1:1 shows the design size. PurrOne wood sides, hover bubbles after one second, three looks in Settings (Neon Navy, Purple Soda Pop, PurrOne; PurrOne is the default).
 - **Light:** no animation timers; the only timer is the one-second hover bubble. Network work runs on a thread pool; thumbnails are decoded as rows are shown.
 - **Manifest:** `studio87_updater/products.json` maps repo to display name, kind (`vst3`, `controller`, `logue`, `app`, `unknown`), install method per OS, and where to look for the installed copy. Kinds and display names come from the repo names; `detect` hints (bundle and Flatpak names) were read from each product's own `release.yml` and are only filled in where that was done. Repos found on GitHub that are not in the file are listed as **view on GitHub**.
-- **Rate limit:** GitHub allows about 60 unauthenticated API requests per hour. A first check uses about 52 (one per product plus the repo list); later checks send the saved ETag and GitHub answers 304, which its documentation says is not counted. If the limit is reached the app stops asking, shows the saved list and says when to try again.
+- **Catalog:** a scheduled workflow (`.github/workflows/catalog.yml`, every 3 hours) builds one `catalog.json` plus small thumbnails from the public API and publishes them on the `catalog` branch. The app fetches that single file by default (with ETag conditional requests), so it normally makes no API request per product and cannot hit the 60 per hour limit. If the catalog cannot be read it falls back to the API, one request per product, and stops asking when the limit is reached.
+- **Optional sign in:** Settings, Sign in with GitHub (OAuth device flow, no permissions requested) raises the API limit to 5000 per hour. The token lives in your system keychain, is never written to a file and never logged. The app works the same without it. In the Flatpak the keychain module may be missing; then sign in is shown as off.
+- **Install modes:** All users (default on Windows and macOS) or Just for me (Windows `%LOCALAPPDATA%\Programs\Common\VST3`, macOS `~/Library/Audio/Plug-Ins/VST3`, Linux `~/.vst3`). The Windows build starts with an administrator manifest, so there is one UAC prompt at start and none per install; macOS asks once per batch.
+- **Screenshots:** each repo's `docs/screenshot.png`, cached locally. Products without one show a tinted "no screenshot yet" tile; nothing is faked.
 
 ## Develop
 ```
 python3 -m unittest discover tests          # pure core + firmware checker + GUI smoke tests (GUI ones skip without PySide6)
-python3 tools/mutation_check.py             # applies 24 deliberate bugs one at a time; the tests must catch every one
+python3 tools/mutation_check.py             # applies deliberate bugs one at a time; the tests must catch every one
 python3 -m studio87_updater --list          # same checks in the terminal, no GUI
 python3 -m studio87_updater                 # the window (needs PySide6)
 QT_QPA_PLATFORM=offscreen python3 tools/make_screenshot.py    # renders the real window with recorded data

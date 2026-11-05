@@ -295,7 +295,10 @@
   {
    "repo": "Purrrstressor",
    "name": "Purrrstressor",
-   "kind": "vst3"
+   "kind": "vst3",
+   "detect": {
+    "vst3": "Purrrstressor"
+   }
   },
   {
    "repo": "AI-Purrformer",
@@ -306,7 +309,10 @@
    "repo": "Whiskerwave-vst",
    "name": "Whiskerwave",
    "kind": "vst3",
-   "category": "synth"
+   "category": "synth",
+   "detect": {
+    "vst3": "Whiskerwave"
+   }
   },
   {
    "repo": "Meowcorder",
@@ -436,6 +442,11 @@
    "kind": "app",
    "install": {
     "linux": "guided"
+   },
+   "detect": {
+    "names": [
+     "WhiskerMix"
+    ]
    }
   },
   {

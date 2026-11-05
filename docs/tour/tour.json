@@ -3,9 +3,9 @@
   {
    "name": "Check for updates",
    "box": [
-    596,
-    12,
-    176,
+    637,
+    13,
+    170,
     34
    ],
    "tip": "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.",
@@ -14,20 +14,20 @@
   {
    "name": "Settings",
    "box": [
-    778,
-    12,
-    80,
+    815,
+    13,
+    96,
     34
    ],
-   "tip": "Look, hover bubbles and where Linux plugins go.",
+   "tip": "Look, hover bubbles, install mode and the optional GitHub sign in.",
    "n": 2
   },
   {
    "name": "About",
    "box": [
-    876,
-    12,
-    80,
+    919,
+    13,
+    84,
     34
    ],
    "tip": "What this is, what it collects (nothing), and how to remove it.",
@@ -38,7 +38,7 @@
    "box": [
     44,
     64,
-    96,
+    100,
     30
    ],
    "tip": "Products that have a newer version than the one installed.",
@@ -47,18 +47,18 @@
   {
    "name": "All tab",
    "box": [
-    146,
+    148,
     64,
-    62,
+    66,
     30
    ],
-   "tip": "Every public Studio 87 product.",
+   "tip": "Every public Studio 87 product. Updates come first.",
    "n": 5
   },
   {
    "name": "VST and FX tab",
    "box": [
-    214,
+    218,
     64,
     118,
     30
@@ -69,9 +69,9 @@
   {
    "name": "Synths tab",
    "box": [
-    338,
+    340,
     64,
-    90,
+    92,
     30
    ],
    "tip": "Synths and instruments.",
@@ -80,7 +80,7 @@
   {
    "name": "Controllers tab",
    "box": [
-    434,
+    436,
     64,
     112,
     30
@@ -93,7 +93,7 @@
    "box": [
     552,
     64,
-    134,
+    144,
     30
    ],
    "tip": "Standalone apps and logue units (minilogue xd, drumlogue).",
@@ -102,9 +102,9 @@
   {
    "name": "Installed tab",
    "box": [
-    692,
-    64,
-    96,
+    228,
+    100,
+    104,
     30
    ],
    "tip": "Products found on this computer.",
@@ -113,9 +113,9 @@
   {
    "name": "Not installed tab",
    "box": [
-    794,
-    64,
-    122,
+    336,
+    100,
+    124,
     30
    ],
    "tip": "Products not installed yet. Pick Install on a row.",
@@ -126,142 +126,142 @@
    "box": [
     44,
     100,
-    300,
+    176,
     30
    ],
    "tip": "Type to filter the list by name, kind (for example controller) or status (for example update).",
    "n": 12
   },
   {
-   "name": "Scrolling / pages switch",
-   "box": [
-    354,
-    100,
-    110,
-    30
-   ],
-   "tip": "Switch between one scrolling list (the default) and pages of five products. Pages never need a scrollbar.",
-   "n": 13
-  },
-  {
    "name": "Update / Install selected",
    "box": [
-    686,
+    691,
     100,
-    144,
+    164,
     30
    ],
-   "tip": "Update the products you ticked, one after another.",
-   "n": 14
+   "tip": "Update or install the products you ticked, one after another.",
+   "n": 13
   },
   {
    "name": "Update all / Install all",
    "box": [
-    838,
+    863,
     100,
-    118,
+    140,
     30
    ],
    "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
-   "n": 15
+   "n": 14
   },
   {
    "name": "Row tick box",
    "box": [
     52,
-    172,
+    216,
     20,
     20
    ],
-   "tip": "Tick to include this product in 'Update selected'.",
-   "n": 16
+   "tip": "Tick to include this product in the batch button above the list.",
+   "n": 15
   },
   {
    "name": "Update / Install button",
    "box": [
-    838,
-    145,
-    110,
-    22
+    865,
+    154,
+    112,
+    28
    ],
    "tip": "Download, verify the SHA256 checksums, then install 0.2.4. Installers are not code-signed: Windows or macOS may show a warning. Nothing is installed until you click.",
-   "n": 17
+   "n": 16
   },
   {
    "name": "Changelog button",
    "box": [
-    838,
-    171,
-    110,
-    22
+    865,
+    189,
+    112,
+    28
    ],
    "tip": "Read the release notes for every version newer than the one you have.",
-   "n": 18
+   "n": 17
   },
   {
    "name": "GitHub button",
    "box": [
-    838,
-    197,
-    110,
-    22
+    865,
+    224,
+    112,
+    28
    ],
    "tip": "Open the project page in your browser.",
-   "n": 19
+   "n": 18
   },
   {
    "name": "Smaller window",
    "box": [
-    758,
-    642,
-    40,
-    24
+    757,
+    1114,
+    56,
+    28
    ],
-   "tip": "Make the window smaller. You can also drag any edge or corner; the shape stays the same.",
+   "tip": "Smaller. Drag a corner to scale everything; drag a side to change only the width or the height.",
+   "n": 19
+  },
+  {
+   "name": "Fit to screen",
+   "box": [
+    881,
+    1114,
+    56,
+    28
+   ],
+   "tip": "Back to the normal size for this screen. Double click on either wood side does the same.",
    "n": 20
   },
   {
-   "name": "Back to 100 percent",
+   "name": "One to one",
    "box": [
-    802,
-    642,
+    943,
+    1114,
     56,
-    24
+    28
    ],
-   "tip": "Back to the normal size. Double click on either wood side does the same.",
+   "tip": "Show everything at its design size (1:1).",
    "n": 21
   },
   {
    "name": "Larger window",
    "box": [
-    864,
-    642,
-    40,
-    24
+    819,
+    1114,
+    56,
+    28
    ],
-   "tip": "Make the window larger.",
+   "tip": "Bigger.",
    "n": 22
   }
  ],
  "displays": [
   {
-   "name": "Screenshot and cat icon",
+   "name": "Screenshot",
    "box": [
-    78,
+    80,
     144,
-    156,
-    76
+    310,
+    162
    ],
-   "text": "The product's own docs/screenshot.png, small, with the cat icon on it, so you recognise it at a glance. Fetched during the check and saved on disk.",
+   "text": "The product's own docs/screenshot.png at 310 x 162, fetched during the check and saved on disk. Products without one show a tinted 'no screenshot yet' tile.",
    "letter": "A"
   },
   {
    "name": "Name, kind and build type",
    "box": [
-    248,
-    142,
-    300,
-    22
+    410,
+    146,
+    400,
+    28
    ],
    "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as one.",
    "letter": "B"
@@ -269,43 +269,43 @@
   {
    "name": "Installed and latest version",
    "box": [
-    248,
-    164,
-    300,
-    15
+    410,
+    176,
+    500,
+    20
    ],
-   "text": "What is really installed (read from the plugin's own metadata or from what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly.",
+   "text": "What is really installed (read from the plugin's own metadata, the system's installer records or what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly.",
    "letter": "C"
   },
   {
    "name": "Status",
    "box": [
-    248,
-    179,
-    300,
-    16
+    410,
+    200,
+    500,
+    22
    ],
-   "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While updating it turns into Downloading, Verifying SHA256, Installing.",
+   "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While working it turns into Downloading, Verifying SHA256, Installing.",
    "letter": "D"
   },
   {
-   "name": "Changelog line",
+   "name": "Description",
    "box": [
-    248,
-    195,
-    576,
-    15
+    410,
+    226,
+    500,
+    44
    ],
-   "text": "The first line of the release notes. The Changelog button shows the notes of every version newer than yours.",
+   "text": "The start of the release notes, wrapped to two lines. The Changelog button shows the notes of every version newer than yours.",
    "letter": "E"
   },
   {
    "name": "Date, size and install route",
    "box": [
-    248,
-    209,
-    576,
-    13
+    410,
+    276,
+    500,
+    18
    ],
    "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited).",
    "letter": "F"
@@ -314,33 +314,33 @@
    "name": "Status line",
    "box": [
     44,
-    550,
+    1058,
     380,
-    36
+    30
    ],
-   "text": "When the last check happened and how many updates were found. Offline and rate-limit messages appear here and in red on the right.",
+   "text": "When the catalog was read and how many updates were found. Offline and rate-limit messages appear here and in red on the right.",
    "letter": "G"
   },
   {
    "name": "Scrolling list",
    "box": [
-    952,
+    985,
     140,
     18,
     60
    ],
-   "text": "One long list of the tab you are on. Use the mouse wheel or the thin scrollbar. The switch button next to the search box shows pages of five instead (off by default).",
+   "text": "One long list of the tab you are on. Use the mouse wheel, drag, or the arrow keys; there are no scrollbars. In the All tab products with an update come first.",
    "letter": "H"
   },
   {
    "name": "Size read-out",
    "box": [
-    444,
-    598,
+    463,
+    1106,
     200,
-    42
+    44
    ],
-   "text": "Window size in pixels and, on the 100% button, the zoom relative to the default size.",
+   "text": "Design size in pixels and the zoom. Drag a corner to scale everything; drag a side to change only the width (960 to 1500) or the height (760 to 1500).",
    "letter": "I"
   },
   {
@@ -349,14 +349,14 @@
     0,
     0,
     34,
-    676
+    1150
    ],
-   "text": "Double click on either wood side to go back to the default size (100%).",
+   "text": "Double click on either wood side to go back to the normal size for this screen.",
    "letter": "J"
   }
  ],
  "design": [
-  1000,
-  676
+  1047,
+  1150
  ]
 }

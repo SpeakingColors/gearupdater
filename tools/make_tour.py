@@ -47,7 +47,7 @@ def main():
     app = QApplication.instance() or QApplication([])
     A.load_fonts()
     win = A.MainWindow(svc)
-    win.resize(int(1000 * SCALE), int(676 * SCALE))
+    win.apply(1047, 1150, SCALE)
     win.show()
     root = win.root
     root.start_open_check()
@@ -56,7 +56,7 @@ def main():
         app.processEvents()
         time.sleep(0.03)
     pump(app)
-    root.tab, root.page = "all", 0
+    root.tab = "updates"
     root.refresh_list()
     pump(app)
     shot = OUT / "window.png"
@@ -81,7 +81,6 @@ def main():
                      ("installed", "Installed tab"), ("notinstalled", "Not installed tab")):
         add(label, root.tabs[k])
     add("Search box", root.search)
-    add("Scrolling / pages switch", root.b_view)
     add("Update / Install selected", root.b_sel)
     add("Update all / Install all", root.b_all)
     add("Row tick box", row.check)
@@ -89,31 +88,34 @@ def main():
     add("Changelog button", row.b_log)
     add("GitHub button", row.b_git)
     add("Smaller window", root.b_zoom_out)
-    add("Back to 100 percent", root.b_zoom_100)
+    add("Fit to screen", root.b_zoom_fit)
+    add("One to one", root.b_zoom_100)
     add("Larger window", root.b_zoom_in)
     rb = box(row)
+    X = rb[0] + 366
+    H = root.H
     displays = [
-        {"name": "Screenshot and cat icon", "box": [rb[0] + 34, rb[1] + 4, 156, 76],
-         "text": "The product's own docs/screenshot.png, small, with the cat icon on it, so you recognise it at a glance. Fetched during the check and saved on disk."},
-        {"name": "Name, kind and build type", "box": [rb[0] + 204, rb[1] + 2, 300, 22],
+        {"name": "Screenshot", "box": [rb[0] + 36, rb[1] + 4, 310, 162],
+         "text": "The product's own docs/screenshot.png at 310 x 162, fetched during the check and saved on disk. Products without one show a tinted 'no screenshot yet' tile."},
+        {"name": "Name, kind and build type", "box": [X, rb[1] + 6, 400, 28],
          "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as one."},
-        {"name": "Installed and latest version", "box": [rb[0] + 204, rb[1] + 24, 300, 15],
-         "text": "What is really installed (read from the plugin's own metadata or from what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly."},
-        {"name": "Status", "box": [rb[0] + 204, rb[1] + 39, 300, 16],
-         "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While updating it turns into Downloading, Verifying SHA256, Installing."},
-        {"name": "Changelog line", "box": [rb[0] + 204, rb[1] + 55, 576, 15],
-         "text": "The first line of the release notes. The Changelog button shows the notes of every version newer than yours."},
-        {"name": "Date, size and install route", "box": [rb[0] + 204, rb[1] + 69, 576, 13],
+        {"name": "Installed and latest version", "box": [X, rb[1] + 36, 500, 20],
+         "text": "What is really installed (read from the plugin's own metadata, the system's installer records or what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly."},
+        {"name": "Status", "box": [X, rb[1] + 60, 500, 22],
+         "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While working it turns into Downloading, Verifying SHA256, Installing."},
+        {"name": "Description", "box": [X, rb[1] + 86, 500, 44],
+         "text": "The start of the release notes, wrapped to two lines. The Changelog button shows the notes of every version newer than yours."},
+        {"name": "Date, size and install route", "box": [X, rb[1] + 136, 500, 18],
          "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited)."},
-        {"name": "Status line", "box": [44, 550, 380, 36],
-         "text": "When the last check happened and how many updates were found. Offline and rate-limit messages appear here and in red on the right."},
+        {"name": "Status line", "box": [44, H - 92, 380, 30],
+         "text": "When the catalog was read and how many updates were found. Offline and rate-limit messages appear here and in red on the right."},
         {"name": "Scrolling list", "box": [root.scroll.x() + root.scroll.width() - 18, root.scroll.y(), 18, 60],
-         "text": "One long list of the tab you are on. Use the mouse wheel or the thin scrollbar. The switch button next to the search box shows pages of five instead (off by default)."},
-        {"name": "Size read-out", "box": [444, 598, 200, 42], "text": "Window size in pixels and, on the 100% button, the zoom relative to the default size."},
-        {"name": "Wood sides", "box": [0, 0, 34, 676], "text": "Double click on either wood side to go back to the default size (100%)."},
+         "text": "One long list of the tab you are on. Use the mouse wheel, drag, or the arrow keys; there are no scrollbars. In the All tab products with an update come first."},
+        {"name": "Size read-out", "box": [root.W // 2 - 60, H - 44, 200, 44], "text": "Design size in pixels and the zoom. Drag a corner to scale everything; drag a side to change only the width (960 to 1500) or the height (760 to 1500)."},
+        {"name": "Wood sides", "box": [0, 0, 34, H], "text": "Double click on either wood side to go back to the normal size for this screen."},
     ]
     img = Image.open(shot).convert("RGBA")
-    s = img.width / 1000.0
+    s = img.width / 1047.0
     d = ImageDraw.Draw(img)
     f = ImageFont.truetype(str(A.ASSETS / "BarlowCondensed-Bold.ttf"), int(17 * s / 1.0 * 0.9))
 
@@ -127,15 +129,16 @@ def main():
         bx, by = (x + w + 6, y + 2) if w < 30 else ((x + w / 2, y - 3) if (y > 540 and w < 60) else (x + 6, y + 4))
         badge(int(bx * s), int(by * s), str(i), (255, 123, 177, 255))
         c["n"] = i
-    anchors = [(rb[0] + 182, rb[1] + 10), (rb[0] + 700, rb[1] + 13), (rb[0] + 700, rb[1] + 31), (rb[0] + 700, rb[1] + 47),
-               (rb[0] + 760, rb[1] + 62), (rb[0] + 760, rb[1] + 76), (392, 556), (root.scroll.x() + root.scroll.width() - 9, root.scroll.y() + 12), (610, 620), (17, 330)]
+    anchors = [(rb[0] + 330, rb[1] + 20), (rb[0] + 700, rb[1] + 20), (rb[0] + 700, rb[1] + 46), (rb[0] + 700, rb[1] + 71),
+               (rb[0] + 700, rb[1] + 108), (rb[0] + 700, rb[1] + 145), (400, H - 78), (root.scroll.x() + root.scroll.width() - 9, root.scroll.y() + 12),
+               (root.W // 2 + 130, H - 22), (17, 330)]
     for i, (dsp, (ax, ay)) in enumerate(zip(displays, anchors)):
         L = chr(ord("A") + i)
         badge(int(ax * s), int(ay * s), L, (2, 235, 186, 255))
         dsp["letter"] = L
     img.convert("RGB").save(OUT / "window-badges.png")
     # crop of one row for the 'row' page
-    rc = [int(rb[0] * s) - 4, int(rb[1] * s) - 4, int((rb[0] + 912) * s) + 4, int((rb[1] + 84) * s) + 4]
+    rc = [int(rb[0] * s) - 4, int(rb[1] * s) - 4, int((rb[0] + row.W) * s) + 4, int((rb[1] + 172) * s) + 4]
     Image.open(shot).convert("RGB").crop(rc).save(OUT / "row.png")
     # overlays
     hb = next(r for r in root.rows if r.product.name == "Hairball")
@@ -146,7 +149,7 @@ def main():
         win.grab().save(str(OUT / ("%s.png" % key)))
         root.close_overlay()
         pump(app, 5)
-    (OUT / "tour.json").write_text(json.dumps({"controls": controls, "displays": displays, "design": [1000, 676]}, indent=1))
+    (OUT / "tour.json").write_text(json.dumps({"controls": controls, "displays": displays, "design": [1047, 1150]}, indent=1))
     print("tour written:", len(controls), "controls,", len(displays), "displays")
     win.close()
 

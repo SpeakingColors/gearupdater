@@ -35,8 +35,8 @@ jobs:
       - name: Render the real window offscreen
         env:
           QT_QPA_PLATFORM: offscreen
-          SHOT_W: '1500'
-          SHOT_H: "1014"
+          SHOT_W: '1047'
+          SHOT_H: '1150'
         run: python3 tools/make_screenshot.py docs/screenshot-ci.png
       - uses: actions/upload-artifact@v4
         with:

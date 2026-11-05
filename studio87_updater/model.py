@@ -40,12 +40,23 @@ class Row:
         return bool(self.latest and self.latest.zip_asset() and p.checks_releases)
 
     @property
+    def sync(self):
+        """Present on this computer but the version cannot be read: 'Update to sync' reinstalls the latest and writes the record."""
+        return self.status == UNKNOWN_INSTALL and self.installed is not None and self.installed.state == "installed"
+
+    @property
     def action_label(self):
+        if self.sync:
+            return "Update to sync"
         return {UPDATE: "Update", NOT_INSTALLED: "Install", UNKNOWN_INSTALL: "Install"}.get(self.status, "Update")
 
     @property
     def changelog_line(self):
         return R.changelog_line(self.latest.body) if self.latest else ""
+
+    @property
+    def changelog_text(self):
+        return R.changelog_text(self.latest.body) if self.latest else ""
 
     def notes(self):
         iv = self.installed.version if self.installed else None
@@ -75,8 +86,8 @@ def compute_status(product, releases, installed, error=None):
 
 
 def sort_key(row):
-    order = {UPDATE: 0, UNKNOWN_INSTALL: 1, NOT_INSTALLED: 2, CURRENT: 3, ERROR: 4, NO_RELEASE: 5, UNCHECKED: 5, GITHUB_ONLY: 6}
-    return (order.get(row.status, 9), row.product.name.lower())
+    """Rows with an update float to the top, everything else is by name."""
+    return (0 if row.status == UPDATE else 1, row.product.name.lower())
 
 
 MISSING = "missing-repo"     # GitHub answered 404: private or gone, so it is never shown
@@ -96,14 +107,23 @@ def check_product(client, product, use_network=True):
     return R.parse_releases(data), "", src == "cache"
 
 
-def build_rows(client, products, installed_for, use_network=True, on_progress=None):
+def build_rows(client, products, installed_for, use_network=True, on_progress=None, catalog=None):
     """Check every product. Returns (rows, notice); notice is '' or a user-facing message.
     Stops using the network on the first offline or rate-limit answer and fills the rest from the cache."""
     rows, notice, net = [], "", use_network
     client.went_offline = False
     for i, p in enumerate(products):
         row = Row(product=p, installed=installed_for(p))
-        if p.checks_releases:
+        cat_rels = catalog.releases(p.repo) if (catalog is not None and p.checks_releases) else None
+        if p.checks_releases and cat_rels is not None:
+            rels, err, cached = cat_rels, "", False         # answered by the catalog: no API request at all
+            if rels == MISSING:
+                if on_progress:
+                    on_progress(i + 1, len(products), row)
+                continue
+            row.releases, row.error, row.from_cache = rels, "", False
+            row.status = compute_status(p, rels, row.installed, None)
+        elif p.checks_releases:
             try:
                 rels, err, cached = check_product(client, p, use_network=net)
             except Offline:
@@ -144,7 +164,7 @@ def status_line(row):
     if s == UNKNOWN_INSTALL:
         i = row.installed
         if i is not None and i.state == "installed":
-            return "Installed, version not readable"
+            return "Installed, version unknown. Update to sync reinstalls the latest and remembers it."
         return "Cannot tell if it is installed"
     if s == GITHUB_ONLY:
         return "Not set up for updates yet: view on GitHub"
@@ -174,7 +194,7 @@ def in_tab(row, tab):
     if tab == "updates":
         return row.status == UPDATE
     if tab == "installed":
-        return row.status in (UPDATE, CURRENT)
+        return row.status in (UPDATE, CURRENT) or row.sync
     if tab == "notinstalled":
         return row.status == NOT_INSTALLED
     return row.product.cat == tab
@@ -197,11 +217,12 @@ def filter_rows(rows, tab="all", query=""):
 
 # ---- contextual bulk buttons: only updates count as updates, fresh installs are installs ----
 
-def split_actions(rows):
-    """(updates, installs) among the rows that can actually be installed."""
+def split_actions(rows, include_sync=True):
+    """(updates, installs) among the rows that can actually be installed. A 'sync' row (installed, version
+    unknown) counts as an update when you picked it yourself; 'Update all' leaves it alone (include_sync=False)."""
     ok = [r for r in rows if r.can_install]
-    return ([r for r in ok if r.status == UPDATE],
-            [r for r in ok if r.status in (NOT_INSTALLED, UNKNOWN_INSTALL)])
+    upd = [r for r in ok if r.status == UPDATE or (include_sync and r.sync)]
+    return (upd, [r for r in ok if r.status in (NOT_INSTALLED, UNKNOWN_INSTALL) and not r.sync])
 
 
 def _n(n, word):
@@ -210,12 +231,12 @@ def _n(n, word):
 
 def all_targets(view_rows):
     """What 'all' acts on: the updates in view; if the view holds none, the installs in view."""
-    upd, ins = split_actions(view_rows)
+    upd, ins = split_actions(view_rows, include_sync=False)
     return upd if upd else ins
 
 
 def all_label(view_rows):
-    upd, ins = split_actions(view_rows)
+    upd, ins = split_actions(view_rows, include_sync=False)
     if upd:
         return "Update all (%d)" % len(upd)
     if ins:
@@ -252,4 +273,4 @@ def confirm_button(rows):
 
 def progress_word(row):
     """Verb for one row while a queue runs."""
-    return "Installing" if row.status in (NOT_INSTALLED, UNKNOWN_INSTALL) else "Updating"
+    return "Installing" if row.status in (NOT_INSTALLED, UNKNOWN_INSTALL) and not row.sync else "Updating"

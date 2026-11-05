@@ -31,7 +31,7 @@ STAGED = {"Hairball": "0.1.0", "Cat Crusher": "0.2.2", "Cat Spacer": "0.2.3", "F
 
 def main():
     out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs" / "screenshot.png"
-    tab = sys.argv[2] if len(sys.argv) > 2 else "all"
+    tab = sys.argv[2] if len(sys.argv) > 2 else "updates"
     page = int(sys.argv[3]) if len(sys.argv) > 3 else 0
     home = Path(tempfile.mkdtemp())
     vst3 = home / "vst3"
@@ -44,7 +44,7 @@ def main():
     app = QApplication.instance() or QApplication([])
     A.load_fonts()
     win = A.MainWindow(svc)
-    win.resize(int(os.environ.get("SHOT_W", 1000)), int(os.environ.get("SHOT_H", 676)))
+    win.apply(int(os.environ.get("SHOT_W", 1047)), int(os.environ.get("SHOT_H", 1150)), float(os.environ.get("SHOT_SCALE", 1.0)))
     win.show()
     win.root.start_open_check()
     t0 = time.time()
@@ -57,7 +57,7 @@ def main():
         app.processEvents()
         time.sleep(0.02)
     win.root.tab = tab
-    win.root.page = page
+    pass
     win.root.refresh_list()
     for _ in range(10):
         app.processEvents()

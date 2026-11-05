@@ -5,15 +5,15 @@ It collects nothing. It checks GitHub only when you open it or click Check for u
 
 ## Quick start
 - Open Studio 87 Gear Updater. The list saved last time appears at once and it checks GitHub one time.
-- Type in the search box to filter by name, kind or status. Tabs: All, VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed, Updates. The list scrolls; The switch button next to the search box shows pages of five instead (off by default).
+- Type in the search box to filter by name, kind or status. Tabs: Updates, All, VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed. The app opens on Updates; on the All tab the products with an update come first, then the rest by name. The list scrolls with the mouse wheel; there are no scrollbars.
 - The Updates tab shows what has a newer version. Click Changelog on a row to read what changed.
-- Click Update on a row to update just that product. Or tick several rows and click Update selected (only real updates count), Install selected (not-installed products) or Apply selected (a mix, for example "2 updates, 1 install"). Update all / Install all act on the products in the tab you are viewing.
+- Click Update on a row to update just that product. Or tick several rows and click Update selected (only real updates count), Install selected (not-installed products) or Apply selected (a mix, for example "2 updates, 1 install"). Update all acts on the updates in the tab you are viewing; on the Not installed tab the button says Install all.
 - Each download is checked against its SHA256 checksums before anything is installed. If a check fails, that product is refused and nothing is changed.
 - Close your DAW before updating a plugin, so its file is not in use. Restart the DAW and rescan plugins afterwards.
 - Click Check for updates whenever you want to look again. Nothing else asks GitHub anything.
 
 ## Install and remove
-Windows: run Studio87-GearUpdater-Setup.exe from the zip. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
+Windows: run Studio87-GearUpdater-Setup.exe from the zip. The app asks for administrator rights once when it starts (one UAC prompt), then installs without asking again. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
 macOS: open Studio87-GearUpdater-macOS.pkg. If macOS blocks it, use System Settings, Privacy and Security, Open Anyway. Remove it with Uninstall Studio 87 Gear Updater in the Applications folder.
 Linux: double click Studio87-GearUpdater.flatpak and press Install in your software centre. Terminal alternative: flatpak install --user Studio87-GearUpdater.flatpak. Remove it with: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater
 The installers are not code-signed or notarised, because certificates cost money and this is a free project. The warning only says not signed by a known company. The code is open on GitHub and SHA256SUMS in the zip lets you check your download.
@@ -21,6 +21,8 @@ The installers are not code-signed or notarised, because certificates cost money
 ## Settings
 Look: three looks, Neon Navy, Purple Soda Pop and PurrOne. The look is saved with the app settings. The default is PurrOne.
 Hover bubbles: switch the one-second info bubbles on or off.
+Install mode: All users (default on Windows and macOS) or Just for me. Just for me puts plugins in your own VST3 folder: Windows %LOCALAPPDATA%\Programs\Common\VST3, macOS ~/Library/Audio/Plug-Ins/VST3, Linux ~/.vst3. Choose it if you do not want any administrator prompt.
+GitHub account: optional Sign in with GitHub (device code, no permissions). It raises GitHub's hourly limit from 60 to 5000. The token is kept in your system keychain, never in a file, never logged. Sign out removes it.
 Linux plugins go to: Automatic uses the Flatpak extension when that product's extension is already installed and otherwise puts the plugin in the VST3 folder (~/.vst3). VST3 folder and Flatpak DAW force one of the two. Your presets are never touched by either.
 
 ## Safety and privacy
@@ -33,7 +35,7 @@ Linux plugins go to: Automatic uses the Flatpak extension when that product's ex
 
 ## Troubleshooting
 - Offline: the list shows the last saved answers and the status line says Offline. Click Check for updates again when you are back online.
-- GitHub rate limit: without an account GitHub allows about 60 requests per hour. The first check uses about 52. If the limit is reached the app stops asking, shows the saved list, and tells you in how many minutes to try again.
+- GitHub rate limit: the app normally reads one catalog file that is rebuilt every 3 hours, so it does not use the limit. If that file cannot be read it asks GitHub per product (about 52 requests, 60 allowed per hour without an account, 5000 if you sign in). If the limit is reached the app stops asking, shows the saved list, and tells you in how many minutes to try again.
 - Installed version unknown: the product has no readable version in its plugin file and was not installed by this updater. After you update it once with this updater, it is known.
 - Not set up for updates yet: the row only links to GitHub. Its project page tells you how to get it.
 - Guided install: the release has no installer this updater knows how to run for your system, so it downloads and verifies the zip, opens the folder and you follow INSTALL.txt. It never runs scripts it does not know.

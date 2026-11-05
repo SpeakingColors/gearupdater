@@ -88,6 +88,20 @@ def changelog_line(body, maxlen=100):
     return ""
 
 
+def changelog_text(body, maxlen=260):
+    """A few clean lines of the release notes joined into one paragraph for the row (the row wraps it to 2 lines)."""
+    parts = []
+    for line in (body or "").splitlines():
+        t = line.strip()
+        for rx, rep in _MD:
+            t = rx.sub(rep, t)
+        t = t.strip(" -\t")
+        if t:
+            parts.append(t)
+    out = " ".join(parts)
+    return out[:maxlen].rsplit(" ", 1)[0].rstrip(",.;: ") + "..." if len(out) > maxlen else out
+
+
 def notes_since(releases, installed_version, limit=5):
     """Releases newer than the installed version (all up to `limit` if the installed version is unknown)."""
     out = []

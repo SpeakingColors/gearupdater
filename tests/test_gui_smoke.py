@@ -86,24 +86,70 @@ class GuiSmoke(unittest.TestCase):
         self.assertEqual(len(timers), 1)
         self.assertFalse(timers[0].isActive())
 
-    def test_aspect_lock_and_reset(self):
+    def test_resize_corners_scale_sides_change_one_dimension(self):
         win = self.make()
-        for size in ((1400, 700), (700, 900), (640, 300), (1200, 1200)):
-            win.resize(*size)
-            self.app.processEvents()
-            self.assertLessEqual(abs(win.width() / win.height() - 1000 / 676), 0.01, size)
-        win.resize(1500, 960)
+        self.assertEqual((win.LW, win.LH), (1047, 1150))
+        ratio = win.LW / win.LH
+        scr = self.A.screen_available()
+        self.assertLessEqual(win.width(), scr[0])
+        self.assertLessEqual(win.height(), scr[1])
+        w0, h0, s0 = win.width(), win.height(), win.s
+        win.resize(w0 + 100, h0 + 100)                  # corner: both change, shape kept
         self.app.processEvents()
+        self.assertEqual((win.LW, win.LH), (1047, 1150))
+        self.assertAlmostEqual(win.width() / win.height(), ratio, delta=0.01)
+        self.assertGreater(win.s, s0)
+        win.apply(1047, 1150, 1.0)
+        win.resize(win.width() + 200, win.height())     # side: only the width changes, scale stays
+        self.app.processEvents()
+        self.assertEqual((win.LH, win.s), (1150, 1.0))
+        self.assertEqual(win.LW, 1247)
+        win.resize(win.width(), win.height() - 300)     # bottom edge: only the height
+        self.app.processEvents()
+        self.assertEqual((win.LW, win.LH), (1247, 850))
+        win.resize(5000, win.height())                  # limits
+        self.app.processEvents()
+        self.assertEqual(win.LW, 1500)
+        win.resize(win.width(), 10)
+        self.app.processEvents()
+        self.assertEqual(win.LH, 760)
+        win.apply(100, 100, 1.0)
+        self.assertEqual((win.LW, win.LH), (960, 760))
+
+    def test_double_click_wood_resets_and_default_fits_screen(self):
+        win = self.make()
         root = win.root
+        win.apply(1400, 1000, 1.0)
         ev = QMouseEvent(QEvent.Type.MouseButtonDblClick, QPointF(10, 300), QPointF(10, 300), Qt.MouseButton.LeftButton,
                          Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
         root.mouseDoubleClickEvent(ev)
-        self.app.processEvents()
-        self.assertEqual((win.width(), win.height()), (1000, 676))
-        win.zoom(0.5)
-        self.assertEqual(win.width(), 1500)
+        self.assertEqual((win.LW, win.LH, win.s), (1047, 1150, win.s_fit))
+        self.assertLessEqual(win.s_fit, 1.0)
+        self.assertEqual(self.A.fit_scale((3000, 3000)), 1.0)
+        self.assertLess(self.A.fit_scale((1366, 768)), 0.7)
+        win.zoom(0.1)
+        self.assertAlmostEqual(win.s, win.s_fit + 0.1)
         root.b_zoom_100.click()
-        self.assertEqual(win.width(), 1000)
+        self.assertEqual(win.s, 1.0)
+        root.b_zoom_fit.click()
+        self.assertEqual(win.s, win.s_fit)
+
+    def test_rows_keep_thumbnail_size_and_description_wraps_to_two_lines(self):
+        self.make(staged={"Hairball": "0.1.0"})
+        root = self.open_and_check()
+        root.set_tab("all")
+        self.assertEqual((self.A.THUMB_W, self.A.THUMB_H), (310, 162))
+        n1 = len(root.view_rows)
+        root.win.apply(1500, 1500, 1.0)
+        rw = root.allrows[0]
+        self.assertEqual(rw.W, 1500 - 88 - 14)
+        self.assertEqual(rw.H, 172)
+        from PySide6.QtGui import QFontMetrics
+        fm = QFontMetrics(self.A.font(px=17))
+        lines = self.A.wrap_lines("word " * 200, fm, 400, 2)
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(lines[1].endswith("\u2026") or lines[1].endswith("..."))
+        self.assertEqual(len(self.A.wrap_lines("short text", fm, 400, 2)), 1)
 
     def test_no_scrollbars_anywhere_in_main_view(self):
         win = self.make()
@@ -111,32 +157,43 @@ class GuiSmoke(unittest.TestCase):
         self.assertEqual(win.view.horizontalScrollBarPolicy(), Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.assertEqual(win.view.verticalScrollBarPolicy(), Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def test_scroll_list_is_default_and_pages_are_optional(self):
+    def test_opens_on_updates_with_empty_state_and_scrolling_list(self):
         self.make(staged={})
         root = self.open_and_check()
-        self.assertEqual(self.svc.settings["view"], "scroll")
-        self.assertTrue(root.show_all and root.scroll.isVisible())
+        self.assertEqual(root.tab, "updates")
+        self.assertEqual(root.view_rows, [])
+        self.assertIn("Everything is up to date", root.empty_text())
+        self.assertTrue(root.b_browse.isVisibleTo(root))
+        self.assertEqual(root.b_all.text(), "Update all (0)")
         root.set_tab("all")
-        n = len([p for p in self.svc.products if True])
-        self.assertEqual(len(root.view_rows), len(root.rows))
         shown = [rw for rw in root.allrows if rw.row is not None]
         self.assertEqual(len(shown), len(root.rows), "every product is in the one scrolling list")
         self.assertGreater(root.inner.height(), root.scroll.height())
-        self.assertFalse([rw for rw in root.rowws if rw.row is not None], "paged rows are unused in scroll mode")
-        self.assertFalse(root.b_next.isVisible())
-        root.toggle_view()
-        self.assertEqual(self.svc.settings["view"], "pages")
-        self.assertFalse(root.scroll.isVisible())
-        self.assertEqual(len([rw for rw in root.rowws if rw.row is not None]), 5)
-        root.goto(99)
-        self.assertEqual(len([rw for rw in root.rowws if rw.row is not None]), len(root.rows) % 5 or 5)
-        root.set_tab("updates")
-        self.assertEqual(root.view_rows, [])
-        self.assertIn("up to date", root.empty_text())
+        self.assertEqual(root.scroll.verticalScrollBarPolicy(), Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+    def test_all_tab_updates_first_and_contextual_buttons(self):
+        self.make(staged={"Hairball": "0.1.0", "Cat Crusher": "0.2.4"})
+        root = self.open_and_check()
+        root.set_tab("all")
+        names = [r.product.name for r in root.view_rows]
+        self.assertEqual(names[0], "Hairball")
+        rest = [n.lower() for n in names[1:]]
+        self.assertEqual(rest, sorted(rest))
+        rw = root.allrows[0]
+        self.assertEqual(rw.b_main.text(), "Update")
+        cc = next(w for w in root.allrows if w.row is not None and w.row.product.name == "Cat Crusher")
+        self.assertEqual(cc.b_main.text(), "Up to date")
+        self.assertFalse(cc.b_main.isEnabled())
+        root.set_tab("notinstalled")
+        self.assertTrue(root.view_rows)
+        self.assertTrue(root.b_all.text().startswith("Install all"))
+        self.assertNotIn("Update all", root.b_all.text())
+        self.assertEqual(root.allrows[0].b_main.text(), "Install")
 
     def test_search_box_filters_as_you_type_and_tab_and_view_persist(self):
         self.make(staged={"Hairball": "0.1.0"})
         root = self.open_and_check()
+        root.set_tab("all")
         root.search.setText("hair")
         self.assertEqual([r.product.name for r in root.view_rows], ["Hairball"])
         root.search.setText("controller")
@@ -145,10 +202,7 @@ class GuiSmoke(unittest.TestCase):
         self.assertIn("matches", root.empty_text())
         root.search.setText("")
         root.set_tab("synth")
-        root.toggle_view()
-        from studio87_updater.service import Settings
-        saved = Settings(self.svc.settings.path)
-        self.assertEqual((saved["tab"], saved["view"]), ("synth", "pages"))
+        self.assertEqual(root.tab, "synth")
 
     def test_hover_bubble_after_delay_and_setting_off(self):
         self.make()
@@ -199,6 +253,7 @@ class GuiSmoke(unittest.TestCase):
         # GitHub's own digest in the recorded data belongs to the real zip, so the stub zip must be refused first
         win = self.make(files={url: z}, staged={"Hairball": "0.1.0"})
         root = self.open_and_check()
+        root.set_tab("all")
         hb = lambda: next(rw for rw in root.allrows if rw.row is not None and rw.row.product.name == "Hairball")
         rw = hb()
         rw.b_main.click()

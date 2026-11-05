@@ -17,7 +17,7 @@ Linux (Bazzite, Fedora, Ubuntu and others with Flatpak)
   "flatpak install" on your computer (plugin extensions for Flatpak DAWs). It cannot see the rest of your home folder.
 
 Windows
-  Run windows\Studio87-GearUpdater-Setup.exe. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
+  Run windows\Studio87-GearUpdater-Setup.exe. The app asks for administrator rights once each time it starts (one UAC prompt), so installing many products never asks again. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
   Remove: Settings > Apps > Studio 87 Gear Updater > Uninstall. It asks if you also want its settings deleted (default No).
 
 macOS
@@ -26,6 +26,7 @@ macOS
 
 Using it
   The window opens with the list saved last time and checks GitHub once. After that it only checks when you click "Check for updates".
+  It opens on the Updates tab. Settings has Install mode (All users or Just for me, no admin) and an optional Sign in with GitHub.
   Tick products and click "Update selected" or "Install selected" (or "Apply selected" for a mix), click "Update all" / "Install all", or press Update or Install on a single row. Nothing is installed without a click.
   Every download is checked against SHA256SUMS before it is installed; on a mismatch it is refused and nothing is changed.
   Your saved presets and data folders are never touched.

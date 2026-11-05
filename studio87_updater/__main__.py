@@ -26,6 +26,9 @@ def main(argv=None):
         return 0
     if "--list" in argv:
         return cli_list()
+    from . import elevate
+    if elevate.maybe_relaunch_elevated(argv):
+        return 0
     from .gui.app import run
     return run(argv)
 
