@@ -28,7 +28,7 @@ MUTATIONS = [
     ("github.py", "raise RateLimited(self.reset)\n        headers", "pass\n        headers"),
     ("github.py", "h.get(\"x-ratelimit-remaining\") == \"0\"", "False"),
     ("model.py", "return UPDATE if upd else CURRENT", "return CURRENT if upd else UPDATE"),
-    ("model.py", "        if p.checks_releases:\n            try:", "        if True:\n            try:"),
+    ("model.py", "        elif p.checks_releases:\n            try:", "        elif True:\n            try:"),
     ("model.py", "    return all(w in hay for w in words)", "    return any(w in hay for w in words)"),
     ("model.py", "    if tab == \"updates\":\n        return row.status == UPDATE", "    if tab == \"updates\":\n        return True"),
     ("model.py", "            if rels == MISSING:", "            if False:"),
