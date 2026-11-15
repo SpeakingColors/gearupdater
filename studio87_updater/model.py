@@ -196,7 +196,7 @@ def in_tab(row, tab):
     if tab == "installed":
         return row.status in (UPDATE, CURRENT) or row.sync
     if tab == "notinstalled":
-        return row.status == NOT_INSTALLED
+        return row.status == NOT_INSTALLED or (row.status == NO_RELEASE and (row.installed is None or row.installed.state == "not-installed"))
     return row.product.cat == tab
 
 

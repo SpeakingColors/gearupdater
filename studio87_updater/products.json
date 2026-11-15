@@ -320,6 +320,12 @@
    "kind": "unknown"
   },
   {
+   "repo": "purrrvoicechannel",
+   "name": "Purrr Voice Channel",
+   "kind": "vst3",
+   "category": "fx"
+  },
+  {
    "repo": "mx400-vst-linux",
    "name": "MX400 Controller",
    "kind": "controller",

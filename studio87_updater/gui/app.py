@@ -191,10 +191,11 @@ class RowWidget(QWidget):
         self.b_main.setEnabled(r.can_install and r.status != MD.CURRENT and not busy and not self.ui.installing and not offline_why)
         self.b_roll.setVisible(r.status != MD.GITHUB_ONLY and self.ui.svc.backups.has(r.product.repo))
         self.b_roll.setEnabled(not busy and not self.ui.installing)
-        self.b_main.setVisible(r.status != MD.GITHUB_ONLY)
-        self.b_log.setVisible(r.status != MD.GITHUB_ONLY)
+        bare = r.status in (MD.GITHUB_ONLY, MD.NO_RELEASE)        # nothing to install yet: the GitHub button only
+        self.b_main.setVisible(not bare)
+        self.b_log.setVisible(not bare)
         self.b_log.setEnabled(bool(r.releases))
-        self.check.setVisible(r.status != MD.GITHUB_ONLY)
+        self.check.setVisible(not bare)
         self.check.setEnabled(r.can_install and r.status != MD.CURRENT and not busy and not offline_why)
         self.b_main.update()
 

@@ -244,18 +244,19 @@ var OLD=[
 var MAP={crusher:'catcrusher-vst',spacer:'catspacer',fatcat:'FatCat',hairball:'hairball',maxi:'Meowximizer',scaredy:'scaredy-cat',whiskermix:'whiskermix',purrone:'PurrOne',supurr:'SupurrrSaw-VST',scope:'whiskerscope',meowbass:'meowbass',updater:'gearupdater',ultranova:'linux-ultranova-controller',modx:'modxm-controller-vst',shimmer:'shimmerstuff',multipaw:'multipawcompressor',kick:'KickKitten',hyper:'hypersaw-xd'};
 var CATS=[['updates','Updates'],['all','All'],['fx','VST and FX'],['synth','Synths'],['ctrl','Controllers'],['app','Apps and logue'],['installed','Installed'],['none','Not installed'],['other','Other']];
 var CATLIST=[
-['catcrusher-vst','Cat Crusher','vst3','fx'],['catspacer','Cat Spacer','vst3','fx'],['FatCat','Fat Cat','vst3','fx'],['meowbass','Meowbass','vst3','fx'],['Meowximizer','Meowximizer','vst3','fx'],['scaredy-cat','Scaredy Cat','vst3','fx'],['Clawpressor-vst','Clawpressor','vst3','fx'],['Purrrstressor','Purrrstressor','vst3','fx'],['multipawcompressor','MultiPaw Compressor','vst3','fx'],['clawshaper','ClawShaper','vst3','fx'],['shimmerstuff','Shimmer Reverb','vst3','fx'],['LapCat2A','LapCat2A','vst3','fx'],['Apurrr2500','Apurrr2500','vst3','fx'],['Pawltec','Pawltec','vst3','fx'],['CatRack','CatRack','vst3','fx'],['whiskerscope','Whisker Scope','vst3','fx'],['Meowcorder','Meowcorder','vst3','fx'],
+['catcrusher-vst','Cat Crusher','vst3','fx'],['catspacer','Cat Spacer','vst3','fx'],['FatCat','Fat Cat','vst3','fx'],['meowbass','Meowbass','vst3','fx'],['Meowximizer','Meowximizer','vst3','fx'],['scaredy-cat','Scaredy Cat','vst3','fx'],['Clawpressor-vst','Clawpressor','vst3','fx'],['Purrrstressor','Purrrstressor','vst3','fx'],['multipawcompressor','MultiPaw Compressor','vst3','fx'],['clawshaper','ClawShaper','vst3','fx'],['shimmerstuff','Shimmer Reverb','vst3','fx'],['LapCat2A','LapCat2A','vst3','fx'],['Apurrr2500','Apurrr2500','vst3','fx'],['Pawltec','Pawltec','vst3','fx'],['CatRack','CatRack','vst3','fx'],['whiskerscope','Whisker Scope','vst3','fx'],['purrrvoicechannel','Purrr Voice Channel','vst3','fx'],['Meowcorder','Meowcorder','vst3','fx'],
 ['SupurrrSaw-VST','SupurrSaw','vst3','synth'],['JPurrr-8000','JPurrr-8000','vst3','synth'],['PurrOne','PurrOne','vst3','synth'],['SynthCookBook','Synth Cook Book','vst3','synth'],['provsmini-vst','ProVS Mini','vst3','synth'],['Whiskerwave-vst','Whiskerwave','vst3','synth'],['jt4000-vst','JT4000','vst3','synth'],['KickKitten','Kick Kitten','vst3','synth'],
 ['mx400-vst-linux','MX400 Controller','controller','ctrl'],['modxm-controller-vst','MODX M Controller','controller','ctrl'],['Cobalt8M-Controller-VST','Cobalt8M Controller','controller','ctrl'],['linux-peak-controller','Peak Controller','controller','ctrl'],['minilogue-xd-controller','minilogue xd Controller','controller','ctrl'],['drumlogue-linux-controller','drumlogue Controller','controller','ctrl'],['linux-ultranova-controller','UltraNova Controller','controller','ctrl'],['mwave-fm1-linux-vst','mwave FM1 Controller','controller','ctrl'],
 ['whiskermix','WhiskerMix','app','app'],['gearupdater','Studio 87 Gear Updater','app','app'],['sawwiden-xd','Sawwiden XD','logue','app'],['hypersaw-xd','Hypersaw XD','logue','app'],['hypersaw-drumlogue','Hypersaw drumlogue','logue','app'],['MegaSaw-XD','MegaSaw XD','logue','app'],
 ['hairball','Hairball','vst3','other'],['stretch-cat-vst','Stretch Cat','vst3','other'],['copycat-vst','Copycat','vst3','other'],['CATalog','CATalog','vst3','other'],['PunchPaw','PunchPaw','vst3','other'],['Furchild','Furchild','vst3','other'],['FetlinePounce','FetlinePounce','vst3','other'],['purrfect-cut','Purrfect Cut','vst3','other'],['AI-Purrformer','AI Purrformer','vst3','other'],['scratchcatfx-vst','Scratch Cat FX','vst3','other'],['scratchcatduo-vst','Scratch Cat Duo','vst3','other']
 ];
-var LINES={scaredy:"Fix: crossover chips no longer wrap; smoother band meters.",whiskermix:"Mixer remembers the last workspace; MIDI hub log filters.",ultranova:"NRPN edits from the panel are decoded more reliably.",shimmer:"First test build: shimmer reverb with delay and modulation.",multipaw:"First test build: multiband compressor plus multiband sidechain.",kick:"First test build: trance kick maker.",hyper:"Unit file and INSTALL.txt for the logue SDK loader.",purrone:"Mono synth with filter modes and bass presets.",supurr:"Supersaw synth with a playground page.",scope:"Spectrum, scope, stereo field and Shapes.",meowbass:GENERIC,updater:"This updater."};
+var LINES={purrrvoicechannel:"A design mockup of a voice channel strip. There is no plugin to install yet.",scaredy:"Fix: crossover chips no longer wrap; smoother band meters.",whiskermix:"Mixer remembers the last workspace; MIDI hub log filters.",ultranova:"NRPN edits from the panel are decoded more reliably.",shimmer:"First test build: shimmer reverb with delay and modulation.",multipaw:"First test build: multiband compressor plus multiband sidechain.",kick:"First test build: trance kick maker.",hyper:"Unit file and INSTALL.txt for the logue SDK loader.",purrone:"Mono synth with filter modes and bass presets.",supurr:"Supersaw synth with a playground page.",scope:"Spectrum, scope, stereo field and Shapes.",meowbass:GENERIC,updater:"This updater."};
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 var OLDBY={};OLD.forEach(function(o){OLDBY[MAP[o.id]]=o;o.lid=o.id});
 /* MOCK STATES: the first 18 are hand picked, the rest are generated from the repo name so every reload looks the same */
 var P=CATLIST.map(function(c){
   var o=OLDBY[c[0]],p={id:c[0],name:c[1],kind:c[2],cat:c[3]};
+  if(c[0]==='purrrvoicechannel'){p.norel=true;p.inst=null;p.vers=[];return p}
   if(o){['inst','latest','date','size','err','img','vers','lid'].forEach(function(k){if(o[k]!==undefined)p[k]=o[k]});return p}
   var h=hash(c[0]),r=h%10,lg=c[2]==='logue',pat=1+((h>>>6)%4),mn=1+((h>>>3)%2);
   p.latest=lg?'1.0.'+pat:'0.'+mn+'.'+pat;p.date='2026-'+((h>>>9)%4===0?'11-0'+(1+(h>>>12)%2):'10-'+(18+(h>>>12)%13));p.size=lg?1:30+h%110;
@@ -279,10 +280,10 @@ var $=function(s,r){return (r||document).querySelector(s)};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function byId(id){for(var i=0;i<P.length;i++)if(P[i].id===id)return P[i];}
 function cmp(a,b){var x=a.split('.').map(Number),y=b.split('.').map(Number);for(var i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)-(y[i]||0)}return 0}
-function stateOf(p){if(p.err)return 'error';if(p.inst===null)return 'none';if(p.inst==='?')return 'unknown';return cmp(p.inst,p.latest)<0?'update':'ok'}
+function stateOf(p){if(p.norel)return 'norel';if(p.err)return 'error';if(p.inst===null)return 'none';if(p.inst==='?')return 'unknown';return cmp(p.inst,p.latest)<0?'update':'ok'}
 function eligible(p){var s=stateOf(p);return s==='update'||s==='none'||s==='unknown'}
 function kindText(p){if(p.kind==='vst3')return p.cat==='synth'?'VST3 SYNTH':p.cat==='fx'?'VST3 FX':'VST3 PLUGIN';return {controller:'CONTROLLER (VST3)',app:'APP',logue:'LOGUE UNIT'}[p.kind]}
-function statusLabel(p){return {update:'installed update available',ok:'installed up to date',none:'not installed',unknown:'installed version unknown',error:'could not check'}[stateOf(p)]}
+function statusLabel(p){return {update:'installed update available',ok:'installed up to date',none:'not installed',norel:'not installed no release yet',unknown:'installed version unknown',error:'could not check'}[stateOf(p)]}
 function routeText(p){if(p.kind==='logue')return 'Guided: opens the folder';if(p.kind==='app')return 'Flatpak app';return {auto:'VST3 (native or Flatpak)',tarball:'VST3 tarball to ~/.vst3',flatpak:'Flatpak extension'}[S.route]}
 function sizeText(p){return p.size>=1&&p.size<2&&p.kind==='logue'?'1 MB':p.size+' MB'}
 
@@ -328,8 +329,8 @@ function visible(){
   var t=S.tab,q=S.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   var L=P.filter(function(p){var s=stateOf(p);
     if(t==='updates'){if(!(s==='update'||S.recent[p.id]))return false}
-    else if(t==='installed'){if(s==='none'&&!S.recent[p.id])return false}
-    else if(t==='none'){if(s!=='none'&&!S.recent[p.id])return false}
+    else if(t==='installed'){if((s==='none'||s==='norel')&&!S.recent[p.id])return false}
+    else if(t==='none'){if(s!=='none'&&s!=='norel'&&!S.recent[p.id])return false}
     else if(t!=='all'&&p.cat!==t)return false;
     if(!q.length)return true;var hs=(p.name+' '+kindText(p)+' '+statusLabel(p)).toLowerCase();return q.every(function(w){return hs.indexOf(w)>=0})});
   L.sort(function(a,b){if(t==='all'&&S.sortFirst){var x=stateOf(a)==='update'?0:1,y=stateOf(b)==='update'?0:1;if(x!==y)return x-y}return a.name.localeCompare(b.name)});
@@ -337,7 +338,7 @@ function visible(){
 }
 function perPage(){return S.compact?8:S.big?4:5}
 function pitch(){return S.compact?55:S.big?178:134}
-function counts(){var c={u:0,i:0,n:0,a:P.length,cat:{}};P.forEach(function(p){var s=stateOf(p);if(s==='update')c.u++;if(s!=='none')c.i++;else c.n++;c.cat[p.cat]=(c.cat[p.cat]||0)+1});return c}
+function counts(){var c={u:0,i:0,n:0,a:P.length,cat:{}};P.forEach(function(p){var s=stateOf(p);if(s==='update')c.u++;if(s!=='none'&&s!=='norel')c.i++;else c.n++;c.cat[p.cat]=(c.cat[p.cat]||0)+1});return c}
 var TABTIPS={updates:'Only the products that have a newer version than the one installed.',all:'Every Studio 87 product, installed or not. Use Install on any row.',fx:'Effects, compressors, EQs, reverbs and analysers (VST3).',synth:'Synths and instruments (VST3).',ctrl:'VST3 controllers for hardware synths and gear.',app:'Standalone apps and logue units.',installed:'Everything found on this computer.',none:'Products that are not installed here yet. Install any of them.',other:'Products not sorted into another tab yet.'};
 function pl(n,w){return n+' '+w+(n===1?'':'s')}
 function bulkInfo(){var u=[],n=[];visible().forEach(function(p){var s=stateOf(p);if(s==='update')u.push(p.id);else if(s==='none')n.push(p.id)});return {u:u,n:n}}
@@ -356,25 +357,26 @@ function statusHTML(p){
   if(s==='update')return '<span class="dot" style="background:var(--accent)"></span><span style="color:var(--accent)">Update available</span>';
   if(s==='ok')return '<span class="dot" style="background:var(--good)"></span>Up to date';
   if(s==='none')return '<span class="dot"></span><span style="color:var(--dim)">Not installed</span>';
+  if(s==='norel')return '<span class="dot"></span><span style="color:var(--dim)">No release yet</span>';
   if(s==='unknown')return '<span class="dot" style="background:var(--info)" data-tip="'+esc(TIPS.st_unknown)+'"></span>Installed version unknown';
   return '<span class="dot" style="background:var(--bad)" data-tip="'+esc(TIPS.st_err)+'"></span><span style="color:var(--bad)">Could not check: GitHub did not answer</span>';
 }
 function rowHTML(p,i){
   var s=stateOf(p),busy=!!S.busy[p.id]||S.queue.indexOf(p.id)>=0,el=eligible(p)&&!S.offlineShown;
-  var inst=s==='none'?'Not installed':s==='unknown'?'Installed ?':'Installed '+p.inst;
-  var l2=inst+'<i>&gt;</i>Latest '+(p.latest||'?');
+  var inst=(s==='none'||s==='norel')?'Not installed':s==='unknown'?'Installed ?':'Installed '+p.inst;
+  var l2=s==='norel'?inst:inst+'<i>&gt;</i>Latest '+(p.latest||'?');
   var label=busy?(S.busy[p.id]?'Working':'Queued'):s==='update'?'Update':s==='none'?(p.kind==='logue'?'Download':'Install'):s==='unknown'?'Update to sync':s==='ok'?'Up to date':'Retry later';
   var line4=p.vers.length&&p.vers[0][2]?p.vers[0][2]:(LINES[p.lid||p.id]||POOL[hash(p.id)%4]);
   var tip=S.offlineShown&&(s==='update'||s==='none'||s==='unknown')?'Offline. Install and Update need the internet to download the plugin, unless its installer is already downloaded.':s==='unknown'?TIPS.sync:s==='update'||s==='none'?TIPS.upd:'';
   return '<div class="row" data-id="'+p.id+'" style="top:'+(i*pitch())+'px">'+
-   '<button class="cb" data-act="tick" data-arg="'+p.id+'" data-tip="'+esc(TIPS.cb)+'" '+(el&&!busy?'':'disabled')+' aria-label="Select '+esc(p.name)+'">'+(S.sel[p.id]?'&#10003;':'')+'</button>'+
+   '<button class="cb" data-act="tick" data-arg="'+p.id+'" data-tip="'+esc(TIPS.cb)+'" '+(el&&!busy?'':'disabled')+(s==='norel'?' hidden':'')+' aria-label="Select '+esc(p.name)+'">'+(S.sel[p.id]?'&#10003;':'')+'</button>'+
    '<div class="thumb" data-tip="'+esc(TIPS.thumb)+'"><img alt="" src="'+thumb(p)+'"></div>'+
    '<div class="txt"><div class="l1">'+esc(p.name)+'<span class="k">'+kindText(p)+'</span><span class="t">TEST BUILD</span></div>'+
    '<div class="l2 mono">'+l2+'</div><i class="br"></i><div class="l3" data-l3>'+statusHTML(p)+'</div>'+
    '<div class="l4">'+esc(line4)+'</div>'+
-   '<div class="l5">'+(p.date?p.date+'&nbsp;&nbsp;'+sizeText(p)+'&nbsp;&nbsp;'+routeText(p):'No release data this time')+'</div></div>'+
-   '<div class="btns"><button class="b sm '+(el&&!busy?'pri':'')+'" data-act="upd" data-arg="'+p.id+'" '+(el&&!busy?'':'disabled')+(tip?' data-tip="'+esc(tip)+'"':'')+'>'+label+'</button>'+
-   '<button class="b sm" data-act="chg" data-arg="'+p.id+'" data-tip="'+esc(TIPS.chg)+'" '+(p.err?'disabled':'')+'>Changelog</button>'+
+   '<div class="l5">'+(s==='norel'?'No release yet. Design mockup only.':p.date?p.date+'&nbsp;&nbsp;'+sizeText(p)+'&nbsp;&nbsp;'+routeText(p):'No release data this time')+'</div></div>'+
+   '<div class="btns">'+(s==='norel'?'':'<button class="b sm '+(el&&!busy?'pri':'')+'" data-act="upd" data-arg="'+p.id+'" '+(el&&!busy?'':'disabled')+(tip?' data-tip="'+esc(tip)+'"':'')+'>'+label+'</button>'+
+   '<button class="b sm" data-act="chg" data-arg="'+p.id+'" data-tip="'+esc(TIPS.chg)+'" '+(p.err?'disabled':'')+'>Changelog</button>')+
    '<button class="b sm" data-act="gh" data-arg="'+p.id+'" data-tip="'+esc(TIPS.gh)+'">GitHub</button>'+(S.prev[p.id]?'<button class="b sm" data-act="roll" data-arg="'+p.id+'" data-tip="Put back the version that was installed before the last update ('+esc(S.prev[p.id])+'). The newer one is removed.">Roll back</button>':'')+'</div></div>';
 }
 function render(){

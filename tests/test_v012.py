@@ -880,6 +880,19 @@ class RenamedRepos(unittest.TestCase):
         self.assertIn("SynthCookBook", repos)
         self.assertNotIn("catpro1", repos)
         self.assertNotIn("td3mo-vst", repos)
+        from studio87_updater import manifest as M
+        from studio87_updater import model as MD
+        pv = [p for p in M.load_manifest().products if p.repo == "purrrvoicechannel"][0]
+        self.assertEqual(pv.cat, "fx")
+        inst = I.InstalledInfo("not-installed", None, "scan", "")
+        row = MD.Row(product=pv, installed=inst)
+        row.releases = []
+        row.status = MD.compute_status(pv, [], inst, None)
+        self.assertEqual(row.status, MD.NO_RELEASE)
+        self.assertFalse(row.can_install)
+        self.assertTrue(MD.in_tab(row, "notinstalled"))
+        self.assertTrue(MD.in_tab(row, "fx"))
+        self.assertFalse(MD.in_tab(row, "installed"))
 
 
 if __name__ == "__main__":
