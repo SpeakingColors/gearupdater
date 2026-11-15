@@ -392,13 +392,8 @@
    }
   },
   {
-   "repo": "td3mo-vst",
-   "name": "TD-3-MO Controller",
-   "kind": "controller"
-  },
-  {
-   "repo": "catpro1",
-   "name": "Cat Pro-1",
+   "repo": "SynthCookBook",
+   "name": "Synth Cook Book",
    "kind": "controller"
   },
   {

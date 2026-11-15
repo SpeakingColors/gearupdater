@@ -865,5 +865,22 @@ class DocsTests(T):
             self.assertNotIn("/home/claude", t, str(p))
 
 
+class RenamedRepos(unittest.TestCase):
+    def test_old_names_map_and_manifest_lists_new_ones(self):
+        import json
+        import tempfile
+        from studio87_updater import installed as I
+        d = Path(tempfile.mkdtemp())
+        (d / "r.json").write_text(json.dumps({"schema": 1, "products": {"catpro1": {"version": "0.1.0"}, "PurrOne": {"version": "1"}}}))
+        rec = I.Record(d / "r.json")
+        self.assertEqual(rec.get("SynthCookBook")["version"], "0.1.0")
+        self.assertIsNone(rec.get("catpro1"))
+        self.assertEqual(rec.get("PurrOne")["version"], "1")
+        repos = [p["repo"] for p in json.loads((Path(__file__).resolve().parents[1] / "studio87_updater" / "products.json").read_text())["products"]]
+        self.assertIn("SynthCookBook", repos)
+        self.assertNotIn("catpro1", repos)
+        self.assertNotIn("td3mo-vst", repos)
+
+
 if __name__ == "__main__":
     unittest.main()

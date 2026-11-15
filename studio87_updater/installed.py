@@ -30,6 +30,10 @@ class InstalledInfo:
         return self.state == "installed" and self.version is not None
 
 
+# Repos that were renamed or merged: an install record written under the old name still counts under the new one.
+RENAMED = {"catpro1": "SynthCookBook", "td3mo-vst": "SynthCookBook"}
+
+
 class Record:
     """installed-versions.json, written only after the user clicked Update and it succeeded."""
 
@@ -41,6 +45,10 @@ class Record:
                 d = json.load(f)
             if isinstance(d, dict) and isinstance(d.get("products"), dict):
                 self.data = d["products"]
+                for old, new in RENAMED.items():
+                    if old in self.data:
+                        v = self.data.pop(old)
+                        self.data.setdefault(new, v)
         except (OSError, ValueError):
             pass
 

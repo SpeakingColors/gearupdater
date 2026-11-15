@@ -8,6 +8,7 @@
 - Offline mode for the catalog, product info and screenshots (60 MB cap, Clear in Settings); Install and Update are off with a reason, unless the installer is already downloaded.
 - Self update: "Update the updater first" when a newer release exists; the footer shows the version everywhere.
 - Plugin link `studio87://open[?product=<repo>]`, registered by the Windows installer, the macOS app and the Linux `.desktop` file; see `docs/plugin-link.md`.
+- Product list: `catpro1` is now `SynthCookBook` (Synth Cook Book; an install record under the old name still counts), `td3mo-vst` was removed (its book lives in Synth Cook Book).
 - Mockup is now `updater-v11.html` (v9 and v10 are kept in `docs/mockup/versions`).
 - Same zip layout and a separate `SHA256SUMS` asset, so v0.1.1 can update to it. Not tested on real machines.
 
