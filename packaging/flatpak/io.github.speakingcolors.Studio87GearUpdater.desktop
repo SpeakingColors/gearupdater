@@ -2,9 +2,10 @@
 Type=Application
 Name=Studio 87 Gear Updater
 Comment=Update your Studio 87 plugins and apps
-Exec=studio87-gearupdater
+Exec=studio87-gearupdater %u
 Icon=io.github.speakingcolors.Studio87GearUpdater
 Keywords=gear updater;updater;studio 87;firmware;plugins;vst;update;
 Categories=AudioVideo;Audio;Utility;
+MimeType=x-scheme-handler/studio87;
 Terminal=false
 StartupWMClass=studio87-gearupdater

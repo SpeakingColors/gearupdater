@@ -17,7 +17,7 @@ Linux (Bazzite, Fedora, Ubuntu and others with Flatpak)
   "flatpak install" on your computer (plugin extensions for Flatpak DAWs). It cannot see the rest of your home folder.
 
 Windows
-  Run windows\Studio87-GearUpdater-Setup.exe. The app asks for administrator rights once each time it starts (one UAC prompt), so installing many products never asks again. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
+  Run windows\Studio87-GearUpdater-Setup.exe. The app starts as a normal user, with no prompt. Only when you install with "All users" does it ask for administrator rights, once for the whole batch (one UAC prompt). "Just for me" in Settings never asks. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
   Remove: Settings > Apps > Studio 87 Gear Updater > Uninstall. It asks if you also want its settings deleted (default No).
 
 macOS
@@ -26,16 +26,21 @@ macOS
 
 Using it
   The window opens with the list saved last time and checks GitHub once. After that it only checks when you click "Check for updates".
-  It opens on the Updates tab. Settings has Install mode (All users or Just for me, no admin) and an optional Sign in with GitHub.
+  It opens on the Updates tab. Settings has Install mode (All users or Just for me, no admin), an optional Sign in with GitHub (it says where the token is kept: OS keychain, local file or this session only), the saved list and Previous versions with a Clear button each.
+  Previous versions: when the updater copies a plugin folder itself, it keeps the version you had so Roll back can put it back (last version per product, 600 MB cap). A Setup.exe, .pkg or Flatpak cannot be rolled back by the updater.
+  A failed update restores the old version. Update all keeps going after one failure and ends with a result list and Retry failed.
+  Offline: the list is shown from the saved copy with a bar "Offline, showing saved list from ..."; Install and Update wait until you are online, unless the installer was already downloaded.
+  If a newer Studio 87 Gear Updater exists, "Update the updater first" appears at the top. On Linux (Flatpak) it shows the command to run; it never replaces itself silently.
+  Plugin link: studio87://open?product=NAME opens this app. Plugins use it for an "Open Studio 87 Gear Updater" button; it sends nothing and runs nothing.
   Tick products and click "Update selected" or "Install selected" (or "Apply selected" for a mix), click "Update all" / "Install all", or press Update or Install on a single row. Nothing is installed without a click.
   Every download is checked against SHA256SUMS before it is installed; on a mismatch it is refused and nothing is changed.
   Your saved presets and data folders are never touched.
 
 Where it keeps its own files
-  Linux   : ~/.var/app/io.github.speakingcolors.Studio87GearUpdater/data/Studio 87/Gear Updater (settings, installed-versions.json)
+  Linux   : ~/.var/app/io.github.speakingcolors.Studio87GearUpdater/data/Studio 87/Gear Updater (settings, installed-versions.json, backups, token file if used)
             and .../cache (saved GitHub answers and screenshots). Outside Flatpak: ~/.local/share/Studio 87/Gear Updater.
   Windows : %APPDATA%\Studio 87\Gear Updater and %LOCALAPPDATA%\Studio 87\Gear Updater\cache
   macOS   : ~/Library/Application Support/Studio 87/Gear Updater and ~/Library/Caches/Studio 87/Gear Updater
 
 Manual: Studio87-GearUpdater-manual.pdf. Checksums: SHA256SUMS. Licence: AGPL-3.0-or-later (see LICENSE).
-This is a test build until it has been checked on real machines.
+This is a test build until it has been checked on real machines. Version 0.1.0 worked on Windows; macOS and Linux have not been tested by anyone.

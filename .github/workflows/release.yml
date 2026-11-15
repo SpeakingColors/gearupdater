@@ -1,7 +1,8 @@
 # Release build: Linux Flatpak, Windows installer (.exe), macOS installer (.pkg), PDF manual, INSTALL.txt, LICENSE and
 # SHA256SUMS in one zip, plus a separate SHA256SUMS asset (so the updater can check the zip itself).
 # The zip is named Studio87-Gear-Updater-<tag>.zip (v0.1.0 was Studio87-Updater-<tag>.zip; the old updater accepts any .zip).
-# The Windows exe is built with a requireAdministrator manifest (--uac-admin): one UAC prompt at start, none per install.
+# The Windows exe has NO administrator manifest: the app starts as a normal user and asks for administrator rights (one UAC prompt per batch) only when the install mode is All users.
+# studio87://open is registered by the Windows installer (registry), the macOS app (Info.plist CFBundleURLTypes) and the Flatpak (.desktop MimeType).
 # Run by hand with a tag, for example: gh api -X POST repos/SpeakingColors/gearupdater/actions/workflows/release.yml/dispatches -f ref=main -f 'inputs[tag]=v0.1.0'
 name: release
 on:
@@ -40,6 +41,8 @@ jobs:
       - env:
           QT_QPA_PLATFORM: offscreen
         run: |
+          pip install pytest
+          python3 -m pytest -q tests
           python3 -m unittest discover tests -v
           python3 tools/mutation_check.py
 
@@ -82,7 +85,7 @@ jobs:
           MSYS_NO_PATHCONV: '1'
         run: |
           pip install pyinstaller PySide6-Essentials keyring
-          pyinstaller --noconfirm --windowed --uac-admin --collect-submodules keyring --paths . --name Studio87GearUpdater --icon studio87_updater/assets/icon.ico \
+          pyinstaller --noconfirm --windowed --collect-submodules keyring --paths . --name Studio87GearUpdater --icon studio87_updater/assets/icon.ico \
             --add-data "studio87_updater/assets;studio87_updater/assets" --add-data "studio87_updater/products.json;studio87_updater" \
             packaging/launcher.py
           test -f dist/Studio87GearUpdater/Studio87GearUpdater.exe
@@ -121,6 +124,9 @@ jobs:
             --add-data "studio87_updater/assets:studio87_updater/assets" --add-data "studio87_updater/products.json:studio87_updater" \
             packaging/launcher.py
           test -d "dist/Studio 87 Gear Updater.app"
+          plist="dist/Studio 87 Gear Updater.app/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" -c "Add :CFBundleURLTypes:0 dict" -c "Add :CFBundleURLTypes:0:CFBundleURLName string Studio 87 Gear Updater link" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string studio87" "$plist"
+          plutil -p "$plist" | grep -q studio87
           id="io.github.speakingcolors.studio87gearupdater"
           mkdir -p root/app root/doc
           cp -R "dist/Studio 87 Gear Updater.app" root/app/

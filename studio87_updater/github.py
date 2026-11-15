@@ -5,6 +5,7 @@ Uses conditional requests (ETag): a 304 answer costs nothing against the unauthe
 list still shows when offline.
 """
 import hashlib
+import http.client
 import json
 import os
 import time
@@ -90,6 +91,7 @@ class GitHubClient:
         self.requests_made = 0
         self.went_offline = False
         self.token_provider = None     # optional: returns an OAuth token string or None (never logged)
+        self.on_unauthorized = None    # optional: called when GitHub answers 401 to a request that carried the token
         os.makedirs(self.cache_dir, exist_ok=True)
 
     # -- cache -------------------------------------------------------------
@@ -182,6 +184,22 @@ class GitHubClient:
                 return cached, "cache"
             raise
         self.requests_made += 1
+        if resp.status == 401 and tok:
+            # an expired or revoked token must never break the list: forget it and ask once more without it
+            if self.on_unauthorized:
+                try:
+                    self.on_unauthorized()
+                except Exception:
+                    pass
+            headers.pop("Authorization", None)
+            try:
+                resp = self.t.request(url, headers)
+            except Offline:
+                self.went_offline = True
+                if cached is not None:
+                    return cached, "cache"
+                raise
+            self.requests_made += 1
         self._note_rate(resp.headers)
         if resp.status == 304 and cached is not None:
             return cached, "not-modified"
@@ -214,16 +232,57 @@ class GitHubClient:
     def screenshot_url(self, owner, repo, branch="main"):
         return "%s/%s/%s/%s/docs/screenshot.png" % (RAW, owner, repo, branch)
 
-    def download(self, url, dest, progress=None, cancel=lambda: False):
-        """Stream a release asset to dest (via dest.part). Returns bytes written."""
-        status, headers, stream = self.t.open_stream(url, {"Accept": "application/octet-stream"})
-        if status != 200 or stream is None:
-            raise HttpError(status, url)
-        total = int(headers.get("content-length") or 0)
-        done = 0
+    def download(self, url, dest, progress=None, cancel=lambda: False, sleep=time.sleep, retries=4, backoff=1.5):
+        """Stream a release asset to dest (via dest.part). Returns bytes written.
+        An interrupted or failed attempt is retried with growing pauses (1.5 s, 3 s, 6 s, 12 s) and RESUMES from the part
+        already on disk with an HTTP Range request; a server that ignores Range simply restarts that file. The part is
+        kept when giving up (Retry resumes it) and removed only by the caller once the file is known to be bad."""
+        attempt = 0
+        while True:
+            try:
+                return self._download_once(url, dest, progress, cancel)
+            except InterruptedError:
+                raise
+            except (Offline, OSError, http.client.HTTPException, IncompleteDownload) as e:
+                err = e
+            except HttpError as e:
+                if e.status < 500 and e.status != 429:
+                    raise
+                err = e
+            attempt += 1
+            if attempt > retries:
+                raise err
+            sleep(backoff * (2 ** (attempt - 1)))
+            if cancel():
+                raise InterruptedError("cancelled")
+
+    def _download_once(self, url, dest, progress, cancel):
         part = str(dest) + ".part"
+        start = os.path.getsize(part) if os.path.exists(part) else 0
+        headers = {"Accept": "application/octet-stream"}
+        if start:
+            headers["Range"] = "bytes=%d-" % start
+        status, h, stream = self.t.open_stream(url, headers)
+        if status == 416:
+            if stream is not None:
+                stream.close()
+            if start and (h.get("content-range") or "").endswith("/%d" % start):
+                os.replace(part, dest)            # the part already was the whole file
+                return start
+            try:
+                os.remove(part)
+            except OSError:
+                pass
+            raise IncompleteDownload("server could not resume; starting again")
+        if status not in (200, 206) or stream is None:
+            raise HttpError(status, url)
+        clen = int(h.get("content-length") or 0)
+        if status == 206:
+            mode, done, total = "ab", start, start + clen
+        else:
+            mode, done, total = "wb", 0, clen
         try:
-            with open(part, "wb") as f:
+            with open(part, mode) as f:
                 while True:
                     if cancel():
                         raise InterruptedError("cancelled")
@@ -234,13 +293,13 @@ class GitHubClient:
                     done += len(b)
                     if progress:
                         progress(done, total)
-            os.replace(part, dest)
-        except BaseException:
-            try:
-                os.remove(part)
-            except OSError:
-                pass
-            raise
         finally:
             stream.close()
+        if total and done != total:
+            raise IncompleteDownload("the connection closed after %d of %d bytes" % (done, total))
+        os.replace(part, dest)
         return done
+
+
+class IncompleteDownload(OSError):
+    pass

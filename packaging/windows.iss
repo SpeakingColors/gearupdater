@@ -1,4 +1,7 @@
-; Windows installer + uninstaller (Inno Setup) for the updater. Called as: ISCC /DVersion=0.1.0 packaging/windows.iss
+; Windows installer + uninstaller (Inno Setup) for the updater. Called as: ISCC /DVersion=0.1.2 packaging/windows.iss
+; The app itself never needs administrator rights (no administrator manifest). This installer starts as a normal user and
+; lets you choose: for all users (Windows then shows its UAC prompt) or just for you (no prompt). An update installed
+; over an older copy keeps the choice made the first time.
 ; Expects the PyInstaller folder in ..\dist\Studio87GearUpdater and the manual in ..\stage. Works offline.
 ; The uninstaller removes everything it installed. The updater's own settings and installed-versions list
 ; (%APPDATA%\Studio 87\Gear Updater) are kept unless you answer Yes; a silent uninstall always keeps them.
@@ -14,7 +17,10 @@ OutputDir=..\Output
 OutputBaseFilename=Studio87-GearUpdater-Setup
 LicenseFile=..\LICENSE
 SetupIconFile=..\studio87_updater\assets\icon.ico
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog commandline
+UsePreviousPrivileges=yes
+ChangesAssociations=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 Compression=lzma2
@@ -38,6 +44,19 @@ Source: "..\studio87_updater\assets\icon.ico"; DestDir: "{app}"; Flags: ignoreve
 Name: "{group}\Studio 87 Gear Updater"; Filename: "{app}\Studio87GearUpdater.exe"; IconFilename: "{app}\icon.ico"
 Name: "{group}\Studio 87 Gear Updater manual"; Filename: "{app}\Studio87-GearUpdater-manual.pdf"; IconFilename: "{app}\icon.ico"
 Name: "{group}\Uninstall Studio 87 Gear Updater"; Filename: "{uninstallexe}"; IconFilename: "{app}\icon.ico"
+
+[Registry]
+; studio87://open lets a plugin's About page open this updater (docs/plugin-link.md). HKA is HKLM for an all-users install
+; and HKCU for a just-for-me install; the uninstaller removes the keys. The link only opens the window, nothing is executed from it.
+Root: HKA; Subkey: "Software\Classes\studio87"; ValueType: string; ValueName: ""; ValueData: "URL:Studio 87 Gear Updater"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\studio87"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\studio87\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Studio87GearUpdater.exe,0"
+Root: HKA; Subkey: "Software\Classes\studio87\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Studio87GearUpdater.exe"" ""%1"""
+
+[Run]
+; interactive install: an optional "start it" checkbox; silent install (used by the in-app 'Update the updater'): start it again
+Filename: "{app}\Studio87GearUpdater.exe"; Description: "Start Studio 87 Gear Updater"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Studio87GearUpdater.exe"; Flags: nowait skipifnotsilent runasoriginaluser
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"

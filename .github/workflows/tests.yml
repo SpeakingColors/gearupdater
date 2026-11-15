@@ -23,11 +23,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1 libglib2.0-0
-          pip install PySide6-Essentials Pillow
+          pip install PySide6-Essentials Pillow pytest
       - name: Tests (pure core, firmware checker, GUI offscreen)
         env:
           QT_QPA_PLATFORM: offscreen
-        run: python3 -m unittest discover tests -v
+        run: |
+          python3 -m pytest -q tests
+          python3 -m unittest discover tests -v
       - name: The tests must catch deliberately broken code
         env:
           QT_QPA_PLATFORM: offscreen

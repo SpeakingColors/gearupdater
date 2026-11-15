@@ -1,5 +1,8 @@
-"""python3 -m studio87_updater          opens the window
-   python3 -m studio87_updater --list  prints the list in the terminal (same checks, no GUI)"""
+"""python3 -m studio87_updater                      opens the window
+   python3 -m studio87_updater --list              prints the list in the terminal (same checks, no GUI)
+   python3 -m studio87_updater studio87://open     opens the window (see docs/plugin-link.md); the same link form is what the
+                                                   operating system hands over when a plugin's About page opens the updater
+   --elevated-run <job file>                       internal: the one administrator helper of a batch (see elevation.py)"""
 import sys
 
 from . import APP_NAME, __version__
@@ -26,9 +29,9 @@ def main(argv=None):
         return 0
     if "--list" in argv:
         return cli_list()
-    from . import elevate
-    if elevate.maybe_relaunch_elevated(argv):
-        return 0
+    if "--elevated-run" in argv:
+        from . import elevation
+        return elevation.helper_main(argv)
     from .gui.app import run
     return run(argv)
 

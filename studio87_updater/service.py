@@ -4,8 +4,11 @@ import os
 import time
 from pathlib import Path
 
+from . import backup as BK
+from . import cache as CA
 from . import installed as I
 from . import mode as MODE
+from . import selfupdate as SU
 from . import manifest as M
 from . import model as MD
 from . import paths as P
@@ -13,9 +16,9 @@ from . import shots as S
 from . import catalog as CAT
 from .github import GitHubClient, Offline, RateLimited, UrlLibTransport, RAW
 from .install import Installer
-from .auth import Auth
+from .auth import Auth, AutoStore, FileStore, KeyringStore
 
-DEFAULT_SETTINGS = {"theme": "purr", "bubbles": True, "linux_target": "auto", "zoom_note_seen": False, "view": "scroll", "tab": "all", "install_mode": "", "mode_seen": False}
+DEFAULT_SETTINGS = {"theme": "purr", "bubbles": True, "linux_target": "auto", "zoom_note_seen": False, "view": "scroll", "tab": "all", "install_mode": "", "mode_seen": False, "token_storage": "auto"}
 THEMES = ("navy", "soda", "purr")
 
 
@@ -40,6 +43,8 @@ class Settings:
             self.data["theme"] = "purr"
         if self.data["install_mode"] not in ("", "all-users", "just-me"):
             self.data["install_mode"] = ""
+        if self.data["token_storage"] not in ("auto", "session"):
+            self.data["token_storage"] = "auto"
         if self.data["linux_target"] not in ("auto", "native", "flatpak"):
             self.data["linux_target"] = "auto"
 
@@ -63,10 +68,15 @@ class Service:
         self.cache_dir = P.cache_dir(self.system, env, home)
         self.manifest = manifest or M.load_manifest()
         self.client = GitHubClient(transport or UrlLibTransport(), self.cache_dir / "github")
-        self.auth = auth or Auth()
-        self.client.token_provider = self.auth.token
-        self.record = I.Record(self.data_dir / "installed-versions.json")
         self.settings = Settings(self.data_dir / "settings.json")
+        self.auth = auth or Auth(store=AutoStore(KeyringStore(), FileStore(self.data_dir / "auth"),
+                                                 session_only=self.settings["token_storage"] == "session"))
+        self.client.token_provider = self.auth.token
+        self.client.on_unauthorized = self.auth.invalidate
+        self.record = I.Record(self.data_dir / "installed-versions.json")
+        self.backups = BK.BackupStore(self.data_dir / "backups")
+        self.caches = CA.CacheManager(self.cache_dir / "github", self.cache_dir / "zips")
+        self.offline = False
         self._vst3_dirs = vst3_dirs if vst3_dirs is not None else P.vst3_dirs(self.system, env, home)
         self._probe = flatpak_probe or (lambda: I.probe_flatpak() if self.system == "linux" else ("absent", set()))
         self._flatpak = ("absent", set())
@@ -161,6 +171,35 @@ class Service:
         names = [d.get("name") for d in data if isinstance(d, dict) and d.get("name") and not d.get("private")]
         self.products = M.merge_discovered(self.manifest, names)
 
+    def saved_date(self):
+        """Epoch seconds of the list being shown from the saved copy (the catalog's time, else the last good check), or None."""
+        if self.catalog is not None:
+            return self.catalog.generated
+        return self.last_checked
+
+    def offline_text(self):
+        """'Offline, showing saved list from 2026-11-15 14:05' (empty when online)."""
+        if not self.offline:
+            return ""
+        t = self.saved_date()
+        return "Offline, showing saved list from %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime(t)) if t else "an earlier visit (date unknown)")
+
+    def install_disabled_reason(self, row):
+        """Why Install/Update cannot run right now, or '' when it can. Offline: only a zip that is already downloaded works."""
+        if not self.offline:
+            return ""
+        try:
+            if row.latest is not None and self.installer().zip_ready(row.product, row.latest):
+                return ""
+        except Exception:
+            pass
+        return "Offline. Install and Update need the internet to download the plugin, unless its installer is already downloaded."
+
+    def self_update_release(self, rows):
+        """The newer gearupdater release to offer, or None."""
+        r = next((x for x in rows if x.product.repo == SU.SELF_REPO), None)
+        return SU.newer_release(r.releases) if r is not None else None
+
     def cached_rows(self):
         self.refresh_local()
         self.catalog = self._load_catalog(False)
@@ -174,8 +213,14 @@ class Service:
         self.catalog = self._load_catalog(True)
         self._discover(True)
         rows, notice = MD.build_rows(self.client, self.products, self.installed_for, True, on_progress, catalog=self.catalog)
+        self.offline = notice == "offline"
         if notice != "offline":
             self._save_last()
+        try:
+            self.caches.prune()
+            self.caches.prune_downloads()
+        except OSError:
+            pass
         return sorted(rows, key=MD.sort_key), notice
 
     def _get(self, url, use_network):
@@ -211,4 +256,7 @@ class Service:
         kw = {"runner": self.runner} if self.runner else {}
         return Installer(self.client, self.record, self.system, self.cache_dir / "work", P.user_vst3_dir(self.system, self._env, self._home),
                          self.data_dir / "downloads", linux_target=self.settings["linux_target"], mode=self.mode,
-                         stage_dir=self.cache_dir / "staged", **kw)
+                         stage_dir=self.cache_dir / "staged", backups=self.backups, zip_dir=self.cache_dir / "zips", **kw)
+
+    def self_update_folder(self):
+        return self.data_dir / "selfupdate"

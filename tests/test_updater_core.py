@@ -9,7 +9,9 @@ import unittest
 import zipfile
 from pathlib import Path
 
+from studio87_updater import backup as BK
 from studio87_updater import checksum as C
+from studio87_updater import elevation as EL
 from studio87_updater import installed as I
 from studio87_updater import install as INS
 from studio87_updater import manifest as M
@@ -19,7 +21,7 @@ from studio87_updater import version as V
 from studio87_updater import paths as P
 from studio87_updater.github import GitHubClient, HttpError, Offline, RateLimited, UrlLibTransport
 
-from helpers import FakeTransport, make_release_zip, make_vst3_tar, release_json
+from helpers import FakeBackend, FakeTransport, make_release_zip, make_vst3_tar, release_json
 
 
 class T(unittest.TestCase):
@@ -246,7 +248,7 @@ class GitHubTests(T):
         self.assertEqual(c.fetch("https://raw.test/a.png"), (None, "missing"))
         self.assertEqual(len(t.log), 1)
 
-    def test_download_writes_file_and_cleans_part_on_cancel(self):
+    def test_download_writes_file_and_keeps_part_on_cancel_so_it_can_resume(self):
         t, c = self.client({"https://dl.test/f": (200, {}, b"x" * 1000)})
         d = self.tmp()
         got = []
@@ -255,7 +257,7 @@ class GitHubTests(T):
         self.assertEqual(got[-1], (1000, 1000))
         with self.assertRaises(InterruptedError):
             c.download("https://dl.test/f", d / "g", cancel=lambda: True)
-        self.assertFalse((d / "g").exists() or (d / "g.part").exists())
+        self.assertFalse((d / "g").exists(), "a cancelled download is never presented as a finished file")
 
 
 class InstalledTests(T):
@@ -465,7 +467,7 @@ class InstallTests(T):
         self.assertTrue((vst3 / "Other.vst3").exists(), "other plugins untouched")
         self.assertEqual(sorted(x.name for x in vst3.iterdir()), ["Other.vst3", "PunchPaw.vst3"], "no temp leftovers")
 
-    def installer(self, zip_bytes, release_assets=None, system="linux", runner=None, sums_asset=None):
+    def installer(self, zip_bytes, release_assets=None, system="linux", runner=None, sums_asset=None, backend=None, mode="all-users", backups=True):
         d = self.tmp()
         name = "PunchPaw-v0.2.0.zip"
         routes = {"https://dl.test/" + name: (200, {}, zip_bytes)}
@@ -475,7 +477,9 @@ class InstallTests(T):
         rec = I.Record(d / "rec.json")
         opened = []
         ins = INS.Installer(client, rec, system, d / "work", d / "vst3", d / "guided", runner=runner or (lambda *a, **k: None),
-                            opener=opened.append)
+                            opener=opened.append, backend=backend or FakeBackend(admin=True), mode=mode,
+                            backups=BK.BackupStore(d / "backups") if backups else None, zip_dir=d / "zips", stage_dir=d / "staged",
+                            sleep=lambda s: None)
         row = MD.Row(self.prod(), releases=[rel], installed=I.InstalledInfo("installed", "0.1.0"), status=MD.UPDATE)
         return d, ins, row, rec, opened
 
@@ -529,7 +533,7 @@ class InstallTests(T):
             calls.append(cmd)
             class R: returncode, stdout, stderr = 0, "", ""
             return R()
-        d, ins, row, rec, _ = self.installer(make_release_zip(), system="windows", runner=runner)
+        d, ins, row, rec, _ = self.installer(make_release_zip(), system="windows", runner=runner, backend=FakeBackend(admin=True))
         res = ins.install(row)
         self.assertEqual(res["method"], "exe")
         self.assertTrue(calls[0][0].endswith("PunchPaw-Setup.exe") and "/SILENT" in calls[0])
@@ -539,7 +543,7 @@ class InstallTests(T):
         def runner(cmd, **k):
             class R: returncode, stdout, stderr = 5, "", "boom"
             return R()
-        d, ins, row, rec, _ = self.installer(make_release_zip(), system="windows", runner=runner)
+        d, ins, row, rec, _ = self.installer(make_release_zip(), system="windows", runner=runner, backend=FakeBackend(admin=True))
         with self.assertRaises(INS.InstallError):
             ins.install(row)
         self.assertIsNone(rec.get("PunchPaw"))
@@ -811,20 +815,21 @@ class ModeTests(T):
         self.assertEqual(MODE.user_vst3_dir("macos", {}, h), Path("/h/Library/Audio/Plug-Ins/VST3"))
         self.assertEqual(MODE.user_vst3_dir("linux", {}, h), Path("/h/.vst3"))
 
-    def test_startup_elevation_only_windows_all_users_once(self):
-        self.assertEqual(MODE.startup_elevation("windows", "all-users", False), "relaunch")
-        self.assertEqual(MODE.startup_elevation("windows", "all-users", True), "none")
-        self.assertEqual(MODE.startup_elevation("windows", "all-users", False, already_tried=True), "none", "no relaunch loop if UAC is declined")
-        self.assertEqual(MODE.startup_elevation("windows", "just-me", False), "none", "just-me starts normally")
-        self.assertEqual(MODE.startup_elevation("macos", "all-users", False), "none")
-        self.assertEqual(MODE.startup_elevation("linux", "all-users", False), "none")
+    def test_the_app_never_relaunches_itself_elevated(self):
+        self.assertFalse(hasattr(MODE, "startup_elevation"), "the app always starts as a normal user")
+        import studio87_updater.__main__ as MAIN
+        self.assertFalse(hasattr(MAIN, "elevate"))
 
     def test_batch_has_at_most_one_prompt(self):
         b = MODE.batch_plan("macos", "all-users", ["pkg"] * 50)
         self.assertEqual(b["prompts"], 1)
         self.assertEqual(len(b["elevated"]), 50)
         self.assertEqual(MODE.batch_plan("macos", "just-me", ["pkg", "vst3-zip"])["prompts"], 0)
-        self.assertEqual(MODE.batch_plan("windows", "all-users", ["exe"] * 50)["prompts"], 0, "the app itself is already elevated")
+        w = MODE.batch_plan("windows", "all-users", ["exe"] * 50)
+        self.assertEqual((w["prompts"], len(w["elevated"])), (1, 50), "Windows all-users: ONE prompt for 50 installers")
+        self.assertEqual(MODE.batch_plan("windows", "all-users", ["exe"] * 50, is_admin=True)["prompts"], 0, "already administrator: no prompt")
+        self.assertEqual(MODE.batch_plan("windows", "just-me", ["exe"] * 5)["prompts"], 0, "Just for me never prompts")
+        self.assertEqual(MODE.batch_plan("windows", "all-users", ["vst3-zip", "guided"])["prompts"], 0, "nothing that needs admin: no prompt")
         self.assertEqual(MODE.batch_plan("linux", "just-me", ["vst3-tarball", "flatpak-ext"])["prompts"], 0)
         self.assertFalse(MODE.method_needs_admin("windows", "just-me", "exe"))
         self.assertTrue(MODE.method_needs_admin("windows", "all-users", "exe"))
@@ -884,46 +889,6 @@ class InstallModeTests(T):
         self.assertFalse((dest / "X.vst3").exists())
         self.assertTrue((other / "keep").exists(), "files that were not recorded are never removed")
         self.assertIsNone(rec.get("x"))
-
-    def test_elevated_pkg_script_runs_every_pkg_in_one_helper(self):
-        sc = INS.elevated_pkg_script([Path("/a/one.pkg"), Path("/a/it's.pkg")])
-        self.assertEqual(sc.count("/usr/sbin/installer"), 2)
-        cmd = INS.elevation_command(Path("/t/s.sh"))
-        self.assertEqual(cmd[0], "osascript")
-        self.assertIn("with administrator privileges", cmd[2])
-
-    def test_staged_pkgs_are_installed_in_one_elevated_call(self):
-        stage = self.tmp()
-        calls = []
-
-        class R:
-            returncode, stdout, stderr = 0, "", ""
-        run = lambda cmd, **k: (calls.append(cmd), R())[1]
-        rec = I.Record(self.tmp() / "r.json")
-        inst = INS.Installer(None, rec, "macos", self.tmp(), self.tmp(), self.tmp(), runner=run, stage_dir=stage)
-        for n in range(5):
-            f = stage / ("p%d.pkg" % n)
-            f.write_bytes(b"x")
-            inst.staged.append(("r%d" % n, "N", f, "1.0", "v1"))
-        out = inst.finish_batch()
-        self.assertEqual(len(calls), 1, "one administrator prompt for the whole batch")
-        self.assertEqual(len(out), 5)
-        self.assertTrue(all(ok for ok, _ in out.values()))
-        self.assertEqual(rec.get("r3")["version"], "1.0")
-
-    def test_failed_elevated_batch_records_nothing(self):
-        stage = self.tmp()
-
-        class R:
-            returncode, stdout, stderr = 1, "", "user cancelled"
-        rec = I.Record(self.tmp() / "r.json")
-        inst = INS.Installer(None, rec, "macos", self.tmp(), self.tmp(), self.tmp(), runner=lambda cmd, **k: R(), stage_dir=stage)
-        f = stage / "p.pkg"
-        f.write_bytes(b"x")
-        inst.staged.append(("r1", "N", f, "1.0", "v1"))
-        out = inst.finish_batch()
-        self.assertFalse(out["r1"][0])
-        self.assertIsNone(rec.get("r1"))
 
     def test_norm_keeps_digits(self):
         self.assertEqual(I.norm("JPurrr-8000"), "jpurrr8000")

@@ -1,19 +1,20 @@
-"""The Qt window, ported from the approved mockup (docs/mockup/updater-v9.html): design size 1047 x 1150, scaled to the window."""
-import os
+"""The Qt window, ported from the approved mockup (docs/mockup/updater-v11.html; older versions are kept under docs/mockup/versions): design size 1047 x 1150, scaled to the window."""
 import sys
 import time
-import webbrowser
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QRect, QRectF, QRunnable, QSize, Qt, QThreadPool, QTimer, Signal
+from PySide6.QtCore import QEvent, QObject, QRect, QRectF, QRunnable, QSize, Qt, QThreadPool, QTimer, Signal
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QFontDatabase, QFontMetrics, QIcon, QImage, QPainter, QPen, QPixmap
 from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import (QApplication, QLineEdit, QScrollArea, QGraphicsScene, QGraphicsView, QMainWindow, QTextBrowser, QWidget)
 
 from .. import APP_NAME, __version__
+from .. import batch as BA
+from .. import link as LK
 from .. import model as MD
 from .. import mode as MODE
-from ..service import THEMES, Service
+from .. import selfupdate as SU
+from ..service import Service
 from .theme import LOOKS, THEME
 from .widgets import MONO, BubbleManager, Btn, Check, font, paint_cat, wood_pixmap
 
@@ -24,7 +25,8 @@ CHEEK = 34
 ROW_H = 172
 ROW_GAP = 4
 THUMB_W, THUMB_H = 310, 162
-LIST_Y = 140
+LIST_Y = 140          # top of the list when no bar is shown; each bar (update the updater, offline) adds BAR_H
+BAR_H = 34
 KOFI = "https://ko-fi.com/studio87"
 ASSETS = Path(__file__).resolve().parents[1] / "assets"
 
@@ -45,8 +47,9 @@ class Bridge(QObject):
     refreshed = Signal(str, object)
     inst_progress = Signal(str, str, int, int)
     inst_done = Signal(str, bool, str, object)
-    queue_done = Signal()
+    queue_done = Signal(object)
     signin = Signal(str, str, str)
+    selfupd = Signal(str, object)
 
 
 class Job(QRunnable):
@@ -127,10 +130,14 @@ class RowWidget(QWidget):
         self.b_main = Btn("Update", self, "primary", 16)
         self.b_log = Btn("Changelog", self, "normal", 16)
         self.b_git = Btn("GitHub", self, "normal", 16)
+        self.b_roll = Btn("Roll back", self, "normal", 16)
         self.check.toggled.connect(lambda on: ui.toggle_select(self.row, on))
         self.b_main.clicked.connect(lambda: ui.update_rows([self.row]))
         self.b_log.clicked.connect(lambda: ui.show_changelog(self.row))
         self.b_git.clicked.connect(lambda: ui.open_url(self.row.product.github_url))
+        self.b_roll.clicked.connect(lambda: ui.roll_back(self.row))
+        ui.bubbles.attach(self.b_roll, lambda: "Put back the version that was installed before the last update: %s. The newer one is removed." %
+                          (ui.svc.backups.describe(self.row.product.repo) if self.row is not None else "the previous version"))
         ui.bubbles.attach(self.check, "Tick to include this product in the batch button above the list.")
         ui.bubbles.attach(self.b_log, "Read the release notes for every version newer than the one you have.")
         ui.bubbles.attach(self.b_git, "Open the project page in your browser.")
@@ -140,7 +147,7 @@ class RowWidget(QWidget):
     def set_width(self, w):
         self.W = w
         self.resize(w, self.H)
-        for b, y in ((self.b_main, 14), (self.b_log, 49), (self.b_git, 84)):
+        for b, y in ((self.b_main, 14), (self.b_log, 49), (self.b_git, 84), (self.b_roll, 119)):
             b.setGeometry(w - 124, y, 112, 28)
 
     def main_tip(self):
@@ -149,6 +156,9 @@ class RowWidget(QWidget):
             return ""
         if r.status == MD.CURRENT:
             return "You have the newest version."
+        why = self.ui.svc.install_disabled_reason(r) if r.can_install else ""
+        if why:
+            return why
         if not r.can_install:
             return "No download for this one yet, or it is not set up for updates."
         return ("Download, verify the SHA256 checksums, then install %s. Installers are not code-signed: Windows or macOS may show a warning. "
@@ -177,12 +187,15 @@ class RowWidget(QWidget):
             label = "Unavailable"
         self.b_main.setText(label)
         self.b_main.kind = "primary" if r.status in (MD.UPDATE, MD.NOT_INSTALLED) else "normal"
-        self.b_main.setEnabled(r.can_install and r.status != MD.CURRENT and not busy and not self.ui.installing)
+        offline_why = self.ui.svc.install_disabled_reason(r) if r.can_install else ""
+        self.b_main.setEnabled(r.can_install and r.status != MD.CURRENT and not busy and not self.ui.installing and not offline_why)
+        self.b_roll.setVisible(r.status != MD.GITHUB_ONLY and self.ui.svc.backups.has(r.product.repo))
+        self.b_roll.setEnabled(not busy and not self.ui.installing)
         self.b_main.setVisible(r.status != MD.GITHUB_ONLY)
         self.b_log.setVisible(r.status != MD.GITHUB_ONLY)
         self.b_log.setEnabled(bool(r.releases))
         self.check.setVisible(r.status != MD.GITHUB_ONLY)
-        self.check.setEnabled(r.can_install and r.status != MD.CURRENT and not busy)
+        self.check.setEnabled(r.can_install and r.status != MD.CURRENT and not busy and not offline_why)
         self.b_main.update()
 
     def set_busy(self, text, frac=None):
@@ -199,7 +212,8 @@ class RowWidget(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         p.setBrush(T.c("panel"))
-        p.setPen(QPen(T.c("line"), 1))
+        focus = r.product.repo == self.ui.focus_repo
+        p.setPen(QPen(T.c("accent") if focus else T.c("line"), 3 if focus else 1))
         p.drawRoundedRect(QRectF(0.5, 0.5, self.W - 1, self.H - 1), 4, 4)
         tr = QRect(36, 4, THUMB_W, THUMB_H)
         p.setBrush(T.c("display"))
@@ -288,6 +302,12 @@ class StudioRoot(QWidget):
         self.thumbs, self.status, self.notice = {}, "", ""
         self.noshot = set()
         self.catalog_line, self.catalog_stale = "", False
+        self.offline_line = ""          # "Offline, showing saved list from ..." (bar under the tabs)
+        self.self_rel = None            # newer gearupdater release, when there is one ("Update the updater first")
+        self.self_busy = ""
+        self.focus_repo = None          # product opened by a studio87:// link
+        self.pending_link = None
+        self.last_results = []
         self.pool = QThreadPool()
         self.pool.setMaxThreadCount(3)
         self.install_pool = QThreadPool()
@@ -301,6 +321,7 @@ class StudioRoot(QWidget):
         self.br.inst_done.connect(self.on_inst_done)
         self.br.queue_done.connect(self.on_queue_done)
         self.br.signin.connect(self.on_signin)
+        self.br.selfupd.connect(self.on_selfupd)
         self.bubbles = BubbleManager(self, lambda: bool(self.svc.settings["bubbles"]))
         self.cancel_flag = False
         self.signin_cancel = False
@@ -330,6 +351,9 @@ class StudioRoot(QWidget):
         self.b_stop.hide()
         self.b_browse = Btn("Browse all products", self, "primary", 19)
         self.b_browse.hide()
+        self.b_self = Btn("Update the updater", self, "primary", 16)
+        self.b_self.hide()
+        self.b_self.clicked.connect(self.start_self_update)
         self.scroll = QScrollArea(self)
         self.scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -362,6 +386,10 @@ class StudioRoot(QWidget):
           "Update every product that has a newer version. Products with an unknown installed version are left alone.")
         B(self.b_sel, "Update or install the products you ticked, one after another.")
         B(self.b_stop, "Finish the current product, then stop the rest.")
+        B(self.b_self, lambda: self.svc.install_disabled_reason_self() if hasattr(self.svc, "install_disabled_reason_self") else
+          "Download the newer Studio 87 Gear Updater, check its SHA256, then hand over to its installer. Nothing is replaced until the check passes.")
+        B(self.b_self, lambda: "Offline. The update needs the internet to download." if self.svc.offline else
+          "Download the newer Studio 87 Gear Updater, check its SHA256, then hand over to its installer. Nothing is replaced until the check passes; the old version keeps working if anything fails.")
         B(self.b_zoom_out, "Smaller. Drag a corner to scale everything; drag a side to change only the width or the height.")
         B(self.b_zoom_in, "Bigger.")
         B(self.b_zoom_fit, "Back to the normal size for this screen. Double click on either wood side does the same.")
@@ -395,7 +423,9 @@ class StudioRoot(QWidget):
         self.b_all.setGeometry(right - 140, 100, 140, 30)
         self.b_sel.setGeometry(right - 140 - 8 - 164, 100, 164, 30)
         self.b_stop.setGeometry(right - 140 - 8 - 164 - 8 - 160, 100, 160, 30)
-        self.scroll.setGeometry(x0, LIST_Y, rw, max(100, H - 240))
+        ly = self.list_y()
+        self.scroll.setGeometry(x0, ly, rw, max(100, H - 100 - ly))
+        self.b_self.setGeometry(right - 190, LIST_Y - 6, 190, 28)
         self.row_w = rw - 14
         for rwid in self.allrows:
             rwid.set_width(self.row_w)
@@ -404,13 +434,25 @@ class StudioRoot(QWidget):
         self.inner.resize(self.row_w, max(1, len(self.view_rows)) * (ROW_H + ROW_GAP))
         for i, rwid in enumerate(self.allrows):
             rwid.move(0, i * (ROW_H + ROW_GAP))
-        self.b_browse.setGeometry(W // 2 - 110, LIST_Y + 130, 220, 38)
+        self.b_browse.setGeometry(W // 2 - 110, ly + 130, 220, 38)
         fx = W - CHEEK - 14 - 4 * 56 - 3 * 6
         for i, b in enumerate((self.b_zoom_out, self.b_zoom_in, self.b_zoom_fit, self.b_zoom_100)):
             b.setGeometry(fx + i * 62, H - 36, 56, 28)
         if self.overlay is not None:
             self.overlay.relayout()
         self.update()
+
+    def bars(self):
+        """Slim bars between the tabs and the list: 'Update the updater first' and the offline notice."""
+        out = []
+        if self.self_rel is not None:
+            out.append("self")
+        if self.offline_line:
+            out.append("offline")
+        return out
+
+    def list_y(self):
+        return LIST_Y + BAR_H * len(self.bars())
 
     def apply_look(self):
         THEME.set(self.svc.settings["theme"])
@@ -469,15 +511,32 @@ class StudioRoot(QWidget):
         p.drawLine(CHEEK, H - 44, W - CHEEK, H - 44)
         p.setPen(T.c("dim"))
         p.setFont(font(px=16, weight=QFont.Weight.Medium))
-        p.drawText(CHEEK + 26, H - 44, 420, 44, Qt.AlignmentFlag.AlignVCenter, "Studio 87  ·  Gear Updater v%s" % __version__)
+        p.drawText(CHEEK + 26, H - 44, 420, 44, Qt.AlignmentFlag.AlignVCenter, "Studio 87 Gear Updater v%s" % __version__)
         sz = self.win.logical_size() if self.win else (W, H)
         p.setFont(font(MONO, 13, QFont.Weight.Normal))
         p.drawText(W // 2 - 60, H - 44, 200, 44, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter,
                    "%d x %d  %d%%" % (sz[0], sz[1], sz[2]))
+        by = LIST_Y - 8
+        for kind in self.bars():
+            bar = QRect(CHEEK + 10, by, W - 2 * CHEEK - 20, BAR_H - 6)
+            p.setPen(QPen(T.c("accent") if kind == "self" else T.c("line"), 1))
+            p.setBrush(T.c("panel2") if kind == "self" else T.c("display"))
+            p.drawRoundedRect(bar, 4, 4)
+            p.setFont(font(px=17, weight=QFont.Weight.DemiBold))
+            p.setPen(T.c("accent") if kind == "self" else T.c("bad"))
+            if kind == "self":
+                msg = self.self_busy or "Update the updater first: Studio 87 Gear Updater %s is available (this is v%s)." % (
+                    self.self_rel.version or self.self_rel.tag, __version__)
+                tw = bar.width() - 210
+            else:
+                msg, tw = self.offline_line, bar.width() - 20
+            p.drawText(bar.x() + 12, bar.y(), tw, bar.height(), Qt.AlignmentFlag.AlignVCenter,
+                       QFontMetrics(p.font()).elidedText(msg, Qt.TextElideMode.ElideRight, tw))
+            by += BAR_H
         if not self.view_rows:
             p.setPen(T.c("dim"))
             p.setFont(font(px=24, weight=QFont.Weight.Medium))
-            p.drawText(CHEEK, LIST_Y + 60, W - 2 * CHEEK, 60, Qt.AlignmentFlag.AlignCenter, self.empty_text())
+            p.drawText(CHEEK, self.list_y() + 60, W - 2 * CHEEK, 60, Qt.AlignmentFlag.AlignCenter, self.empty_text())
         if not hasattr(self, "_wood") or self._wood[0] != H:
             self._wood = (H, wood_pixmap(CHEEK, H, True), wood_pixmap(CHEEK, H, False))
         p.drawPixmap(0, 0, self._wood[1])
@@ -507,9 +566,11 @@ class StudioRoot(QWidget):
 
     def set_tab(self, key):
         self.tab = key
+        self.focus_repo = None
         self.refresh_list()
 
     def on_search(self, _text):
+        self.focus_repo = None
         self.refresh_list()
 
     def all_row_widgets(self):
@@ -532,6 +593,9 @@ class StudioRoot(QWidget):
                 rw.row = None
                 rw.hide()
         self.inner.resize(self.row_w if hasattr(self, "row_w") else 900, max(1, len(chunk)) * (ROW_H + ROW_GAP))
+        self.b_self.setVisible(self.self_rel is not None)
+        self.b_self.setEnabled(self.self_rel is not None and not self.svc.offline and not self.installing and not self.self_busy)
+        self.relayout(self.W, self.H)
         self.scroll.setVisible(bool(chunk))
         self.b_browse.setVisible(not chunk and self.tab == "updates" and bool(self.rows) and not self.search.text().strip())
         for k, label in MD.TABS:
@@ -539,18 +603,24 @@ class StudioRoot(QWidget):
             b = self.tabs[k]
             b.setText("%s (%d)" % (label, n) if self.rows else label)
             b.setChecked(k == self.tab)
-        n_all = len(MD.all_targets(self.view_rows))
+        n_all = len([r for r in MD.all_targets(self.view_rows) if not self.blocked(r)])
         self.b_all.setText(MD.all_label(self.view_rows))
         self.b_all.setEnabled(n_all > 0 and not self.installing)
         sel = [r for r in self.rows if r.product.repo in self.selected and r.can_install]
         self.b_sel.setText(MD.selected_label(sel))
-        self.b_sel.setEnabled(bool(sel) and not self.installing)
+        self.b_sel.setEnabled(bool([r for r in sel if not self.blocked(r)]) and not self.installing)
         self.b_check.setEnabled(not self.checking and not self.installing)
         self.b_stop.setVisible(self.installing)
         self.update()
         self.load_visible_thumbs()
 
     busy_text = {}
+
+    def blocked(self, row):
+        """Why this product cannot be installed right now (offline without a downloaded zip, or it is the updater itself)."""
+        if row.product.repo == SU.SELF_REPO:
+            return "Use 'Update the updater' at the top."
+        return self.svc.install_disabled_reason(row)
 
     def toggle_select(self, row, on):
         if row is None:
@@ -623,8 +693,10 @@ class StudioRoot(QWidget):
         self.selected &= {r.product.repo for r in rows}
         n_upd = sum(1 for r in rows if r.status == MD.UPDATE)
         when = time.strftime("%H:%M", time.localtime(self.svc.last_checked)) if self.svc.last_checked else "never"
+        self.offline_line = self.svc.offline_text()
+        self.self_rel = self.svc.self_update_release(rows)
         if notice == "offline":
-            self.notice = "Offline: showing the saved list"
+            self.notice = ""
             self.status = "Last checked %s. %d update%s in the saved list." % (when, n_upd, "" if n_upd == 1 else "s")
         else:
             self.notice = notice
@@ -632,6 +704,9 @@ class StudioRoot(QWidget):
                 when, len(rows), "" if len(rows) == 1 else "s", n_upd, "" if n_upd == 1 else "s")
         self.catalog_line, self.catalog_stale = self.svc.catalog_text()
         self.refresh_list()
+        if self.pending_link is not None:
+            link, self.pending_link = self.pending_link, None
+            self.handle_link(link)
         if notice != "offline":
             todo = [r.product for r in rows if r.product.checks_releases and r.latest]
             svc, br = self.svc, self.br
@@ -670,6 +745,16 @@ class StudioRoot(QWidget):
     # ---- installing -----------------------------------------------------
     def update_rows(self, rows):
         rows = [r for r in rows if r is not None and r.can_install]
+        if any(r.product.repo == SU.SELF_REPO for r in rows):
+            if len(rows) == 1 and self.self_rel is not None:
+                return self.start_self_update()
+            rows = [r for r in rows if r.product.repo != SU.SELF_REPO]
+        skipped = [r for r in rows if self.blocked(r)]
+        rows = [r for r in rows if not self.blocked(r)]
+        if skipped and not rows:
+            self.status = "Nothing was started: %s" % self.blocked(skipped[0])
+            self.update()
+            return
         if not rows or self.installing:
             return
         if len(rows) == 1:
@@ -687,35 +772,32 @@ class StudioRoot(QWidget):
         svc, br = self.svc, self.br
         queue = list(rows)
 
-        def work():
-            inst = svc.installer()          # one installer for the whole batch, so staged .pkg files share ONE elevated helper
-            for r in queue:
-                if self.cancel_flag:
-                    br.inst_done.emit(r.product.repo, False, "Skipped (stopped).", None)
-                    continue
-                last = [0.0]
+        def progress_for(repo):
+            last = [0.0]
 
-                def prog(stage, d, t, repo=r.product.repo):
-                    now = time.time()
-                    if stage != "download" or now - last[0] > 0.1 or (t and d >= t):
-                        last[0] = now
-                        br.inst_progress.emit(repo, stage, d, t)
-                try:
-                    res = inst.install(r, ext_installed=svc.ext_installed(r.product), progress=prog,
-                                       cancel=lambda: self.cancel_flag)
-                    svc.refresh_local()
-                    br.inst_done.emit(r.product.repo, True, res["message"], None if res.get("staged") else svc.installed_for(r.product))
-                except InterruptedError:
-                    br.inst_done.emit(r.product.repo, False, "Cancelled.", None)
-                except Exception as e:
-                    br.inst_done.emit(r.product.repo, False, "Refused: %s" % e, None)
-            if inst.staged:
-                msgs = inst.finish_batch()
+            def prog(stage, d, t):
+                now = time.time()
+                if stage != "download" or now - last[0] > 0.1 or (t and d >= t):
+                    last[0] = now
+                    br.inst_progress.emit(repo, stage, d, t)
+            return prog
+
+        def on_item(r):
+            if r.staged:
+                return          # verified, waiting for the one administrator step; the final result comes after it
+            pr = next((p for p in svc.products if p.repo == r.repo), None)
+            if r.ok:
                 svc.refresh_local()
-                for repo, (ok, msg) in msgs.items():
-                    pr = next((p for p in svc.products if p.repo == repo), None)
-                    br.inst_done.emit(repo, ok, msg, svc.installed_for(pr) if ok and pr else None)
-            br.queue_done.emit()
+            br.inst_done.emit(r.repo, r.ok, r.message, svc.installed_for(pr) if (r.ok and pr) else None)
+
+        def work():
+            inst = svc.installer()          # one installer for the whole batch, so staged installers share ONE elevated helper
+            try:
+                results = BA.run_batch(inst, queue, ext_installed=svc.ext_installed, progress_for=progress_for,
+                                       cancel=lambda: self.cancel_flag, on_item=on_item)
+            except Exception as e:          # never leave the window stuck in "installing"
+                results = [BA.ItemResult(r.product.repo, r.product.name, False, "Refused: %s" % e) for r in queue]
+            br.queue_done.emit(results)
         self.install_pool.start(Job(work))
 
     def stop_queue(self):
@@ -759,16 +841,171 @@ class StudioRoot(QWidget):
         self.selected.discard(repo)
         self.status = message
 
-    def on_queue_done(self):
+    def on_queue_done(self, results):
         self.installing = False
         self.b_stop.setEnabled(True)
+        self.last_results = list(results or [])
+        by = {r.repo: r for r in self.last_results}
+        for repo, r in by.items():
+            if r.staged is False and r.ok is not None:
+                self.busy_text.pop(repo, None)
+        self.svc.refresh_local()
+        for row in self.rows:                       # rows that went through the administrator step get their new state now
+            r = by.get(row.product.repo)
+            if r is not None and r.ok and row.status != MD.CURRENT:
+                info = self.svc.installed_for(row.product)
+                row.installed = info
+                row.status = MD.compute_status(row.product, row.releases, info)
         self.rows.sort(key=MD.sort_key)
         keep = {rw.row.product.repo: rw.message for rw in self.all_row_widgets() if rw.row is not None}
+        for r in self.last_results:
+            keep[r.repo] = r.message
         self.refresh_list()
         for rw in self.all_row_widgets():
             if rw.row is not None and keep.get(rw.row.product.repo):
                 rw.message = keep[rw.row.product.repo]
                 rw.update()
+        self.status = BA.summary(self.last_results) if self.last_results else self.status
+        if len(self.last_results) > 1 or BA.retryable(self.last_results):
+            self.show_results()
+
+    def show_results(self):
+        """One line per product, and Retry failed for the ones that did not finish."""
+        res = self.last_results
+        if not res:
+            return
+        ov = self._overlay("Results", 760, 560)
+        ov.sub = BA.summary(res)
+        tb = QTextBrowser(ov.holder)
+        tb.setGeometry(24, 92, ov.w - 48, ov.h - 92 - 64)
+        tb.setOpenLinks(False)
+        tb.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        tb.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        tb.setFrameShape(QTextBrowser.Shape.NoFrame)
+        tb.setStyleSheet("QTextBrowser{background:%s;color:%s;border:1px solid %s;padding:6px;}" % (
+            THEME.s("display"), THEME.s("text"), THEME.s("line")))
+        tb.setFont(font("Barlow Condensed", 17, QFont.Weight.Medium))
+        good, bad = THEME.s("good"), THEME.s("bad")
+        html = []
+        for r in res:
+            mark = "Done" if r.ok else ("Stopped" if r.cancelled else "Failed")
+            html.append('<p><b style="color:%s">%s</b>&nbsp; <b>%s</b><br>%s</p>' % (good if r.ok else bad, mark, r.name, r.message))
+        tb.setHtml("".join(html))
+        tb.show()
+        todo = BA.retryable(res)
+        rb = ov.add_button("Retry failed (%d)" % len(todo) if todo else "Retry failed", ov.w - 24 - 100 - 8 - 170, ov.h - 46, 170,
+                           self.retry_failed, "primary" if todo else "normal")
+        rb.setEnabled(bool(todo) and not self.svc.offline_text())
+        self.bubbles.attach(rb, "Run only the products that did not finish again. A download that was cut off continues where it stopped.")
+        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay)
+
+    def retry_failed(self):
+        ids = {r.repo for r in BA.retryable(self.last_results)}
+        rows = [r for r in self.rows if r.product.repo in ids and r.can_install]
+        if rows:
+            self.run_queue(rows)
+
+    def roll_back(self, row):
+        """One click: put the previous version of this plugin back."""
+        if row is None or self.installing:
+            return
+        try:
+            msg = self.svc.installer().rollback(row.product.repo)
+        except Exception as e:
+            msg = "Could not roll back: %s" % e
+        else:
+            self.svc.refresh_local()
+            info = self.svc.installed_for(row.product)
+            row.installed = info
+            row.status = MD.compute_status(row.product, row.releases, info)
+            self.rows.sort(key=MD.sort_key)
+        self.status = msg
+        self.refresh_list()
+        rw = self._row_widget(row.product.repo)
+        if rw:
+            rw.message = msg
+            rw.update()
+
+    # ---- update the updater itself --------------------------------------
+    def start_self_update(self):
+        rel = self.self_rel
+        if rel is None or self.installing or self.self_busy or self.svc.offline:
+            return
+        self.self_busy = "Updating the updater: downloading..."
+        self.refresh_list()
+        svc, br, system = self.svc, self.br, self.svc.system
+
+        def work():
+            try:
+                def prog(stage, d, t):
+                    if stage == "download":
+                        br.selfupd.emit("progress", "Updating the updater: downloading %d%%" % (100 * d // t if t else 0))
+                    else:
+                        br.selfupd.emit("progress", "Updating the updater: checking SHA256...")
+                plan = SU.prepare(svc.client, rel, system, svc.self_update_folder(), progress=prog)
+                br.selfupd.emit("ready", plan)
+            except Exception as e:
+                br.selfupd.emit("error", str(e) or e.__class__.__name__)
+        self.pool.start(Job(work))
+
+    def on_selfupd(self, kind, payload):
+        if kind == "progress":
+            self.self_busy = payload
+            self.update()
+            return
+        self.self_busy = ""
+        if kind == "error":
+            self.status = "The updater could not be updated: %s. The current version keeps working." % payload
+            self.refresh_list()
+            return
+        plan = payload
+        self.refresh_list()
+        if plan.action == "instruct":
+            ov = self._overlay("Update the updater", 760, 380)
+            ov.sub = "Studio 87 Gear Updater %s is verified and saved." % plan.version
+            ov.lines = [plan.text, "", plan.command, "", "Saved in: %s" % plan.file.parent]
+            ov.add_button("Copy command", 24, ov.h - 46, 150, lambda: QApplication.clipboard().setText(plan.command))
+            ov.add_button("Open folder", 182, ov.h - 46, 130, lambda: self.open_url(QUrl.fromLocalFile(str(plan.file.parent)).toString()))
+            ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+            return
+        try:
+            exit_now = SU.launch(plan, self.svc.system)
+        except Exception as e:
+            self.status = "Could not start the new installer: %s. It is saved in %s" % (e, plan.file.parent)
+            self.update()
+            return
+        self.status = plan.text
+        self.update()
+        if exit_now and self.win is not None:
+            QTimer.singleShot(300, QApplication.quit)
+
+    # ---- studio87:// links and the single instance -----------------------
+    def handle_link(self, text):
+        """A link from a plugin's About page (or `focus`): bring the window up and show that product. Never executes anything."""
+        if self.win is not None:
+            self.win.showNormal() if self.win.isMinimized() else self.win.show()
+            self.win.raise_()
+            self.win.activateWindow()
+        if not text or text == "focus":
+            return
+        act = LK.parse(text, [p.repo for p in self.svc.products])
+        if act is None or act.product is None:
+            return
+        if not self.rows:
+            self.pending_link = text          # the list is still loading: show the product as soon as it is there
+            return
+        self.close_overlay()
+        self.search.blockSignals(True)
+        self.search.setText("")
+        self.search.blockSignals(False)
+        self.tab = "all"
+        self.focus_repo = act.product
+        self.refresh_list()
+        for i, r in enumerate(self.view_rows):
+            if r.product.repo == act.product:
+                self.scroll.verticalScrollBar().setValue(i * (ROW_H + ROW_GAP))
+                break
+        self.update()
 
     # ---- overlays -------------------------------------------------------
     def close_overlay(self):
@@ -841,17 +1078,18 @@ class StudioRoot(QWidget):
         ov.add_button("Got it", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
 
     def show_settings(self):
-        ov = self._overlay("Settings", 700, 580)
+        ov = self._overlay("Settings", 700, 700)
         s = self.svc.settings
         ov.sub = "Saved on this computer only."
-        y = 100
+        ov.clear_infos()
+        y = 92
         ov.label("Look", 28, y + 4)
+        ov.look_buttons = {}
         for i, (k, v) in enumerate(LOOKS.items()):
             b = ov.add_button(v["label"], 160 + i * 150, y, 140, lambda _=None, k=k: self.set_look(k), "tab")
             b.setChecked(s["theme"] == k)
-            ov.look_buttons = getattr(ov, "look_buttons", {})
             ov.look_buttons[k] = b
-        y += 56
+        y += 46
         ov.label("Hover bubbles", 28, y + 4)
         bb = ov.add_button("On" if s["bubbles"] else "Off", 160, y, 80, lambda: None, "tab")
         bb.setChecked(bool(s["bubbles"]))
@@ -862,18 +1100,31 @@ class StudioRoot(QWidget):
             bb.setChecked(bool(s["bubbles"]))
         bb.clicked.disconnect()
         bb.clicked.connect(tog)
-        y += 56
+        y += 46
         ov.label("GitHub account", 28, y + 4)
         au = self.svc.auth
-        if not au.available:
-            ov.add_button("No keychain found: signing in is off", 160, y, 300, lambda: None, "tab")
-        else:
-            sb = ov.add_button("Sign out" if au.signed_in else "Sign in with GitHub (optional)", 160, y, 300, lambda: None, "tab")
-            sb.setChecked(au.signed_in)
-            sb.clicked.disconnect()
-            sb.clicked.connect(self.sign_out if au.signed_in else self.start_signin)
-            ov.note_extra = "Optional. Raises GitHub's hourly limit from 60 to 5000 requests. No permissions are requested; the token stays in your system keychain."
-        y += 56
+        sb = ov.add_button("Sign out" if au.signed_in else "Sign in with GitHub (optional)", 160, y, 300, lambda: None, "tab")
+        sb.setChecked(au.signed_in)
+        sb.clicked.disconnect()
+        sb.clicked.connect(self.sign_out if au.signed_in else self.start_signin)
+        self.bubbles.attach(sb, "Optional. Raises GitHub's hourly limit from 60 to 5000 requests. No permissions are requested.")
+        ov.info(au.status_line(), 160, y + 32, 500)
+        y += 76
+        ov.label("Keep sign in", 28, y + 4)
+        tb = {}
+
+        def pick_store(k):
+            s.set("token_storage", k)
+            self.svc.auth.store.session_only = (k == "session")
+            for kk, bt in tb.items():
+                bt.setChecked(kk == k)
+            self.show_settings()
+        for i, (k, label) in enumerate((("auto", "Keychain or file"), ("session", "This session only"))):
+            tb[k] = ov.add_button(label, 160 + i * 180, y, 170, lambda _=None, k=k: pick_store(k), "tab")
+            tb[k].setChecked(s["token_storage"] == k)
+        self.bubbles.attach(tb["auto"], "The token goes into the system keychain; if there is none (Flatpak, headless) into an encrypted file in the app data folder that only you can read (casual protection only).")
+        self.bubbles.attach(tb["session"], "The token is kept in memory only and is gone when you close the app.")
+        y += 46
         ov.label("Install mode", 28, y + 4)
         if self.svc.system == "linux":
             ov.add_button("No admin needed on Linux", 160, y, 280, lambda: None, "tab").setChecked(True)
@@ -884,15 +1135,13 @@ class StudioRoot(QWidget):
                 s.set("install_mode", k)
                 for kk, bt in mb.items():
                     bt.setChecked(kk == k)
-                if k == "all-users" and self.svc.system == "windows":
-                    self.notice = "Restart the updater: it will ask for administrator rights once."
                 self.update()
             for i, k in enumerate(MODE.MODES):
                 mb[k] = ov.add_button(MODE.MODE_LABEL[k], 160 + i * 230, y, 220, lambda _=None, k=k: pick_mode(k), "tab")
                 mb[k].setChecked(self.svc.mode == k)
         explain = MODE.EXPLAIN[self.svc.system]
         if self.svc.system == "linux":
-            y += 56
+            y += 46
             ov.label("Linux plugins go to", 28, y + 4)
             opts = (("auto", "Automatic"), ("native", "VST3 folder"), ("flatpak", "Flatpak DAW"))
             btns = {}
@@ -907,7 +1156,33 @@ class StudioRoot(QWidget):
                     bt.setChecked(kk == k)
             explain += (" Automatic: Flatpak extension if that product's extension is already installed, otherwise ~/.vst3. "
                         "Presets are never touched.")
-        ov.note, ov.note_y = explain, y + 56
+        y += 54
+        ov.label("Saved list", 28, y + 4)
+        cb = ov.add_button("Clear (%s)" % human_size(self.svc.caches.size()), 160, y, 190, lambda: None)
+
+        def clear_cache():
+            freed = self.svc.caches.clear()
+            self.thumbs.clear()
+            self.status = "Cleared the saved list and screenshots (%s). The next check downloads them again." % human_size(freed)
+            self.show_settings()
+        cb.clicked.disconnect()
+        cb.clicked.connect(clear_cache)
+        self.bubbles.attach(cb, "Delete the saved catalog, release info and screenshots used for offline mode. Plugins and settings are not touched. The next check downloads them again.")
+        ov.info("Offline mode keeps only the list, product info and screenshots (capped at %s), never plugin files." % human_size(self.svc.caches.cap), 360, y - 2, 310)
+        y += 46
+        ov.label("Previous versions", 28, y + 4)
+        kb = ov.add_button("Clear (%s)" % human_size(self.svc.backups.total_size()), 160, y, 190, lambda: None)
+
+        def clear_backups():
+            freed = self.svc.backups.clear()
+            self.status = "Cleared the kept previous versions (%s). Roll back is gone for them." % human_size(freed)
+            self.refresh_list()
+            self.show_settings()
+        kb.clicked.disconnect()
+        kb.clicked.connect(clear_backups)
+        self.bubbles.attach(kb, "Delete the previous plugin versions kept for Roll back. Installed plugins are not touched.")
+        ov.info("The last version before each update is kept for Roll back (plugin folders only, capped at %s)." % human_size(self.svc.backups.cap), 360, y - 2, 310)
+        ov.note, ov.note_y = explain, y + 54
         ov.lines = []
         ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
 
@@ -919,13 +1194,14 @@ class StudioRoot(QWidget):
                 b.setChecked(kk == k)
 
     def show_about(self):
-        ov = self._overlay("About Studio 87 Gear Updater", 720, 470)
-        ov.sub = "Version %s  ·  free and open source (AGPL-3.0-or-later)" % __version__
+        ov = self._overlay("About Studio 87 Gear Updater", 720, 520)
+        ov.sub = "Studio 87 Gear Updater v%s  ·  free and open source (AGPL-3.0-or-later)" % __version__
         d = str(self.svc.data_dir)
         ov.lines = [
             "Studio 87 Gear Updater lists every Studio 87 plugin and app and tells you which have a newer version on GitHub.",
             "It collects nothing: no telemetry, no account, no background checks, no timers. It only reads public GitHub release data when you open it or click Check for updates, "
             "and downloads a release zip only when you click Update. Everything is verified against SHA256SUMS first; a mismatch is refused.",
+            "Before it replaces a plugin it keeps the previous version (the last one per product) so one click on Roll back puts it back; interrupted downloads resume; if one product fails in a batch the others still go ahead.",
             "The installers are not code-signed: Windows may say 'unknown publisher', macOS may need Privacy and Security, Open Anyway.",
             "Your presets and data folders are never touched. This app keeps its settings and a small list of installed versions in: " + d,
             "Remove it like any app: Linux: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater; Windows: Settings, Apps; macOS: the Uninstall app in Applications.",
@@ -971,7 +1247,7 @@ class StudioRoot(QWidget):
             self.open_url(b)
         elif kind == "ok":
             self.close_overlay()
-            self.status = "Signed in to GitHub. The hourly limit is now 5000 requests."
+            self.status = "Signed in to GitHub. %s. The hourly limit is now 5000 requests." % self.svc.auth.status_line().replace("Signed in, t", "T")
         else:
             ov.lines = ["Sign in did not finish: %s" % a]
         ov.update()
@@ -996,6 +1272,7 @@ class Overlay(QWidget):
         self.relayout(root)
         self.holder.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self._labels = []
+        self._infos = []
 
     def relayout(self, root=None):
         root = root or self.root
@@ -1006,6 +1283,14 @@ class Overlay(QWidget):
     def label(self, text, x, y):
         self._labels.append((text, x, y))
         self.update()
+
+    def info(self, text, x, y, w):
+        """A line of small dim text (status lines in Settings)."""
+        self._infos.append((text, x, y, w))
+        self.update()
+
+    def clear_infos(self):
+        self._infos = []
 
     def add_button(self, text, x, y, w, fn, kind="normal"):
         b = Btn(text, self.holder, kind, 15)
@@ -1049,6 +1334,10 @@ class Overlay(QWidget):
             y += r.height() + 8
         for text, x, yy in self._labels:
             p.drawText(c.x() + x, c.y() + yy, 200, 24, Qt.AlignmentFlag.AlignVCenter, text)
+        p.setPen(T.c("dim"))
+        p.setFont(font(px=15, weight=QFont.Weight.Medium))
+        for text, x, yy, w in self._infos:
+            p.drawText(QRect(c.x() + x, c.y() + yy, w, 40), Qt.TextFlag.TextWordWrap, text)
         extra = getattr(self, "note_extra", "")
         if extra:
             p.setPen(T.c("dim"))
@@ -1150,15 +1439,44 @@ def fit_scale(avail):
     return max(S_MIN, min(1.0, (avail[0] - 24) / DW, (avail[1] - 70) / DH))
 
 
-def run(argv=None, service=None):
+class LinkFilter(QObject):
+    """macOS hands a clicked studio87:// link over as a QFileOpenEvent, not as a command line argument."""
+
+    def __init__(self, cb):
+        super().__init__()
+        self.cb = cb
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.FileOpen:
+            url = ev.url().toString() if ev.url().isValid() else ""
+            if url:
+                self.cb(url)
+            return True
+        return False
+
+
+def run(argv=None, service=None, single_instance=True):
     argv = list(argv or [])
     app = QApplication.instance() or QApplication([sys.argv[0]] + argv)
     app.setApplicationName(APP_NAME)
     app.setOrganizationName("Studio 87")
+    link = LK.find_in_argv(argv)
+    receiver = None
+    if single_instance:
+        from . import single
+        if single.send(link or "focus"):        # a window is already open: it takes the link, this process ends
+            return 0
+        receiver = single.Receiver()
     load_fonts()
     svc = service or Service()
     win = MainWindow(svc)
     win.show()
+    if receiver is not None:
+        receiver.got.connect(win.root.handle_link)
+    app._studio87 = (receiver, LinkFilter(win.root.handle_link))
+    app.installEventFilter(app._studio87[1])
+    if link:
+        win.root.pending_link = link
     QTimer.singleShot(0, win.root.start_open_check)
     QTimer.singleShot(400, win.root.show_first_run)
     return app.exec()

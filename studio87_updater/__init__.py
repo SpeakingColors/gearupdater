@@ -7,7 +7,7 @@ installed-version detection, GitHub client, installer logic. The Qt GUI lives in
 No telemetry. The only network use is read-only requests for public GitHub data and
 the download of a release zip the user chose to install.
 """
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 APP_NAME = "Studio 87 Gear Updater"
 USER_AGENT = "Studio87-GearUpdater"
 GITHUB_OWNER = "SpeakingColors"

@@ -10,7 +10,7 @@
   </description>
   <launchable type="desktop-id">io.github.speakingcolors.Studio87GearUpdater.desktop</launchable>
   <url type="homepage">https://github.com/SpeakingColors/gearupdater</url>
-  <provides><binary>studio87-gearupdater</binary></provides>
-  <releases><release version="0.1.1" date="2026-11-03"/></releases>
+  <provides><binary>studio87-gearupdater</binary><mediatype>x-scheme-handler/studio87</mediatype></provides>
+  <releases><release version="0.1.2" date="2026-11-15"/></releases>
   <content_rating type="oars-1.1"/>
 </component>

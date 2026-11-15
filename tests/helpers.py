@@ -16,6 +16,9 @@ class FakeTransport:
         self.routes = routes or {}      # url -> (status, headers, body) or callable(headers)
         self.log = []
         self.offline = False
+        self.range_support = True
+        self.break_after = {}       # url -> bytes delivered before the stream dies (once)
+        self.fail_open = {}         # url -> number of opens that fail first
 
     def request(self, url, headers=None):
         self.log.append((url, dict(headers or {})))
@@ -35,7 +38,47 @@ class FakeTransport:
         r = self.routes.get(url)
         if r is None:
             return 404, {}, None
-        return r[0], {"content-length": str(len(r[2]))}, io.BytesIO(r[2])
+        body = r[2]
+        if self.fail_open.get(url):                         # the first N opens fail like a dropped connection
+            self.fail_open[url] -= 1
+            raise Offline("connection reset")
+        rng = (headers or {}).get("Range")
+        if rng and self.range_support:
+            start = int(rng.split("=")[1].split("-")[0])
+            if start >= len(body):
+                return 416, {"content-range": "bytes */%d" % len(body)}, io.BytesIO(b"")
+            body = body[start:]
+            status, h = 206, {"content-length": str(len(body)), "content-range": "bytes %d-%d/%d" % (start, start + len(body) - 1, len(r[2]))}
+        else:
+            status, h = r[0], {"content-length": str(len(body))}
+        cut = self.break_after.get(url)
+        if cut is not None:                                  # deliver only `cut` bytes, then the connection dies (once)
+            del self.break_after[url]
+            return status, h, _Dying(body[:cut])
+        return status, h, io.BytesIO(body)
+
+
+class _Dying(io.BytesIO):
+    """Gives its bytes, then the connection closes early (short read) like a dropped download."""
+
+    def read(self, n=-1):
+        return super().read(n)
+
+
+class FakeBackend:
+    """Stands in for the elevation backend. Records every batch so tests can count prompts."""
+
+    def __init__(self, admin=False, outcome=None):
+        self.admin = admin
+        self.batches = []
+        self.outcome = outcome or {}        # repo -> (ok, message) overrides; default ok
+
+    def is_admin(self):
+        return self.admin
+
+    def run_batch(self, jobs, stage_dir):
+        self.batches.append([j.repo for j in jobs])
+        return {j.repo: self.outcome.get(j.repo, (True, "Installed.")) for j in jobs}
 
 
 def release_json(tag="v0.2.0", assets=(), body="Notes", prerelease=True, draft=False, name=None):

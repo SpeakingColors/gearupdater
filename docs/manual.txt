@@ -13,7 +13,7 @@ It collects nothing. It checks GitHub only when you open it or click Check for u
 - Click Check for updates whenever you want to look again. Nothing else asks GitHub anything.
 
 ## Install and remove
-Windows: run Studio87-GearUpdater-Setup.exe from the zip. The app asks for administrator rights once when it starts (one UAC prompt), then installs without asking again. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
+Windows: run Studio87-GearUpdater-Setup.exe from the zip. The app starts as a normal user, without a prompt. Only an All users install asks for administrator rights, once for the whole batch (one UAC prompt); Just for me never asks. Windows may show an unknown publisher screen (More info, Run anyway). Remove it in Settings, Apps. The uninstaller asks if you also want the updater's own settings deleted (the default is No).
 macOS: open Studio87-GearUpdater-macOS.pkg. If macOS blocks it, use System Settings, Privacy and Security, Open Anyway. Remove it with Uninstall Studio 87 Gear Updater in the Applications folder.
 Linux: double click Studio87-GearUpdater.flatpak and press Install in your software centre. Terminal alternative: flatpak install --user Studio87-GearUpdater.flatpak. Remove it with: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater
 The installers are not code-signed or notarised, because certificates cost money and this is a free project. The warning only says not signed by a known company. The code is open on GitHub and SHA256SUMS in the zip lets you check your download.
@@ -21,8 +21,10 @@ The installers are not code-signed or notarised, because certificates cost money
 ## Settings
 Look: three looks, Neon Navy, Purple Soda Pop and PurrOne. The look is saved with the app settings. The default is PurrOne.
 Hover bubbles: switch the one-second info bubbles on or off.
-Install mode: All users (default on Windows and macOS) or Just for me. Just for me puts plugins in your own VST3 folder: Windows %LOCALAPPDATA%\Programs\Common\VST3, macOS ~/Library/Audio/Plug-Ins/VST3, Linux ~/.vst3. Choose it if you do not want any administrator prompt.
-GitHub account: optional Sign in with GitHub (device code, no permissions). It raises GitHub's hourly limit from 60 to 5000. The token is kept in your system keychain, never in a file, never logged. Sign out removes it.
+Install mode: All users (default on Windows and macOS) or Just for me. The app itself always starts without administrator rights; All users asks once per batch, only when a Setup.exe or .pkg has to run. Just for me puts plugins in your own VST3 folder: Windows %LOCALAPPDATA%\Programs\Common\VST3, macOS ~/Library/Audio/Plug-Ins/VST3, Linux ~/.vst3. Choose it if you do not want any administrator prompt.
+GitHub account: optional Sign in with GitHub (device code, no permissions). It raises GitHub's hourly limit from 60 to 5000. The token is kept in your system keychain if there is one, otherwise in an encrypted file in the app's own folder (0600, key beside it), otherwise only for this session. A line says which: Signed in, token stored in: OS keychain, local file or this session only. The file is casual protection only: the key sits beside it, so it hides the token from other accounts and from a glance, not from a program running as you. The token is never logged. If the sign in expires the app asks you to sign in again and keeps working without it. Sign out removes it.
+Saved list: Clear removes the offline copy of the catalog, product info and screenshots (60 MB cap). Plugin files are never cached for offline use.
+Previous versions: Clear removes the kept older plugin folders (600 MB cap).
 Linux plugins go to: Automatic uses the Flatpak extension when that product's extension is already installed and otherwise puts the plugin in the VST3 folder (~/.vst3). VST3 folder and Flatpak DAW force one of the two. Your presets are never touched by either.
 
 ## Safety and privacy
@@ -30,11 +32,16 @@ Linux plugins go to: Automatic uses the Flatpak extension when that product's ex
 - Every download is verified: GitHub's own SHA-256 digest of the zip, a SHA256SUMS release asset that lists the zip (when the release has one), and the SHA256SUMS inside the zip for every file. At least one source must exist; all that exist must match. On a mismatch the product is refused.
 - These checks show that the download is intact and is what the release published. They are not a signature and do not prove who made it.
 - Zips and plugin tarballs are unpacked safely: no paths outside the target folder, no symbolic links, and a plugin tarball must contain exactly one .vst3 folder.
-- Presets and user data folders are never touched. A plugin update replaces only the plugin's .vst3 folder, and the old one is kept until the new one is in place.
+- Presets and user data folders are never touched. A plugin update replaces only the plugin's .vst3 folder. Every file is checked against its SHA256 before the installed copy is touched, and checked again after copying; if anything fails the old version is put back by itself.
+- Roll back: after an update of a plugin folder the app copied itself, the version you had is kept (last version only). The Roll back button on that row puts it back. A Setup.exe, .pkg or Flatpak runs as it is and has no Roll back.
+- Downloads retry up to three times with a growing pause and resume where they stopped. In Update all one failure never stops the others; a Results list shows each product and Retry failed repeats only the failed ones.
+- Administrator rights: one helper per batch re-checks each installer's SHA256 and runs fixed command lines only; it takes no commands or paths from the file it reads.
 - Nothing about you or your computer is sent. The requests carry only the generic User-Agent Studio87-GearUpdater, an Accept header and, for saved answers, the If-None-Match header GitHub itself gave out.
 
 ## Troubleshooting
-- Offline: the list shows the last saved answers and the status line says Offline. Click Check for updates again when you are back online.
+- Offline: a bar says Offline, showing saved list from the date of the saved copy. Install and Update are disabled (hover for the reason) unless the installer zip was already downloaded. Click Check for updates when you are back online.
+- Update the updater first: a newer Studio 87 Gear Updater exists. Windows runs its Setup and closes this window; macOS opens the .pkg; the Linux Flatpak shows the command to run.
+- Plugin link: plugins open this app with studio87://open?product=NAME. Only open and product are read, the product must be in the catalog, nothing is executed, only one window exists.
 - GitHub rate limit: the app normally reads one catalog file that is rebuilt every 3 hours, so it does not use the limit. If that file cannot be read it asks GitHub per product (about 52 requests, 60 allowed per hour without an account, 5000 if you sign in). If the limit is reached the app stops asking, shows the saved list, and tells you in how many minutes to try again.
 - Installed version unknown: the product has no readable version in its plugin file and was not installed by this updater. After you update it once with this updater, it is known.
 - Not set up for updates yet: the row only links to GitHub. Its project page tells you how to get it.
