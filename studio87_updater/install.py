@@ -376,7 +376,7 @@ class Installer:
                 fn = install_vst3_tarball if plan.method == "vst3-tarball" else install_vst3_zip
                 target = fn(plan.file, self.vst3_dir, keep=keep)
                 paths = bundle_files(target)
-                pass
+                self.record.set(p.repo, ver, rel.tag, plan.method, paths)
                 self._drop_zip(zip_path)
                 kept = self.backups is not None and self.backups.has(p.repo)
                 msg = "Installed %s %s (%s). Checksums verified." % (p.name, ver, plan.method)
