@@ -1,0 +1,342 @@
+{
+ "flow": "You open the app or click Check for updates, then GitHub public release data is read (one small catalog.json, or one request per product as a fallback; read only, saved with ETags), then the list shows the installed version read from your computer, then you click Update or Install, then the zip is downloaded (retry and resume), its SHA256 is checked (refused on a mismatch, before any installed file is touched), the product is installed by its own route (the previous plugin folder is kept for Roll back when the app copies it), and the installed version is noted.",
+ "displays": {
+  "main": [
+   {
+    "name": "Screenshot",
+    "text": "The product's own docs/screenshot.png at 310 x 162, taken from the catalog's small thumbnail (or from the repository when the catalog has none), fetched during the check and saved on disk. Products without one show a tinted 'no screenshot yet' tile."
+   },
+   {
+    "name": "Name, kind and build type",
+    "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as a pre-release or called a test build."
+   },
+   {
+    "name": "Installed and latest version",
+    "text": "What is really installed (read from the plugin's own metadata, the system's installer records or what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly."
+   },
+   {
+    "name": "Status",
+    "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While working it turns into the stage (Downloading, Verifying SHA256, Installing) with a progress bar. After an update or a Roll back it shows the result message of that row."
+   },
+   {
+    "name": "Description",
+    "text": "The start of the release notes, wrapped to two lines. The Changelog button shows the notes of every version newer than yours."
+   },
+   {
+    "name": "Date, size and install route",
+    "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited)."
+   },
+   {
+    "name": "Status line",
+    "text": "The result of the last action (for example '3 of 4 done.' or a Roll back message). The small line under it says when the catalog was read and turns amber when the catalog is more than 9 hours old. 'N of M shown' is on the right; a GitHub rate-limit or offline message appears in red on the right."
+   },
+   {
+    "name": "Scrolling list",
+    "text": "One long list of the tab you are on. Use the mouse wheel, drag, or the arrow keys; there are no scrollbars. In the All tab products with an update come first."
+   },
+   {
+    "name": "Size read-out",
+    "text": "Design size in pixels and the zoom percent. Drag a corner to scale everything; drag a side to change only the width (960 to 1500) or the height (760 to 1500)."
+   },
+   {
+    "name": "Wood sides",
+    "text": "Double click on either wood side to go back to the normal size for this screen."
+   }
+  ],
+  "changelog": [
+   {
+    "find": "sub",
+    "name": "Installed and latest",
+    "text": "The installed version (or 'unknown') and the newest release on GitHub."
+   },
+   {
+    "find": "browser",
+    "name": "Release notes",
+    "text": "The notes of every release newer than the installed one, newest first, as written on GitHub (the newest one only when the installed version is unknown). Page up and Page down move through it; there are no scrollbars."
+   }
+  ],
+  "confirm": [
+   {
+    "find": "sub",
+    "name": "What will happen",
+    "text": "Says that each product is downloaded, its SHA256 checked, then installed, and that a mismatch stops that product only."
+   },
+   {
+    "find": "lines",
+    "name": "Products and warning",
+    "text": "The products and versions in this batch (the first 12, then 'and N more'), and the note that the installers are not code-signed and that presets are never touched."
+   }
+  ],
+  "results": [
+   {
+    "find": "sub",
+    "name": "Summary",
+    "text": "How many products finished and how many did not. A failure never stops the others."
+   },
+   {
+    "find": "browser",
+    "name": "One entry per product",
+    "text": "Done (green), Failed or Stopped (red), the product name and the message: what was installed, or why it was refused. The entries in this picture are examples, written for this manual."
+   }
+  ],
+  "settings": [
+   {
+    "find": "info:0",
+    "name": "Sign in status",
+    "text": "Says whether you are signed in and where the token is kept: OS keychain, local file or this session only. After an expired sign in it says 'Your GitHub sign in expired. Please sign in again'."
+   },
+   {
+    "find": "info:1",
+    "name": "Saved list note",
+    "text": "What offline mode keeps (the list, product info and screenshots, never plugin files) and the size cap."
+   },
+   {
+    "find": "info:2",
+    "name": "Previous versions note",
+    "text": "What Roll back keeps (the last version before each update, plugin folders only) and the size cap."
+   },
+   {
+    "find": "note",
+    "name": "Install mode explanation",
+    "text": "What the install mode means on this system. On Linux it also says what Automatic does and that presets are never touched."
+   }
+  ],
+  "signin": [
+   {
+    "find": "sub",
+    "name": "Reminder",
+    "text": "Sign in is optional and requests no permissions."
+   },
+   {
+    "find": "lines",
+    "name": "Code to type",
+    "text": "The web address and the one-time code to type there. The app opens the address in your browser by itself and waits until you approve. In this picture the code is an example from a stub, not a real GitHub code."
+   }
+  ],
+  "about": [
+   {
+    "find": "sub",
+    "name": "Version and licence",
+    "text": "The version of this updater and its licence."
+   },
+   {
+    "find": "lines",
+    "name": "What it is and what it stores",
+    "text": "What the app does, that it collects nothing, the folder where it keeps its own files (on this computer), how Roll back works, the unsigned-installer note and how to remove it."
+   }
+  ],
+  "firstrun": [
+   {
+    "find": "sub",
+    "name": "Install mode",
+    "text": "The install mode in force on this system."
+   },
+   {
+    "find": "lines",
+    "name": "How installing works here",
+    "text": "One short explanation of when an administrator prompt can appear (Windows and macOS, All users only) or that none is ever needed (Linux). Shown once, the first time the app is opened."
+   }
+  ]
+ },
+ "notes": {
+  "row_progress": "While a product is installing, its status line shows the stage (Downloading, Verifying SHA256, Installing) and a bar. A row's buttons stay off until it is done.",
+  "bar_self": "Appears under the tabs when a newer Studio 87 Gear Updater release exists. The button hands over to the new installer after its SHA256 check passes. While it works, the bar shows 'Updating the updater: downloading N%'. The version in this picture (v0.1.3) is an example.",
+  "bar_offline": "Appears when GitHub could not be reached: 'Offline, showing saved list from <date and time of the saved copy>'. Install and Update are off with a reason, unless the installer was already downloaded. The date in this picture is an example."
+ },
+ "panels": {
+  "bars": [
+   "Offline bar and Update the updater bar",
+   "Two slim bars can appear between the tabs and the list. They are not there in the normal case. The update bar is amber; the offline bar is red. Both can show at once, as here. The picture is made by switching them on in the real window; the version and date are examples."
+  ],
+  "working": [
+   "While an update runs",
+   "Update, Update selected, Update all and Install all start the same queue. While it runs, the row shows its stage and a bar, the batch buttons are off and Stop after this one appears. Stop finishes the product that is running and skips the rest."
+  ],
+  "changelog": [
+   "Changelog",
+   "Opened by the Changelog button on a row. It shows what changed in every version newer than the one installed."
+  ],
+  "confirm": [
+   "Update several",
+   "Update selected, Install selected, Apply selected, Update all and Install all show this list first, worded to match (for example 'Apply 1 update and 2 installs?'). Nothing is downloaded until you confirm."
+  ],
+  "results": [
+   "Results and Retry failed",
+   "A batch of more than one product (or a batch with a failure) ends with this list. One failed product never stops the others. Retry failed runs only the products that did not finish; a download that was cut off continues where it stopped. The button is off while the app is offline."
+  ],
+  "settings": [
+   "Settings",
+   "Everything is saved on this computer only. This picture is the Linux version, with the sign in switched off. On Windows and macOS the Install mode row offers 'For all users (admin)' and 'Just for me (no admin)' and the Linux plugins row is not shown."
+  ],
+  "signin": [
+   "Sign in with GitHub (optional)",
+   "Raises GitHub's hourly request limit from 60 to 5000. It uses GitHub's device flow and asks for no permissions. The app shows a code, opens github.com/login/device, and waits until you approve it there."
+  ],
+  "about": [
+   "About",
+   "What the app is, what it collects (nothing), where its own files are and how to remove it. The Ko-fi button only opens the page in your browser when you click it."
+  ],
+  "firstrun": [
+   "Welcome note",
+   "Shown once, the first time the app is opened. It says how installing works on this system, so an administrator prompt never comes as a surprise."
+  ]
+ },
+ "controls": {
+  "Check for updates": {
+   "range": "Click",
+   "default": "Also runs once when the app opens"
+  },
+  "Settings": {
+   "range": "Click",
+   "default": "-"
+  },
+  "About": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Updates tab": {
+   "range": "One tab is active",
+   "default": "Active at every start"
+  },
+  "All tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "VST and FX tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Synths tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Controllers tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Apps and logue tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Installed tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Not installed tab": {
+   "range": "One tab is active",
+   "default": "-"
+  },
+  "Search box": {
+   "range": "Any text",
+   "default": "Empty"
+  },
+  "Update / Install selected": {
+   "range": "Click (acts on ticked rows)",
+   "default": "-"
+  },
+  "Update all / Install all": {
+   "range": "Click (acts on the tab you see)",
+   "default": "-"
+  },
+  "Row tick box": {
+   "range": "On or off",
+   "default": "Off"
+  },
+  "Update / Install button": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Changelog button": {
+   "range": "Click",
+   "default": "-"
+  },
+  "GitHub button": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Roll back button": {
+   "range": "Click; only shown when a previous version is kept",
+   "default": "Hidden"
+  },
+  "Smaller window": {
+   "range": "Click; scale step 0.1",
+   "default": "-"
+  },
+  "Larger window": {
+   "range": "Click; scale step 0.1",
+   "default": "-"
+  },
+  "Fit to screen": {
+   "range": "Click",
+   "default": "-"
+  },
+  "One to one": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Stop after this one": {
+   "range": "Click",
+   "default": "Hidden until an install runs"
+  },
+  "Update all / Install all (waiting)": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Row progress (status area of the row)": {
+   "range": "Display only",
+   "default": "-"
+  },
+  "Update the updater": {
+   "range": "Click",
+   "default": "Hidden unless a newer release exists"
+  },
+  "Check for updates (leaves offline mode)": {
+   "range": "Click",
+   "default": "-"
+  },
+  "Hover bubbles: On or Off": {
+   "range": "On or Off",
+   "default": "On"
+  },
+  "GitHub account: Sign in with GitHub / Sign out": {
+   "range": "Click",
+   "default": "Not signed in"
+  },
+  "Keep sign in: Keychain or file": {
+   "range": "Keychain or file; This session only",
+   "default": "Keychain or file"
+  },
+  "Keep sign in: This session only": {
+   "range": "Keychain or file; This session only",
+   "default": "Keychain or file"
+  },
+  "Install mode: No admin needed on Linux": {
+   "range": "Linux has no choice (Windows and macOS: All users or Just for me)",
+   "default": "Just for me (Linux); All users (Windows, macOS)"
+  },
+  "Linux plugins go to: Automatic": {
+   "range": "Automatic; VST3 folder; Flatpak DAW",
+   "default": "Automatic"
+  },
+  "Linux plugins go to: VST3 folder": {
+   "range": "Automatic; VST3 folder; Flatpak DAW",
+   "default": "Automatic"
+  },
+  "Linux plugins go to: Flatpak DAW": {
+   "range": "Automatic; VST3 folder; Flatpak DAW",
+   "default": "Automatic"
+  },
+  "Saved list: Clear (size)": {
+   "range": "Click; the saved list is capped at 60 MB",
+   "default": "-"
+  },
+  "Previous versions: Clear (size)": {
+   "range": "Click; previous versions are capped at 600 MB",
+   "default": "-"
+  },
+  "Retry failed": {
+   "range": "Click; shows the number to retry",
+   "default": "-"
+  }
+ }
+}

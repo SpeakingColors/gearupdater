@@ -40,6 +40,13 @@ def human_size(n):
     return "%.0f MB" % (n / 1048576) if n >= 1048576 else "%.0f KB" % (n / 1024)
 
 
+MODE_TIPS = {"all-users": "Use each product's own installer for every user of this computer. The app starts without a prompt; it asks for administrator rights once per batch, only for a Setup.exe or .pkg.",
+             "just-me": "Put plugins in your own VST3 folder. No administrator rights and no prompt, ever."}
+LINUX_TIPS = {"auto": "Use the Flatpak extension when that product's extension is already installed, otherwise put the plugin in ~/.vst3.",
+              "native": "Always put the plugin in ~/.vst3 (for DAWs that are not Flatpaks).",
+              "flatpak": "Always install the Flatpak extension (for Flatpak DAWs). The DAW must use the same Freedesktop runtime."}
+
+
 class Bridge(QObject):
     progress = Signal(int, int)
     checked = Signal(object, str)
@@ -387,8 +394,7 @@ class StudioRoot(QWidget):
           "Update every product that has a newer version. Products with an unknown installed version are left alone.")
         B(self.b_sel, "Update or install the products you ticked, one after another.")
         B(self.b_stop, "Finish the current product, then stop the rest.")
-        B(self.b_self, lambda: self.svc.install_disabled_reason_self() if hasattr(self.svc, "install_disabled_reason_self") else
-          "Download the newer Studio 87 Gear Updater, check its SHA256, then hand over to its installer. Nothing is replaced until the check passes.")
+        B(self.b_browse, "Show every public Studio 87 product (the All tab).")
         B(self.b_self, lambda: "Offline. The update needs the internet to download." if self.svc.offline else
           "Download the newer Studio 87 Gear Updater, check its SHA256, then hand over to its installer. Nothing is replaced until the check passes; the old version keeps working if anything fails.")
         B(self.b_zoom_out, "Smaller. Drag a corner to scale everything; drag a side to change only the width or the height.")
@@ -898,7 +904,7 @@ class StudioRoot(QWidget):
                            self.retry_failed, "primary" if todo else "normal")
         rb.setEnabled(bool(todo) and not self.svc.offline_text())
         self.bubbles.attach(rb, "Run only the products that did not finish again. A download that was cut off continues where it stopped.")
-        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay)
+        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, tip="Close this window. Nothing is changed.")
 
     def retry_failed(self):
         ids = {r.repo for r in BA.retryable(self.last_results)}
@@ -967,7 +973,7 @@ class StudioRoot(QWidget):
             ov.lines = [plan.text, "", plan.command, "", "Saved in: %s" % plan.file.parent]
             ov.add_button("Copy command", 24, ov.h - 46, 150, lambda: QApplication.clipboard().setText(plan.command))
             ov.add_button("Open folder", 182, ov.h - 46, 130, lambda: self.open_url(QUrl.fromLocalFile(str(plan.file.parent)).toString()))
-            ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+            ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary", tip="Close this window. Nothing is changed.")
             return
         try:
             exit_now = SU.launch(plan, self.svc.system)
@@ -1048,12 +1054,12 @@ class StudioRoot(QWidget):
             md.append("## %s  (%s)\n\n%s\n" % (r.name or r.tag, r.published[:10], r.body or "No release notes."))
         tb.setMarkdown("\n---\n".join(md))
         tb.show()
-        ov.add_button("Page up", 24, ov.h - 46, 100, lambda: tb.verticalScrollBar().setValue(tb.verticalScrollBar().value() - tb.viewport().height() + 20))
-        ov.add_button("Page down", 132, ov.h - 46, 100, lambda: tb.verticalScrollBar().setValue(tb.verticalScrollBar().value() + tb.viewport().height() - 20))
+        ov.add_button("Page up", 24, ov.h - 46, 100, lambda: tb.verticalScrollBar().setValue(tb.verticalScrollBar().value() - tb.viewport().height() + 20), tip="Show the previous page of the release notes. There are no scrollbars.")
+        ov.add_button("Page down", 132, ov.h - 46, 100, lambda: tb.verticalScrollBar().setValue(tb.verticalScrollBar().value() + tb.viewport().height() - 20), tip="Show the next page of the release notes. There are no scrollbars.")
         rb = ov.add_button("Refresh now", 240, ov.h - 46, 120, lambda: self.refresh_one(row))
         self.bubbles.attach(rb, "Ask GitHub directly about this product, for the newest answer right now. Uses 1 of the 60 free requests per hour.")
-        ov.add_button("Open on GitHub", ov.w - 24 - 100 - 8 - 140, ov.h - 46, 140, lambda: self.open_url(row.latest.html_url or row.product.github_url))
-        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+        ov.add_button("Open on GitHub", ov.w - 24 - 100 - 8 - 140, ov.h - 46, 140, lambda: self.open_url(row.latest.html_url or row.product.github_url), tip="Open this release on GitHub in your browser.")
+        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary", tip="Close this window. Nothing is changed.")
 
     def show_confirm(self, rows):
         ov = self._overlay(MD.confirm_title(rows), 640, 420)
@@ -1062,8 +1068,8 @@ class StudioRoot(QWidget):
         names = ", ".join(shown) + (" and %d more" % (len(rows) - 12) if len(rows) > 12 else "")
         ov.lines = [names, "", "These installers are not code-signed (no paid certificate). Windows or macOS may show an 'unknown publisher' warning; "
                     "the code is open on GitHub and the checksum is verified here. Your presets are never touched."]
-        ov.add_button("Cancel", ov.w - 24 - 100 - 8 - 100, ov.h - 46, 100, self.close_overlay)
-        ov.add_button(MD.confirm_button(rows), ov.w - 24 - 100, ov.h - 46, 100, lambda: self.run_queue(rows), "primary")
+        ov.add_button("Cancel", ov.w - 24 - 100 - 8 - 100, ov.h - 46, 100, self.close_overlay, tip="Go back. Nothing is downloaded or installed.")
+        ov.add_button(MD.confirm_button(rows), ov.w - 24 - 100, ov.h - 46, 100, lambda: self.run_queue(rows), "primary", tip="Start now: each product is downloaded, its SHA256 checked, then installed, one after another. One failure does not stop the others.")
 
     def show_first_run(self):
         """One time only: say how installing works on this system (admin once, or none)."""
@@ -1075,8 +1081,8 @@ class StudioRoot(QWidget):
         ov.sub = "Install mode: %s" % MODE.MODE_LABEL[self.svc.mode]
         ov.lines = [MODE.EXPLAIN[self.svc.system], "", "Change this any time in Settings. Nothing is installed without your click, every download is checked "
                     "against its SHA256, and the installers are not code-signed."]
-        ov.add_button("Open Settings", ov.w - 24 - 100 - 8 - 130, ov.h - 46, 130, self.show_settings)
-        ov.add_button("Got it", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+        ov.add_button("Open Settings", ov.w - 24 - 100 - 8 - 130, ov.h - 46, 130, self.show_settings, tip="Open Settings to change the install mode, the look and the hover bubbles.")
+        ov.add_button("Got it", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary", tip="Close this welcome note. It is only shown once.")
 
     def show_settings(self):
         ov = self._overlay("Settings", 700, 700)
@@ -1087,12 +1093,12 @@ class StudioRoot(QWidget):
         ov.label("Look", 28, y + 4)
         ov.look_buttons = {}
         for i, (k, v) in enumerate(LOOKS.items()):
-            b = ov.add_button(v["label"], 160 + i * 150, y, 140, lambda _=None, k=k: self.set_look(k), "tab")
+            b = ov.add_button(v["label"], 160 + i * 150, y, 140, lambda _=None, k=k: self.set_look(k), "tab", tip="Switch the whole window to this colour look now. Saved on this computer; the wood sides, cat logo and layout stay the same.")
             b.setChecked(s["theme"] == k)
             ov.look_buttons[k] = b
         y += 46
         ov.label("Hover bubbles", 28, y + 4)
-        bb = ov.add_button("On" if s["bubbles"] else "Off", 160, y, 80, lambda: None, "tab")
+        bb = ov.add_button("On" if s["bubbles"] else "Off", 160, y, 80, lambda: None, "tab", tip="Switch the info bubbles that appear after about one second of hovering on or off.")
         bb.setChecked(bool(s["bubbles"]))
 
         def tog():
@@ -1128,7 +1134,7 @@ class StudioRoot(QWidget):
         y += 46
         ov.label("Install mode", 28, y + 4)
         if self.svc.system == "linux":
-            ov.add_button("No admin needed on Linux", 160, y, 280, lambda: None, "tab").setChecked(True)
+            ov.add_button("No admin needed on Linux", 160, y, 280, lambda: None, "tab", tip="On Linux plugins go to ~/.vst3 or a user-level Flatpak, so there is nothing to choose and no password prompt.").setChecked(True)
         else:
             mb = {}
 
@@ -1138,7 +1144,7 @@ class StudioRoot(QWidget):
                     bt.setChecked(kk == k)
                 self.update()
             for i, k in enumerate(MODE.MODES):
-                mb[k] = ov.add_button(MODE.MODE_LABEL[k], 160 + i * 230, y, 220, lambda _=None, k=k: pick_mode(k), "tab")
+                mb[k] = ov.add_button(MODE.MODE_LABEL[k], 160 + i * 230, y, 220, lambda _=None, k=k: pick_mode(k), "tab", tip=MODE_TIPS[k])
                 mb[k].setChecked(self.svc.mode == k)
         explain = MODE.EXPLAIN[self.svc.system]
         if self.svc.system == "linux":
@@ -1147,7 +1153,7 @@ class StudioRoot(QWidget):
             opts = (("auto", "Automatic"), ("native", "VST3 folder"), ("flatpak", "Flatpak DAW"))
             btns = {}
             for i, (k, label) in enumerate(opts):
-                b = ov.add_button(label, 200 + i * 140, y, 130, lambda _=None, k=k: pick(k), "tab")
+                b = ov.add_button(label, 200 + i * 140, y, 130, lambda _=None, k=k: pick(k), "tab", tip=LINUX_TIPS[k])
                 b.setChecked(s["linux_target"] == k)
                 btns[k] = b
 
@@ -1185,7 +1191,7 @@ class StudioRoot(QWidget):
         ov.info("The last version before each update is kept for Roll back (plugin folders only, capped at %s)." % human_size(self.svc.backups.cap), 360, y - 2, 310)
         ov.note, ov.note_y = explain, y + 54
         ov.lines = []
-        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary", tip="Close this window. Nothing is changed.")
 
     def set_look(self, k):
         self.svc.settings.set("theme", k)
@@ -1207,9 +1213,9 @@ class StudioRoot(QWidget):
             "Your presets and data folders are never touched. This app keeps its settings and a small list of installed versions in: " + d,
             "Remove it like any app: Linux: flatpak uninstall --user io.github.speakingcolors.Studio87GearUpdater; Windows: Settings, Apps; macOS: the Uninstall app in Applications.",
         ]
-        ov.add_button("Ko-fi (optional tip)", 24, ov.h - 46, 170, lambda: self.open_url(KOFI))
-        ov.add_button("GitHub", 202, ov.h - 46, 100, lambda: self.open_url("https://github.com/SpeakingColors/gearupdater"))
-        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary")
+        ov.add_button("Ko-fi (optional tip)", 24, ov.h - 46, 170, lambda: self.open_url(KOFI), tip="Optional. Opens the Studio 87 Ko-fi page in your browser when you click. Nothing is locked behind it and the app never asks again.")
+        ov.add_button("GitHub", 202, ov.h - 46, 100, lambda: self.open_url("https://github.com/SpeakingColors/gearupdater"), tip="Open the source code and the releases of this updater on GitHub.")
+        ov.add_button("Close", ov.w - 24 - 100, ov.h - 46, 100, self.close_overlay, "primary", tip="Close this window. Nothing is changed.")
 
     # ---- optional GitHub sign in (OAuth device flow) -------------------------
     def start_signin(self):
@@ -1218,7 +1224,7 @@ class StudioRoot(QWidget):
         ov = self._overlay("Sign in with GitHub", 640, 340)
         ov.sub = "Optional. No permissions are requested."
         ov.lines = ["Asking GitHub for a code..."]
-        ov.add_button("Cancel", ov.w - 24 - 100, ov.h - 46, 100, self.cancel_signin)
+        ov.add_button("Cancel", ov.w - 24 - 100, ov.h - 46, 100, self.cancel_signin, tip="Stop signing in. Nothing is stored.")
         br = self.br
 
         def work():
@@ -1293,10 +1299,12 @@ class Overlay(QWidget):
     def clear_infos(self):
         self._infos = []
 
-    def add_button(self, text, x, y, w, fn, kind="normal"):
+    def add_button(self, text, x, y, w, fn, kind="normal", tip=None):
         b = Btn(text, self.holder, kind, 15)
         b.setGeometry(x, y, w, 30)
         b.clicked.connect(fn)
+        if tip:
+            self.root.bubbles.attach(b, tip)
         b.show()
         return b
 

@@ -1,362 +1,1271 @@
 {
- "controls": [
-  {
-   "name": "Check for updates",
-   "box": [
-    637,
-    13,
-    170,
-    34
+ "scenes": {
+  "main": {
+   "image": "window-badges.png",
+   "controls": [
+    {
+     "name": "Check for updates",
+     "box": [
+      637,
+      13,
+      170,
+      34
+     ],
+     "tip": "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.",
+     "n": 1,
+     "range": "Click",
+     "default": "Also runs once when the app opens"
+    },
+    {
+     "name": "Settings",
+     "box": [
+      815,
+      13,
+      96,
+      34
+     ],
+     "tip": "Look, hover bubbles, install mode and the optional GitHub sign in.",
+     "n": 2,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "About",
+     "box": [
+      919,
+      13,
+      84,
+      34
+     ],
+     "tip": "What this is, what it collects (nothing), and how to remove it.",
+     "n": 3,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Updates tab",
+     "box": [
+      44,
+      64,
+      100,
+      30
+     ],
+     "tip": "Products that have a newer version than the one installed.",
+     "n": 4,
+     "range": "One tab is active",
+     "default": "Active at every start"
+    },
+    {
+     "name": "All tab",
+     "box": [
+      148,
+      64,
+      66,
+      30
+     ],
+     "tip": "Every public Studio 87 product. Updates come first.",
+     "n": 5,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "VST and FX tab",
+     "box": [
+      218,
+      64,
+      118,
+      30
+     ],
+     "tip": "VST3 effects, analysers, editors and tools.",
+     "n": 6,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Synths tab",
+     "box": [
+      340,
+      64,
+      92,
+      30
+     ],
+     "tip": "Synths and instruments.",
+     "n": 7,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Controllers tab",
+     "box": [
+      436,
+      64,
+      112,
+      30
+     ],
+     "tip": "Plugins that control a hardware synth or effect unit.",
+     "n": 8,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Apps and logue tab",
+     "box": [
+      552,
+      64,
+      144,
+      30
+     ],
+     "tip": "Standalone apps and logue units (minilogue xd, drumlogue).",
+     "n": 9,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Installed tab",
+     "box": [
+      228,
+      100,
+      104,
+      30
+     ],
+     "tip": "Products found on this computer.",
+     "n": 10,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Not installed tab",
+     "box": [
+      336,
+      100,
+      124,
+      30
+     ],
+     "tip": "Products not installed yet. Pick Install on a row.",
+     "n": 11,
+     "range": "One tab is active",
+     "default": "-"
+    },
+    {
+     "name": "Search box",
+     "box": [
+      44,
+      100,
+      176,
+      30
+     ],
+     "tip": "Type to filter the list by name, kind (for example controller) or status (for example update).",
+     "n": 12,
+     "range": "Any text",
+     "default": "Empty"
+    },
+    {
+     "name": "Update / Install selected",
+     "box": [
+      691,
+      100,
+      164,
+      30
+     ],
+     "tip": "Update or install the products you ticked, one after another.",
+     "n": 13,
+     "range": "Click (acts on ticked rows)",
+     "default": "-"
+    },
+    {
+     "name": "Update all / Install all",
+     "box": [
+      863,
+      100,
+      140,
+      30
+     ],
+     "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
+     "n": 14,
+     "range": "Click (acts on the tab you see)",
+     "default": "-"
+    },
+    {
+     "name": "Row tick box",
+     "box": [
+      52,
+      216,
+      20,
+      20
+     ],
+     "tip": "Tick to include this product in the batch button above the list.",
+     "n": 15,
+     "range": "On or off",
+     "default": "Off"
+    },
+    {
+     "name": "Update / Install button",
+     "box": [
+      865,
+      154,
+      112,
+      28
+     ],
+     "tip": "Download, verify the SHA256 checksums, then install 0.2.4. Installers are not code-signed: Windows or macOS may show a warning. Nothing is installed until you click.",
+     "n": 16,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Changelog button",
+     "box": [
+      865,
+      189,
+      112,
+      28
+     ],
+     "tip": "Read the release notes for every version newer than the one you have.",
+     "n": 17,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "GitHub button",
+     "box": [
+      865,
+      224,
+      112,
+      28
+     ],
+     "tip": "Open the project page in your browser.",
+     "n": 18,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Roll back button",
+     "box": [
+      865,
+      259,
+      112,
+      28
+     ],
+     "tip": "Put back the version that was installed before the last update: version 0.2.2. The newer one is removed.",
+     "n": 19,
+     "range": "Click; only shown when a previous version is kept",
+     "default": "Hidden"
+    },
+    {
+     "name": "Smaller window",
+     "box": [
+      757,
+      1114,
+      56,
+      28
+     ],
+     "tip": "Smaller. Drag a corner to scale everything; drag a side to change only the width or the height.",
+     "n": 20,
+     "range": "Click; scale step 0.1",
+     "default": "-"
+    },
+    {
+     "name": "Fit to screen",
+     "box": [
+      881,
+      1114,
+      56,
+      28
+     ],
+     "tip": "Back to the normal size for this screen. Double click on either wood side does the same.",
+     "n": 21,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "One to one",
+     "box": [
+      943,
+      1114,
+      56,
+      28
+     ],
+     "tip": "Show everything at its design size (1:1).",
+     "n": 22,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Larger window",
+     "box": [
+      819,
+      1114,
+      56,
+      28
+     ],
+     "tip": "Bigger.",
+     "n": 23,
+     "range": "Click; scale step 0.1",
+     "default": "-"
+    }
    ],
-   "tip": "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.",
-   "n": 1
+   "displays": [
+    {
+     "name": "Screenshot",
+     "box": [
+      80,
+      144,
+      310,
+      162
+     ],
+     "text": "The product's own docs/screenshot.png at 310 x 162, taken from the catalog's small thumbnail (or from the repository when the catalog has none), fetched during the check and saved on disk. Products without one show a tinted 'no screenshot yet' tile.",
+     "letter": "A",
+     "anchor": [
+      374,
+      160
+     ]
+    },
+    {
+     "name": "Name, kind and build type",
+     "box": [
+      410,
+      146,
+      400,
+      28
+     ],
+     "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as a pre-release or called a test build.",
+     "letter": "B",
+     "anchor": [
+      396,
+      160
+     ]
+    },
+    {
+     "name": "Installed and latest version",
+     "box": [
+      410,
+      176,
+      500,
+      20
+     ],
+     "text": "What is really installed (read from the plugin's own metadata, the system's installer records or what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly.",
+     "letter": "C",
+     "anchor": [
+      396,
+      186
+     ]
+    },
+    {
+     "name": "Status",
+     "box": [
+      410,
+      200,
+      500,
+      22
+     ],
+     "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While working it turns into the stage (Downloading, Verifying SHA256, Installing) with a progress bar. After an update or a Roll back it shows the result message of that row.",
+     "letter": "D",
+     "anchor": [
+      396,
+      211
+     ]
+    },
+    {
+     "name": "Description",
+     "box": [
+      410,
+      226,
+      500,
+      44
+     ],
+     "text": "The start of the release notes, wrapped to two lines. The Changelog button shows the notes of every version newer than yours.",
+     "letter": "E",
+     "anchor": [
+      396,
+      248
+     ]
+    },
+    {
+     "name": "Date, size and install route",
+     "box": [
+      410,
+      276,
+      500,
+      18
+     ],
+     "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited).",
+     "letter": "F",
+     "anchor": [
+      396,
+      285
+     ]
+    },
+    {
+     "name": "Status line",
+     "box": [
+      44,
+      1058,
+      380,
+      30
+     ],
+     "text": "The result of the last action (for example '3 of 4 done.' or a Roll back message). The small line under it says when the catalog was read and turns amber when the catalog is more than 9 hours old. 'N of M shown' is on the right; a GitHub rate-limit or offline message appears in red on the right.",
+     "letter": "G",
+     "anchor": [
+      400,
+      1072
+     ]
+    },
+    {
+     "name": "Scrolling list",
+     "box": [
+      985,
+      140,
+      18,
+      60
+     ],
+     "text": "One long list of the tab you are on. Use the mouse wheel, drag, or the arrow keys; there are no scrollbars. In the All tab products with an update come first.",
+     "letter": "H",
+     "anchor": [
+      994,
+      152
+     ]
+    },
+    {
+     "name": "Size read-out",
+     "box": [
+      463,
+      1106,
+      200,
+      44
+     ],
+     "text": "Design size in pixels and the zoom percent. Drag a corner to scale everything; drag a side to change only the width (960 to 1500) or the height (760 to 1500).",
+     "letter": "I",
+     "anchor": [
+      653,
+      1128
+     ]
+    },
+    {
+     "name": "Wood sides",
+     "box": [
+      0,
+      0,
+      34,
+      1150
+     ],
+     "text": "Double click on either wood side to go back to the normal size for this screen.",
+     "letter": "J",
+     "anchor": [
+      17,
+      330
+     ]
+    }
+   ]
   },
-  {
-   "name": "Settings",
-   "box": [
-    815,
-    13,
-    96,
-    34
+  "working": {
+   "image": "working.png",
+   "controls": [
+    {
+     "name": "Stop after this one",
+     "box": [
+      523,
+      100,
+      160,
+      30
+     ],
+     "tip": "Finish the current product, then stop the rest.",
+     "n": 1,
+     "range": "Click",
+     "default": "Hidden until an install runs"
+    },
+    {
+     "name": "Update all / Install all (waiting)",
+     "box": [
+      863,
+      100,
+      140,
+      30
+     ],
+     "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
+     "n": 2,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Row progress (status area of the row)",
+     "box": [
+      44,
+      140,
+      945,
+      172
+     ],
+     "tip": "While a product is installing, its status line shows the stage (Downloading, Verifying SHA256, Installing) and a bar. A row's buttons stay off until it is done.",
+     "n": 3,
+     "range": "Display only",
+     "default": "-"
+    }
    ],
-   "tip": "Look, hover bubbles, install mode and the optional GitHub sign in.",
-   "n": 2
+   "displays": []
   },
-  {
-   "name": "About",
-   "box": [
-    919,
-    13,
-    84,
-    34
+  "bars": {
+   "image": "bars.png",
+   "controls": [
+    {
+     "name": "Update the updater",
+     "box": [
+      813,
+      134,
+      190,
+      28
+     ],
+     "tip": "Download the newer Studio 87 Gear Updater, check its SHA256, then hand over to its installer. Nothing is replaced until the check passes; the old version keeps working if anything fails.",
+     "n": 1,
+     "range": "Click",
+     "default": "Hidden unless a newer release exists"
+    },
+    {
+     "name": "Check for updates (leaves offline mode)",
+     "box": [
+      637,
+      13,
+      170,
+      34
+     ],
+     "tip": "Ask GitHub about every product now. It only reads public release data; nothing is sent about you or this computer.",
+     "n": 2,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "What this is, what it collects (nothing), and how to remove it.",
-   "n": 3
+   "displays": [
+    {
+     "name": "Update the updater first bar",
+     "letter": "A",
+     "text": "Appears under the tabs when a newer Studio 87 Gear Updater release exists. The button hands over to the new installer after its SHA256 check passes. While it works, the bar shows 'Updating the updater: downloading N%'. The version in this picture (v0.1.3) is an example.",
+     "box": [
+      44,
+      132,
+      900,
+      28
+     ],
+     "anchor": [
+      26,
+      146
+     ]
+    },
+    {
+     "name": "Offline bar",
+     "letter": "B",
+     "text": "Appears when GitHub could not be reached: 'Offline, showing saved list from <date and time of the saved copy>'. Install and Update are off with a reason, unless the installer was already downloaded. The date in this picture is an example.",
+     "box": [
+      44,
+      166,
+      900,
+      28
+     ],
+     "anchor": [
+      26,
+      180
+     ]
+    }
+   ]
   },
-  {
-   "name": "Updates tab",
-   "box": [
-    44,
-    64,
-    100,
-    30
+  "changelog": {
+   "image": "changelog.png",
+   "controls": [
+    {
+     "name": "Page up",
+     "box": [
+      24,
+      424,
+      100,
+      30
+     ],
+     "tip": "Show the previous page of the release notes. There are no scrollbars.",
+     "n": 1,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Page down",
+     "box": [
+      132,
+      424,
+      100,
+      30
+     ],
+     "tip": "Show the next page of the release notes. There are no scrollbars.",
+     "n": 2,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Refresh now",
+     "box": [
+      240,
+      424,
+      120,
+      30
+     ],
+     "tip": "Ask GitHub directly about this product, for the newest answer right now. Uses 1 of the 60 free requests per hour.",
+     "n": 3,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Open on GitHub",
+     "box": [
+      448,
+      424,
+      140,
+      30
+     ],
+     "tip": "Open this release on GitHub in your browser.",
+     "n": 4,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Close",
+     "box": [
+      596,
+      424,
+      100,
+      30
+     ],
+     "tip": "Close this window. Nothing is changed.",
+     "n": 5,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Products that have a newer version than the one installed.",
-   "n": 4
+   "displays": [
+    {
+     "name": "Installed and latest",
+     "letter": "A",
+     "text": "The installed version (or 'unknown') and the newest release on GitHub.",
+     "box": [
+      24,
+      50,
+      672,
+      24
+     ]
+    },
+    {
+     "name": "Release notes",
+     "letter": "B",
+     "text": "The notes of every release newer than the installed one, newest first, as written on GitHub (the newest one only when the installed version is unknown). Page up and Page down move through it; there are no scrollbars.",
+     "box": [
+      24,
+      92,
+      672,
+      314
+     ]
+    }
+   ]
   },
-  {
-   "name": "All tab",
-   "box": [
-    148,
-    64,
-    66,
-    30
+  "confirm": {
+   "image": "confirm.png",
+   "controls": [
+    {
+     "name": "Cancel",
+     "box": [
+      408,
+      374,
+      100,
+      30
+     ],
+     "tip": "Go back. Nothing is downloaded or installed.",
+     "n": 1,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Update 3",
+     "box": [
+      516,
+      374,
+      100,
+      30
+     ],
+     "tip": "Start now: each product is downloaded, its SHA256 checked, then installed, one after another. One failure does not stop the others.",
+     "n": 2,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Every public Studio 87 product. Updates come first.",
-   "n": 5
+   "displays": [
+    {
+     "name": "What will happen",
+     "letter": "A",
+     "text": "Says that each product is downloaded, its SHA256 checked, then installed, and that a mismatch stops that product only.",
+     "box": [
+      24,
+      50,
+      592,
+      24
+     ]
+    },
+    {
+     "name": "Products and warning",
+     "letter": "B",
+     "text": "The products and versions in this batch (the first 12, then 'and N more'), and the note that the installers are not code-signed and that presets are never touched.",
+     "box": [
+      24,
+      84,
+      592,
+      100
+     ]
+    }
+   ]
   },
-  {
-   "name": "VST and FX tab",
-   "box": [
-    218,
-    64,
-    118,
-    30
+  "results": {
+   "image": "results.png",
+   "controls": [
+    {
+     "name": "Retry failed",
+     "box": [
+      458,
+      514,
+      170,
+      30
+     ],
+     "tip": "Run only the products that did not finish again. A download that was cut off continues where it stopped.",
+     "n": 1,
+     "checked": false,
+     "range": "Click; shows the number to retry",
+     "default": "-"
+    },
+    {
+     "name": "Close",
+     "box": [
+      636,
+      514,
+      100,
+      30
+     ],
+     "tip": "Close this window. Nothing is changed.",
+     "n": 2,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "VST3 effects, analysers, editors and tools.",
-   "n": 6
+   "displays": [
+    {
+     "name": "Summary",
+     "letter": "A",
+     "text": "How many products finished and how many did not. A failure never stops the others.",
+     "box": [
+      24,
+      50,
+      712,
+      24
+     ]
+    },
+    {
+     "name": "One entry per product",
+     "letter": "B",
+     "text": "Done (green), Failed or Stopped (red), the product name and the message: what was installed, or why it was refused. The entries in this picture are examples, written for this manual.",
+     "box": [
+      24,
+      92,
+      712,
+      404
+     ]
+    }
+   ]
   },
-  {
-   "name": "Synths tab",
-   "box": [
-    340,
-    64,
-    92,
-    30
+  "settings": {
+   "image": "settings.png",
+   "controls": [
+    {
+     "name": "Look: Neon Navy",
+     "box": [
+      160,
+      92,
+      140,
+      30
+     ],
+     "tip": "Switch the whole window to this colour look now. Saved on this computer; the wood sides, cat logo and layout stay the same.",
+     "n": 1,
+     "checked": false,
+     "range": "One of three looks",
+     "default": "no"
+    },
+    {
+     "name": "Look: Purple Soda Pop",
+     "box": [
+      310,
+      92,
+      140,
+      30
+     ],
+     "tip": "Switch the whole window to this colour look now. Saved on this computer; the wood sides, cat logo and layout stay the same.",
+     "n": 2,
+     "checked": false,
+     "range": "One of three looks",
+     "default": "no"
+    },
+    {
+     "name": "Look: PurrOne",
+     "box": [
+      460,
+      92,
+      140,
+      30
+     ],
+     "tip": "Switch the whole window to this colour look now. Saved on this computer; the wood sides, cat logo and layout stay the same.",
+     "n": 3,
+     "checked": true,
+     "range": "One of three looks",
+     "default": "yes"
+    },
+    {
+     "name": "Hover bubbles: On or Off",
+     "box": [
+      160,
+      138,
+      80,
+      30
+     ],
+     "tip": "Switch the info bubbles that appear after about one second of hovering on or off.",
+     "n": 4,
+     "checked": true,
+     "range": "On or Off",
+     "default": "On"
+    },
+    {
+     "name": "GitHub account: Sign in with GitHub / Sign out",
+     "box": [
+      160,
+      184,
+      300,
+      30
+     ],
+     "tip": "Optional. Raises GitHub's hourly limit from 60 to 5000 requests. No permissions are requested.",
+     "n": 5,
+     "checked": false,
+     "range": "Click",
+     "default": "Not signed in"
+    },
+    {
+     "name": "Keep sign in: Keychain or file",
+     "box": [
+      160,
+      260,
+      170,
+      30
+     ],
+     "tip": "The token goes into the system keychain; if there is none (Flatpak, headless) into an encrypted file in the app data folder that only you can read (casual protection only).",
+     "n": 6,
+     "checked": true,
+     "range": "Keychain or file; This session only",
+     "default": "Keychain or file"
+    },
+    {
+     "name": "Keep sign in: This session only",
+     "box": [
+      340,
+      260,
+      170,
+      30
+     ],
+     "tip": "The token is kept in memory only and is gone when you close the app.",
+     "n": 7,
+     "checked": false,
+     "range": "Keychain or file; This session only",
+     "default": "Keychain or file"
+    },
+    {
+     "name": "Install mode: No admin needed on Linux",
+     "box": [
+      160,
+      306,
+      280,
+      30
+     ],
+     "tip": "On Linux plugins go to ~/.vst3 or a user-level Flatpak, so there is nothing to choose and no password prompt.",
+     "n": 8,
+     "checked": true,
+     "range": "Linux has no choice (Windows and macOS: All users or Just for me)",
+     "default": "Just for me (Linux); All users (Windows, macOS)"
+    },
+    {
+     "name": "Linux plugins go to: Automatic",
+     "box": [
+      200,
+      352,
+      130,
+      30
+     ],
+     "tip": "Use the Flatpak extension when that product's extension is already installed, otherwise put the plugin in ~/.vst3.",
+     "n": 9,
+     "checked": true,
+     "range": "Automatic; VST3 folder; Flatpak DAW",
+     "default": "Automatic"
+    },
+    {
+     "name": "Linux plugins go to: VST3 folder",
+     "box": [
+      340,
+      352,
+      130,
+      30
+     ],
+     "tip": "Always put the plugin in ~/.vst3 (for DAWs that are not Flatpaks).",
+     "n": 10,
+     "checked": false,
+     "range": "Automatic; VST3 folder; Flatpak DAW",
+     "default": "Automatic"
+    },
+    {
+     "name": "Linux plugins go to: Flatpak DAW",
+     "box": [
+      480,
+      352,
+      130,
+      30
+     ],
+     "tip": "Always install the Flatpak extension (for Flatpak DAWs). The DAW must use the same Freedesktop runtime.",
+     "n": 11,
+     "checked": false,
+     "range": "Automatic; VST3 folder; Flatpak DAW",
+     "default": "Automatic"
+    },
+    {
+     "name": "Saved list: Clear (size)",
+     "box": [
+      160,
+      406,
+      190,
+      30
+     ],
+     "tip": "Delete the saved catalog, release info and screenshots used for offline mode. Plugins and settings are not touched. The next check downloads them again.",
+     "n": 12,
+     "checked": false,
+     "range": "Click; the saved list is capped at 60 MB",
+     "default": "-"
+    },
+    {
+     "name": "Previous versions: Clear (size)",
+     "box": [
+      160,
+      452,
+      190,
+      30
+     ],
+     "tip": "Delete the previous plugin versions kept for Roll back. Installed plugins are not touched.",
+     "n": 13,
+     "checked": false,
+     "range": "Click; previous versions are capped at 600 MB",
+     "default": "-"
+    },
+    {
+     "name": "Close",
+     "box": [
+      576,
+      654,
+      100,
+      30
+     ],
+     "tip": "Close this window. Nothing is changed.",
+     "n": 14,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Synths and instruments.",
-   "n": 7
+   "displays": [
+    {
+     "name": "Sign in status",
+     "letter": "A",
+     "text": "Says whether you are signed in and where the token is kept: OS keychain, local file or this session only. After an expired sign in it says 'Your GitHub sign in expired. Please sign in again'.",
+     "box": [
+      160,
+      216,
+      500,
+      36
+     ]
+    },
+    {
+     "name": "Saved list note",
+     "letter": "B",
+     "text": "What offline mode keeps (the list, product info and screenshots, never plugin files) and the size cap.",
+     "box": [
+      360,
+      404,
+      310,
+      36
+     ]
+    },
+    {
+     "name": "Previous versions note",
+     "letter": "C",
+     "text": "What Roll back keeps (the last version before each update, plugin folders only) and the size cap.",
+     "box": [
+      360,
+      450,
+      310,
+      36
+     ]
+    },
+    {
+     "name": "Install mode explanation",
+     "letter": "D",
+     "text": "What the install mode means on this system. On Linux it also says what Automatic does and that presets are never touched.",
+     "box": [
+      28,
+      506,
+      644,
+      80
+     ]
+    }
+   ]
   },
-  {
-   "name": "Controllers tab",
-   "box": [
-    436,
-    64,
-    112,
-    30
+  "signin": {
+   "image": "signin.png",
+   "controls": [
+    {
+     "name": "Cancel",
+     "box": [
+      516,
+      294,
+      100,
+      30
+     ],
+     "tip": "Stop signing in. Nothing is stored.",
+     "n": 1,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Plugins that control a hardware synth or effect unit.",
-   "n": 8
+   "displays": [
+    {
+     "name": "Reminder",
+     "letter": "A",
+     "text": "Sign in is optional and requests no permissions.",
+     "box": [
+      24,
+      50,
+      592,
+      24
+     ]
+    },
+    {
+     "name": "Code to type",
+     "letter": "B",
+     "text": "The web address and the one-time code to type there. The app opens the address in your browser by itself and waits until you approve. In this picture the code is an example from a stub, not a real GitHub code.",
+     "box": [
+      24,
+      84,
+      592,
+      100
+     ]
+    }
+   ]
   },
-  {
-   "name": "Apps and logue tab",
-   "box": [
-    552,
-    64,
-    144,
-    30
+  "about": {
+   "image": "about.png",
+   "controls": [
+    {
+     "name": "Ko-fi (optional tip)",
+     "box": [
+      24,
+      474,
+      170,
+      30
+     ],
+     "tip": "Optional. Opens the Studio 87 Ko-fi page in your browser when you click. Nothing is locked behind it and the app never asks again.",
+     "n": 1,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "GitHub",
+     "box": [
+      202,
+      474,
+      100,
+      30
+     ],
+     "tip": "Open the source code and the releases of this updater on GitHub.",
+     "n": 2,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Close",
+     "box": [
+      596,
+      474,
+      100,
+      30
+     ],
+     "tip": "Close this window. Nothing is changed.",
+     "n": 3,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Standalone apps and logue units (minilogue xd, drumlogue).",
-   "n": 9
+   "displays": [
+    {
+     "name": "Version and licence",
+     "letter": "A",
+     "text": "The version of this updater and its licence.",
+     "box": [
+      24,
+      50,
+      672,
+      24
+     ]
+    },
+    {
+     "name": "What it is and what it stores",
+     "letter": "B",
+     "text": "What the app does, that it collects nothing, the folder where it keeps its own files (on this computer), how Roll back works, the unsigned-installer note and how to remove it.",
+     "box": [
+      24,
+      84,
+      672,
+      100
+     ]
+    }
+   ]
   },
-  {
-   "name": "Installed tab",
-   "box": [
-    228,
-    100,
-    104,
-    30
+  "firstrun": {
+   "image": "firstrun.png",
+   "controls": [
+    {
+     "name": "Open Settings",
+     "box": [
+      378,
+      284,
+      130,
+      30
+     ],
+     "tip": "Open Settings to change the install mode, the look and the hover bubbles.",
+     "n": 1,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    },
+    {
+     "name": "Got it",
+     "box": [
+      516,
+      284,
+      100,
+      30
+     ],
+     "tip": "Close this welcome note. It is only shown once.",
+     "n": 2,
+     "checked": false,
+     "range": "Click",
+     "default": "-"
+    }
    ],
-   "tip": "Products found on this computer.",
-   "n": 10
-  },
-  {
-   "name": "Not installed tab",
-   "box": [
-    336,
-    100,
-    124,
-    30
-   ],
-   "tip": "Products not installed yet. Pick Install on a row.",
-   "n": 11
-  },
-  {
-   "name": "Search box",
-   "box": [
-    44,
-    100,
-    176,
-    30
-   ],
-   "tip": "Type to filter the list by name, kind (for example controller) or status (for example update).",
-   "n": 12
-  },
-  {
-   "name": "Update / Install selected",
-   "box": [
-    691,
-    100,
-    164,
-    30
-   ],
-   "tip": "Update or install the products you ticked, one after another.",
-   "n": 13
-  },
-  {
-   "name": "Update all / Install all",
-   "box": [
-    863,
-    100,
-    140,
-    30
-   ],
-   "tip": "Update every product that has a newer version. Products with an unknown installed version are left alone.",
-   "n": 14
-  },
-  {
-   "name": "Row tick box",
-   "box": [
-    52,
-    216,
-    20,
-    20
-   ],
-   "tip": "Tick to include this product in the batch button above the list.",
-   "n": 15
-  },
-  {
-   "name": "Update / Install button",
-   "box": [
-    865,
-    154,
-    112,
-    28
-   ],
-   "tip": "Download, verify the SHA256 checksums, then install 0.2.4. Installers are not code-signed: Windows or macOS may show a warning. Nothing is installed until you click.",
-   "n": 16
-  },
-  {
-   "name": "Changelog button",
-   "box": [
-    865,
-    189,
-    112,
-    28
-   ],
-   "tip": "Read the release notes for every version newer than the one you have.",
-   "n": 17
-  },
-  {
-   "name": "GitHub button",
-   "box": [
-    865,
-    224,
-    112,
-    28
-   ],
-   "tip": "Open the project page in your browser.",
-   "n": 18
-  },
-  {
-   "name": "Smaller window",
-   "box": [
-    757,
-    1114,
-    56,
-    28
-   ],
-   "tip": "Smaller. Drag a corner to scale everything; drag a side to change only the width or the height.",
-   "n": 19
-  },
-  {
-   "name": "Fit to screen",
-   "box": [
-    881,
-    1114,
-    56,
-    28
-   ],
-   "tip": "Back to the normal size for this screen. Double click on either wood side does the same.",
-   "n": 20
-  },
-  {
-   "name": "One to one",
-   "box": [
-    943,
-    1114,
-    56,
-    28
-   ],
-   "tip": "Show everything at its design size (1:1).",
-   "n": 21
-  },
-  {
-   "name": "Larger window",
-   "box": [
-    819,
-    1114,
-    56,
-    28
-   ],
-   "tip": "Bigger.",
-   "n": 22
+   "displays": [
+    {
+     "name": "Install mode",
+     "letter": "A",
+     "text": "The install mode in force on this system.",
+     "box": [
+      24,
+      50,
+      592,
+      24
+     ]
+    },
+    {
+     "name": "How installing works here",
+     "letter": "B",
+     "text": "One short explanation of when an administrator prompt can appear (Windows and macOS, All users only) or that none is ever needed (Linux). Shown once, the first time the app is opened.",
+     "box": [
+      24,
+      84,
+      592,
+      100
+     ]
+    }
+   ]
   }
- ],
- "displays": [
-  {
-   "name": "Screenshot",
-   "box": [
-    80,
-    144,
-    310,
-    162
+ },
+ "hood": {
+  "paths": {
+   "linux": [
+    "~/.local/share/Studio 87/Gear Updater",
+    "~/.cache/Studio 87/Gear Updater"
    ],
-   "text": "The product's own docs/screenshot.png at 310 x 162, fetched during the check and saved on disk. Products without one show a tinted 'no screenshot yet' tile.",
-   "letter": "A"
+   "windows": [
+    "%APPDATA%\\Studio 87\\Gear Updater",
+    "%LOCALAPPDATA%\\Studio 87\\Gear Updater"
+   ],
+   "macos": [
+    "~/Library/Application Support/Studio 87/Gear Updater",
+    "~/Library/Caches/Studio 87/Gear Updater"
+   ]
   },
-  {
-   "name": "Name, kind and build type",
-   "box": [
-    410,
-    146,
-    400,
-    28
-   ],
-   "text": "Product name, its kind (VST3 plugin, standalone app, hardware controller, logue unit) and TEST BUILD when the release is marked as one.",
-   "letter": "B"
+  "caps": {
+   "saved_list": "60 MB",
+   "backups": "600 MB",
+   "zips": "2 GB",
+   "zip_days": 7
   },
-  {
-   "name": "Installed and latest version",
-   "box": [
-    410,
-    176,
-    500,
-    20
+  "downloads": {
+   "retries": 4,
+   "pauses": [
+    1.5,
+    3.0,
+    6.0,
+    12.0
    ],
-   "text": "What is really installed (read from the plugin's own metadata, the system's installer records or what this updater installed) and the newest release on GitHub. 'unknown' and 'not installed' are shown honestly.",
-   "letter": "C"
+   "timeout": 20
   },
-  {
-   "name": "Status",
-   "box": [
-    410,
-    200,
-    500,
-    22
-   ],
-   "text": "Update available, Up to date, Not installed, Installed version unknown, No release yet, Could not check, or View on GitHub. While working it turns into Downloading, Verifying SHA256, Installing.",
-   "letter": "D"
+  "token": {
+   "service": "Studio 87 Gear Updater",
+   "account": "github",
+   "kinds": {
+    "keychain": "OS keychain",
+    "file": "local file",
+    "session": "this session only"
+   }
   },
-  {
-   "name": "Description",
-   "box": [
-    410,
-    226,
-    500,
-    44
+  "status_lines": {
+   "signed_in": [
+    "Signed in, token stored in: OS keychain",
+    "Signed in, token stored in: local file",
+    "Signed in, token stored in: this session only"
    ],
-   "text": "The start of the release notes, wrapped to two lines. The Changelog button shows the notes of every version newer than yours.",
-   "letter": "E"
+   "expired": "Your GitHub sign in expired. Please sign in again (the list works without it).",
+   "out": "Not signed in (optional). A new sign in would be kept in: <where it would go>"
   },
-  {
-   "name": "Date, size and install route",
-   "box": [
-    410,
-    276,
-    500,
-    18
-   ],
-   "text": "Release date, download size and how this product gets installed on this system. 'saved list' means the answer came from disk (offline or rate limited).",
-   "letter": "F"
+  "modes": {
+   "labels": {
+    "all-users": "For all users (admin)",
+    "just-me": "Just for me (no admin)"
+   },
+   "default": {
+    "windows": "all-users",
+    "macos": "all-users",
+    "linux": "just-me"
+   }
   },
-  {
-   "name": "Status line",
-   "box": [
-    44,
-    1058,
-    380,
-    30
-   ],
-   "text": "When the catalog was read and how many updates were found. Offline and rate-limit messages appear here and in red on the right.",
-   "letter": "G"
-  },
-  {
-   "name": "Scrolling list",
-   "box": [
-    985,
-    140,
-    18,
-    60
-   ],
-   "text": "One long list of the tab you are on. Use the mouse wheel, drag, or the arrow keys; there are no scrollbars. In the All tab products with an update come first.",
-   "letter": "H"
-  },
-  {
-   "name": "Size read-out",
-   "box": [
-    463,
-    1106,
-    200,
-    44
-   ],
-   "text": "Design size in pixels and the zoom. Drag a corner to scale everything; drag a side to change only the width (960 to 1500) or the height (760 to 1500).",
-   "letter": "I"
-  },
-  {
-   "name": "Wood sides",
-   "box": [
-    0,
-    0,
-    34,
-    1150
-   ],
-   "text": "Double click on either wood side to go back to the normal size for this screen.",
-   "letter": "J"
+  "defaults": {
+   "theme": "purr",
+   "bubbles": true,
+   "linux_target": "auto",
+   "token_storage": "auto"
   }
- ],
+ },
  "design": [
   1047,
   1150
- ]
+ ],
+ "version": "0.1.2"
 }

@@ -10,6 +10,8 @@
 - Plugin link `studio87://open[?product=<repo>]`, registered by the Windows installer, the macOS app and the Linux `.desktop` file; see `docs/plugin-link.md`.
 - Product list: `catpro1` is now `SynthCookBook` (Synth Cook Book; an install record under the old name still counts), `td3mo-vst` was removed (its book lives in Synth Cook Book); `purrrvoicechannel` (a design mockup, no release yet) is listed as Not installed with only a GitHub button. Rows with no release show no Install or Changelog button.
 - Mockup is now `updater-v11.html` (v9 and v10 are kept in `docs/mockup/versions`).
+- No macOS package in v0.1.2: the macOS build queue was stuck, so the release was built without it (the zip holds `NO-MACOS.txt` instead of a `macos` folder). It returns with the next release.
+- Manual rebuilt as a visual tour of the real window (read from the app: numbered controls, every hover bubble with range and default, one section per bar and pop-up, an Under the hood page with what is stored where and how big). Every pop-up button now has a hover bubble. `docs/index.html` is the web page of the repo. README, INSTALL.txt, this file and the release notes agree (52 products; downloads retry up to four times).
 - Same zip layout and a separate `SHA256SUMS` asset, so v0.1.1 can update to it. Not tested on real machines.
 
 ## v0.1.1 (test build)

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio 87 Gear Updater</title>
+<meta name="description" content="One window that lists every Studio 87 plugin and app, shows which have a newer version on GitHub, and updates them. Free and open source, collects nothing.">
+<style>
+:root{--bg:#0b0b0d;--panel:#15161a;--line:#2b2d34;--text:#f4f5f7;--dim:#a9adb8;--pink:#FF7BB1;--teal:#02EBBA;--amber:#FFD100}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 "Barlow Condensed","Segoe UI",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 56px}
+h1{font-size:44px;line-height:1.1;margin:0 0 6px}
+h2{font-size:24px;margin:0 0 6px;color:var(--teal)}
+p{margin:0 0 10px}
+a{color:var(--pink)}
+.tag{color:var(--dim);font-size:19px;margin-bottom:18px}
+.status{border:1px solid var(--amber);border-radius:6px;padding:12px 14px;margin:18px 0;background:var(--panel)}
+.status b{color:var(--amber)}
+img.shot{display:block;width:100%;max-width:900px;height:auto;margin:16px auto 6px;border:1px solid var(--line);border-radius:6px}
+.cap{color:var(--dim);font-size:15px;text-align:center;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:18px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px}
+ul{margin:6px 0 14px;padding-left:20px}
+li{margin:3px 0}
+.foot{color:var(--dim);font-size:15px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Studio 87 Gear Updater</h1>
+<div class="tag">One window for every Studio 87 plugin and app: see what has a newer version on GitHub, and update one, several or all. Free and open source.</div>
+
+<div class="status"><b>Test build, version 0.1.2 (pre-release).</b> Version 0.1.0 was tried on Windows by the author and worked. Nothing in 0.1.2 has been tried on a real machine yet, and macOS and Linux have not been tested by anyone. The macOS package is missing from v0.1.2 (the macOS build queue was stuck), so v0.1.2 has Windows and Linux installers only. The installers are not code-signed.</div>
+
+<img class="shot" src="screenshot.png" alt="Studio 87 Gear Updater window showing products with newer versions">
+<div class="cap">The real window, rendered offscreen with recorded GitHub data. The installed versions are staged so that every state shows.</div>
+
+<ul>
+<li>Lists every public Studio 87 product, with search and category tabs, and shows the installed version next to the latest one.</li>
+<li>Checks GitHub only when you open it or click Check for updates. No timers, no background checks, no auto-start.</li>
+<li>Collects nothing. Every download is checked against its SHA256 sums first and refused on a mismatch.</li>
+<li>Keeps the previous plugin version so Roll back is one click. It never touches your presets.</li>
+</ul>
+
+<div class="grid">
+<div class="card"><h2>Download</h2>
+<p><a href="https://github.com/SpeakingColors/gearupdater/releases/tag/v0.1.2">Release page, v0.1.2 (pre-release)</a></p>
+<p><a href="https://github.com/SpeakingColors/gearupdater/releases/download/v0.1.2/Studio87-Gear-Updater-v0.1.2.zip">Studio87-Gear-Updater-v0.1.2.zip</a></p>
+<p>The zip holds the Linux Flatpak, the Windows installer, the PDF manual, INSTALL.txt and SHA256SUMS.</p></div>
+<div class="card"><h2>Manual (PDF)</h2>
+<p><a href="Studio87-GearUpdater-manual.pdf">Open the manual</a></p>
+<p>An interface tour of the real window: numbered controls, every hover bubble, and an Under the hood page.</p></div>
+<div class="card"><h2>Design mockup</h2>
+<p><a href="mockup/updater-v11.html">Approved mockup v11</a></p>
+<p>The window was built from this mockup. Older versions are in the repository.</p></div>
+<div class="card"><h2>Source</h2>
+<p><a href="https://github.com/SpeakingColors/gearupdater">github.com/SpeakingColors/gearupdater</a></p>
+<p><a href="plugin-link.md">The studio87:// link for plugins</a></p></div>
+</div>
+
+<div class="foot">Licence: AGPL-3.0-or-later. Free to use; an optional tip page exists at <a href="https://ko-fi.com/studio87">ko-fi.com/studio87</a>. Nothing is locked behind it.</div>
+</div>
+</body>
+</html>

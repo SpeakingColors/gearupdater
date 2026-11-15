@@ -17,11 +17,11 @@ Linux (Bazzite, Fedora, Ubuntu and others with Flatpak)
   "flatpak install" on your computer (plugin extensions for Flatpak DAWs). It cannot see the rest of your home folder.
 
 Windows
-  Run windows\Studio87-GearUpdater-Setup.exe. The app starts as a normal user, with no prompt. Only when you install with "All users" does it ask for administrator rights, once for the whole batch (one UAC prompt). "Just for me" in Settings never asks. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
+  Run windows/Studio87-GearUpdater-Setup.exe. The app starts as a normal user, with no prompt. Only when you install with "All users" does it ask for administrator rights, once for the whole batch (one UAC prompt). "Just for me" in Settings never asks. Windows may show a blue "unknown publisher" screen: click "More info", then "Run anyway".
   Remove: Settings > Apps > Studio 87 Gear Updater > Uninstall. It asks if you also want its settings deleted (default No).
 
 macOS
-  Open macos\Studio87-GearUpdater-macOS.pkg. If macOS blocks it, open System Settings > Privacy & Security and choose "Open Anyway".
+  Open macos/Studio87-GearUpdater-macOS.pkg. Version 0.1.2 has NO macOS package (the macOS build queue was stuck): if there is no macos folder in this zip and a file NO-MACOS.txt instead, macOS users have to wait for the next release. If macOS blocks it, open System Settings > Privacy & Security and choose "Open Anyway".
   Remove: open "Uninstall Studio 87 Gear Updater" in the Applications folder.
 
 Using it
