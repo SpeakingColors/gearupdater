@@ -22,26 +22,45 @@ studio87://open?product=<repo>
 
 ## The snippet for plugins (JUCE)
 
+Every About page gets two buttons: **Open Studio 87 Gear Updater** and **Open on GitHub**. Both make no network call
+by the plugin; each only asks the operating system to open a link.
+
 ```cpp
-// In the About page, on the "Open Studio 87 Gear Updater" button:
+// Button 1, "Open Studio 87 Gear Updater":
 const bool opened = juce::URL("studio87://open?product=NAME").launchInDefaultBrowser();
 
 if (! opened)
-    showMessage ("Install Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases");
+{
+    // No program handles studio87:// : open the plugin's GitHub home page instead and say so in one line.
+    juce::URL("https://github.com/SpeakingColors/NAME").launchInDefaultBrowser();
+    showMessage ("Gear Updater not found, opened the GitHub page instead. Get Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases");
+}
+
+// Button 2, "Open on GitHub" (the repository home page, never the releases page):
+juce::URL("https://github.com/SpeakingColors/NAME").launchInDefaultBrowser();
 ```
 
 Replace `NAME` with the plugin's repository name. Use `studio87://open` when the plugin has no repository row.
 
-Fallback message, exactly: **Install Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases**
+Hover bubbles, exactly:
+
+- Open Studio 87 Gear Updater: "Opens Studio 87 Gear Updater to check this plugin for updates. Nothing is sent anywhere. If it is not installed, the GitHub page opens instead."
+- Open on GitHub: "Opens this plugin's home page on GitHub in your browser. Nothing is sent by the plugin."
+
+Fallback note, exactly: **Gear Updater not found, opened the GitHub page instead. Get Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases**
 
 Show it when `launchInDefaultBrowser()` returns `false`. Honest limit: whether `launchInDefaultBrowser()` reports `false` when
-no program handles a custom scheme can differ between Windows, macOS and Linux and has not been tested on all three, so also
-put the same sentence in the button's hover bubble ("If nothing opens, install Studio 87 Gear Updater from
-github.com/SpeakingColors/gearupdater/releases"). A plugin inside a sandboxed DAW (for example a Flatpak DAW) may not be allowed to
-open links at all; the hover bubble covers that case too.
+no program handles a custom scheme can differ between Windows, macOS and Linux and has not been tested on all three, so the
+hover bubble of the first button also says the GitHub page opens when Gear Updater is not installed. A plugin inside a sandboxed
+DAW (for example a Flatpak DAW) may not be allowed to open links at all; the second button and the hover bubbles cover that case.
+A native message box without hover bubbles puts both facts in its message text and offers both buttons.
 
-Do not put the plugin's version, the user's name, or anything else into the link. The button must not do anything else
+The older wording, kept for plugins that have not been updated yet: "Install Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases".
+
+Do not put the plugin's version, the user's name, or anything else into the link. The buttons must not do anything else
 (no update check, no network).
+
+The "GitHub" button on a product row in Gear Updater itself opens the same home page, `https://github.com/SpeakingColors/<repo>`.
 
 ## How the updater registers the link (set up when you install it)
 

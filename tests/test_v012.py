@@ -845,6 +845,21 @@ class LinkTests(T):
         self.assertIn("Install Studio 87 Gear Updater from github.com/SpeakingColors/gearupdater/releases", doc)
 
 
+class GitHubButtonTests(T):
+    def test_row_github_button_is_the_repo_home_page(self):
+        prods = M.load_manifest().products
+        self.assertTrue(prods)
+        for p in prods:
+            self.assertEqual(p.github_url, "https://github.com/SpeakingColors/%s" % p.repo)
+            self.assertNotIn("/releases", p.github_url)
+
+    def test_plugin_link_doc_has_the_two_button_snippet(self):
+        doc = (Path(__file__).resolve().parents[1] / "docs/plugin-link.md").read_text()
+        self.assertIn('juce::URL("https://github.com/SpeakingColors/NAME").launchInDefaultBrowser()', doc)
+        self.assertIn("Gear Updater not found, opened the GitHub page instead.", doc)
+        self.assertIn("Opens this plugin's home page on GitHub in your browser. Nothing is sent by the plugin.", doc)
+
+
 class DocsTests(T):
     def test_no_em_dash_or_en_dash_in_new_text(self):
         root = Path(__file__).resolve().parents[1]
