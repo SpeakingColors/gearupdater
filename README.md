@@ -14,7 +14,7 @@ One window that lists every Studio 87 plugin, VST, FX and app, shows which ones 
 - The full public Studio 87 catalog in one scrolling list (mouse wheel, drag or keys; no scrollbars). It opens on Updates, with an "Everything is up to date" screen when there is nothing to do. Search filters as you type. Tabs: Updates, All (updates first, then by name), VST and FX, Synths, Controllers, Apps and logue, Installed, Not installed. Private and unavailable repos are never shown.
 - Buttons say what they will do: Update all / Update selected only count real updates; on the Not installed tab it says Install all, and a row says Install; a mixed selection says Apply selected (N updates, M installs).
 - It checks GitHub **only when you open it or click "Check for updates"**. No timers, no background polling, no auto-start.
-- It **collects nothing**. The only network use is read-only requests for public GitHub data and the download of a release zip you chose. The User-Agent is the generic `Studio87-GearUpdater`.
+- The only network use is read-only requests for public GitHub data and the download of a release zip you chose. The User-Agent is the generic `Studio87-GearUpdater`.
 - Nothing is installed without a click. Every download is checked against `SHA256SUMS` first and **refused on a mismatch**, before any installed file is touched.
 - Your presets and data folders are never touched.
 - **New in 0.1.2:** the app always starts as a normal user (no administrator prompt at start; it asks once per batch, only for "All users" installs); the version before an update is kept and Roll back puts it back; a failed copy restores the old version by itself; downloads retry (up to four times) and resume; one failed product never stops Update all (a result list with Retry failed); sign in falls back from the keychain to a local file to this session only; offline mode shows the saved list; the updater tells you when a newer updater exists; plugins can open it with a `studio87://` link.
@@ -75,5 +75,5 @@ python3 gear_updater/gear_updater.py ports            # list ALSA MIDI ports (ne
 python3 gear_updater/gear_updater.py dry-run FW.syx   # check a file and print what a flash would involve
 ```
 
-## Privacy and licence
-No telemetry, no account, no identifiers, no background activity. Fonts: Barlow Condensed and JetBrains Mono (SIL OFL, see `studio87_updater/assets`). Licence: AGPL-3.0-or-later. Support is optional: ko-fi.com/studio87.
+## Fonts and licence
+Fonts: Barlow Condensed and JetBrains Mono (SIL OFL, see `studio87_updater/assets`). Licence: AGPL-3.0-or-later. Support is optional: ko-fi.com/studio87.
